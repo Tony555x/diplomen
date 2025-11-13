@@ -4,9 +4,13 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Taskboard.Models;
 
-namespace Taskboard.Controllers
+namespace MyAuthApi.Controllers
 {
+    // Models for JSON requests
+    
+
     [ApiController]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
@@ -21,10 +25,10 @@ namespace Taskboard.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(string username, string password)
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
-            var user = new IdentityUser { UserName = username };
-            var result = await _userManager.CreateAsync(user, password);
+            var user = new IdentityUser { UserName = request.Username };
+            var result = await _userManager.CreateAsync(user, request.Password);
 
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
@@ -33,10 +37,10 @@ namespace Taskboard.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(string username, string password)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var user = await _userManager.FindByNameAsync(username);
-            if (user == null || !await _userManager.CheckPasswordAsync(user, password))
+            var user = await _userManager.FindByNameAsync(request.Username);
+            if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
                 return Unauthorized("Invalid username or password.");
 
             var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
