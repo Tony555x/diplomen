@@ -39,6 +39,14 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
+
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 
@@ -46,6 +54,7 @@ var app = builder.Build();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseCors();
 
 app.MapControllers();
 
