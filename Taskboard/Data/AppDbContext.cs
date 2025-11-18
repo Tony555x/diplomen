@@ -22,29 +22,18 @@ public class AppDbContext : IdentityDbContext<User>
 
         builder.Entity<WorkspaceMember>()
             .HasKey(x => new { x.WorkspaceId, x.UserId });
-
+            
         builder.Entity<WorkspaceMember>()
-            .HasOne(x => x.Workspace)
-            .WithMany(w => w.Members)
-            .HasForeignKey(x => x.WorkspaceId);
-
-        builder.Entity<WorkspaceMember>()
-            .HasOne(x => x.User)
+            .HasOne(wm => wm.User)
             .WithMany(u => u.WorkspaceMemberships)
-            .HasForeignKey(x => x.UserId);
+            .HasForeignKey(wm => wm.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
 
 
         builder.Entity<ProjectMember>()
             .HasKey(x => new { x.ProjectId, x.UserId });
 
-        builder.Entity<ProjectMember>()
-            .HasOne(x => x.Project)
-            .WithMany(p => p.Members)
-            .HasForeignKey(x => x.ProjectId);
-
-        builder.Entity<ProjectMember>()
-            .HasOne(x => x.User)
-            .WithMany(u => u.ProjectMemberships)
-            .HasForeignKey(x => x.UserId);
+        builder.Entity<UserTask>()
+            .HasKey(x => new { x.TaskItemId, x.UserId });
     }
 }
