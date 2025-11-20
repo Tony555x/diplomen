@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Column from "./Column";
 import "./Dashboard.css";
 
 const initialTasks = {
@@ -9,15 +10,13 @@ const initialTasks = {
 
 function Dashboard() {
   const [tasks, setTasks] = useState(initialTasks);
-  const [newTask, setNewTask] = useState("");
 
-  const addTask = (column) => {
-    if (!newTask.trim()) return;
+  const addTask = (column, taskText) => {
+    if (!taskText.trim()) return;
     setTasks({
       ...tasks,
-      [column]: [...tasks[column], newTask]
+      [column]: [...tasks[column], taskText]
     });
-    setNewTask("");
   };
 
   const moveTask = (fromColumn, index, toColumn) => {
@@ -44,36 +43,14 @@ function Dashboard() {
       </header>
       <div className="board">
         {columns.map(({ key, label }) => (
-          <div key={key} className={`column column-${key}`}>
-            <h2>{label}</h2>
-            <ul>
-              {tasks[key].map((task, index) => (
-                <li key={index}>
-                  <span>{task}</span>
-                  <div className="buttons">
-                    {key !== "todo" && (
-                      <button onClick={() => moveTask(key, index, "todo")}>← To Do</button>
-                    )}
-                    {key !== "inProgress" && (
-                      <button onClick={() => moveTask(key, index, "inProgress")}>→ In Progress</button>
-                    )}
-                    {key !== "done" && (
-                      <button onClick={() => moveTask(key, index, "done")}>→ Done</button>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <div className="add-task">
-              <input
-                type="text"
-                placeholder="Add new task..."
-                value={newTask}
-                onChange={(e) => setNewTask(e.target.value)}
-              />
-              <button onClick={() => addTask(key)}>Add</button>
-            </div>
-          </div>
+          <Column
+            key={key}
+            columnKey={key}
+            label={label}
+            tasks={tasks[key]}
+            addTask={addTask}
+            moveTask={moveTask}
+          />
         ))}
       </div>
     </div>

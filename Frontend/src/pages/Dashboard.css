@@ -15,22 +15,58 @@ body {
 
 .board {
   display: flex;
-  gap: 1.5rem;
+  flex-direction: row;
+  gap: 1rem;
   padding: 2rem;
-  justify-content: center;
-  flex-wrap: wrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
 }
 
 .column {
+  width: 240px;
+  min-width: 240px;
+  max-width: 240px;
   background-color: #1e1e1e;
   border-radius: 12px;
-  flex: 1 1 280px;
-  max-width: 300px;
   padding: 1rem;
+  display: inline-flex;
+  flex-direction: column;
   box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.column li {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
 }
+
+.column li span {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.buttons {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+
+.board::-webkit-scrollbar {
+  height: 8px;
+}
+
+.board::-webkit-scrollbar-thumb {
+  background-color: #374151;
+  border-radius: 4px;
+}
+
+.board::-webkit-scrollbar-track {
+  background-color: #1a1a1a;
+}
+
 
 .column h2 {
   text-align: center;
