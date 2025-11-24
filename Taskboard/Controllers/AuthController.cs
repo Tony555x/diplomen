@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Taskboard.Data.Models;
 using Taskboard.Models;
 
 namespace MyAuthApi.Controllers
@@ -15,10 +16,10 @@ namespace MyAuthApi.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<User> _userManager;
         private readonly IConfiguration _config;
 
-        public AuthController(UserManager<IdentityUser> userManager, IConfiguration config)
+        public AuthController(UserManager<User> userManager, IConfiguration config)
         {
             _userManager = userManager;
             _config = config;
@@ -27,7 +28,7 @@ namespace MyAuthApi.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
-            var user = new IdentityUser { UserName = request.Username };
+            var user = new User { UserName = request.Username };
             var result = await _userManager.CreateAsync(user, request.Password);
 
             if (!result.Succeeded)
