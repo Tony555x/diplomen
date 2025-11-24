@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import Column from "./Column";
+import Column from "../components/Column";
 import "./Dashboard.css";
+import Navbar from "../components/Navbar";
 
 const initialTasks = {
   todo: ["Design homepage", "Set up backend"],
@@ -37,10 +38,13 @@ function Dashboard() {
   ];
 
   return (
-    <div className="dashboard">
+    <>
+      <Navbar /><div className="dashboard">
+      {/*
       <header>
         <h1>Task Board</h1>
       </header>
+      */}
       <div className="board">
         {columns.map(({ key, label }) => (
           <Column
@@ -49,11 +53,11 @@ function Dashboard() {
             label={label}
             tasks={tasks[key]}
             addTask={addTask}
-            moveTask={moveTask}
-          />
+            moveTask={moveTask} />
         ))}
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 
