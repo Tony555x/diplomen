@@ -75,6 +75,7 @@ export async function register(username, password) {
 /**
  * Fetch wrapper for authenticated requests with JSON support.
  * Automatically includes JWT in Authorization header if present.
+ * Handles session expiration (401) by removing token and redirecting to login.
  * @param {string} endpoint - API endpoint (e.g., "/api/tasks")
  * @param {object} [options] - fetch options { method, body, headers, etc. }
  * @returns {Promise<object>} Parsed JSON response from the server.
@@ -100,5 +101,13 @@ export async function fetchWithAuth(endpoint, options = {}) {
   }
 
   const response = await fetch(`${API_URL}${endpoint}`, finalOptions);
+
+  // Handle session expiration
+  if (response.status === 401) {
+    removeToken();
+    window.location.href = "/";
+    return { success: false, message: "Session expired. Please login again." };
+  }
+
   return response.json();
 }
