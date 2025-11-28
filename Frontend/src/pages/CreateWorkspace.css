@@ -1,0 +1,93 @@
+.create-workspace-page {
+    max-width: 500px;
+    margin: 4rem auto;
+    background-color: #1e1e1e;
+    padding: 2rem;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    color: rgba(255, 255, 255, 0.87);
+    border: 1px solid #374151;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.create-workspace-page h2 {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+}
+
+.create-workspace-page label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 500;
+}
+
+.create-workspace-page input {
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #374151;
+    background-color: #2c2c2c;
+    color: rgba(255, 255, 255, 0.87);
+    outline: none;
+    font-size: 1rem;
+}
+
+.create-workspace-page input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.create-workspace-page input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 3px rgba(59, 130, 246, 0.7);
+}
+
+.create-workspace-page .button-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.create-workspace-page button {
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.create-workspace-page .btn-primary {
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    background-color: #3b82f6;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.create-workspace-page .btn-primary:hover {
+    background-color: #2563eb;
+}
+
+.create-workspace-page .btn-secondary {
+    border: 1px solid #374151;
+    background-color: #2c2c2c;
+    color: rgba(255, 255, 255, 0.87);
+}
+
+.create-workspace-page .btn-secondary:hover {
+    background-color: #333333;
+}
+
+.error-message {
+    color: #f87171;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.success-message {
+    color: #10b981;
+    text-align: center;
+    font-size: 0.9rem;
+}
