@@ -2,30 +2,30 @@
 import { API_URL } from "./config";
 
 /**
- * Save JWT to localStorage
- * @param {string} token
+ * Save JWT token to localStorage.
+ * @param {string} token - JWT string.
  */
 export function saveToken(token) {
   localStorage.setItem("jwt", token);
 }
 
 /**
- * Get JWT from localStorage
- * @returns {string|null}
+ * Retrieve JWT token from localStorage.
+ * @returns {string|null} JWT string or null if not set.
  */
 export function getToken() {
   return localStorage.getItem("jwt");
 }
 
 /**
- * Remove JWT from localStorage (logout)
+ * Remove JWT token from localStorage (logout).
  */
 export function removeToken() {
   localStorage.removeItem("jwt");
 }
 
 /**
- * Check if user is logged in
+ * Check if the user is logged in (has a JWT token).
  * @returns {boolean}
  */
 export function isLoggedIn() {
@@ -33,10 +33,12 @@ export function isLoggedIn() {
 }
 
 /**
- * Login user
+ * Login user with username and password.
+ * Returns the full API response object { success, message, token, errors }.
+ * Saves the JWT token automatically.
  * @param {string} username
  * @param {string} password
- * @returns {Promise<object>} API response JSON
+ * @throws {object} Throws API response object if login fails.
  */
 export async function login(username, password) {
   const res = await fetch(`${API_URL}/api/auth/login`, {
@@ -45,21 +47,18 @@ export async function login(username, password) {
     body: JSON.stringify({ username, password })
   });
 
-  if (!res.ok) {
-    const msg = await res.text();
-    throw new Error(msg);
-  }
-
   const data = await res.json();
+  if (!data.success) return data;
   saveToken(data.token);
   return data;
 }
 
 /**
- * Register user
+ * Register a new user.
+ * Returns the full API response object { success, message, errors }.
  * @param {string} username
  * @param {string} password
- * @returns {Promise<object>} API response JSON
+ * @throws {object} Throws API response object if registration fails.
  */
 export async function register(username, password) {
   const res = await fetch(`${API_URL}/api/auth/register`, {
@@ -68,19 +67,17 @@ export async function register(username, password) {
     body: JSON.stringify({ username, password })
   });
 
-  if (!res.ok) {
-    const msg = await res.text();
-    throw new Error(msg);
-  }
+  const data = await res.json();
 
-  return await res.json();
+  return data;
 }
 
 /**
- * Fetch wrapper with JWT authorization and JSON body support
- * @param {string} endpoint API endpoint (e.g., "/api/tasks")
- * @param {object} options fetch options { method, body, headers, etc. }
- * @returns {Promise<Response>}
+ * Fetch wrapper for authenticated requests with JSON support.
+ * Automatically includes JWT in Authorization header if present.
+ * @param {string} endpoint - API endpoint (e.g., "/api/tasks")
+ * @param {object} [options] - fetch options { method, body, headers, etc. }
+ * @returns {Promise<object>} Parsed JSON response from the server.
  */
 export async function fetchWithAuth(endpoint, options = {}) {
   const token = getToken();
@@ -102,5 +99,6 @@ export async function fetchWithAuth(endpoint, options = {}) {
     finalOptions.body = JSON.stringify(options.body);
   }
 
-  return fetch(`${API_URL}${endpoint}`, finalOptions);
+  const response = await fetch(`${API_URL}${endpoint}`, finalOptions);
+  return response.json();
 }

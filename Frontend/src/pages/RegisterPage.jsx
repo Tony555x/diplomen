@@ -13,12 +13,19 @@ export default function RegisterPage() {
   const handleRegister = async () => {
     setError("");
     try {
-      await register(username, password);
-      navigate("/"); // redirect to login after successful registration
+      const res = await register(username, password);
+      if (!res.success) {
+        setError(res.errors.join("\n"));
+      } else {
+        navigate("/");
+      }
     } catch (err) {
-      setError(err.message);
+      console.log(err)
+      setError("Network or server error");
     }
+
   };
+
 
   return (
     <>

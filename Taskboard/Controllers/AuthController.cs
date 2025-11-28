@@ -32,17 +32,37 @@ namespace MyAuthApi.Controllers
             var result = await _userManager.CreateAsync(user, request.Password);
 
             if (!result.Succeeded)
-                return BadRequest(result.Errors);
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Registration failed",
+                    errors = result.Errors.Select(e => e.Description)
+                });
+            }
 
-            return Ok("User created successfully.");
+            return Ok(new
+            {
+                success = true,
+                message = "User created successfully",
+                errors = Array.Empty<string>()
+            });
         }
+
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var user = await _userManager.FindByNameAsync(request.Username);
             if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
-                return Unauthorized("Invalid username or password.");
+            {
+                return Unauthorized(new
+                {
+                    success = false,
+                    message = "Invalid username or password",
+                    errors = new string[] { }
+                });
+            }
 
             var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -62,7 +82,14 @@ namespace MyAuthApi.Controllers
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
-            return Ok(new { token = tokenHandler.WriteToken(token) });
+            return Ok(new
+            {
+                success = true,
+                message = "Login successful",
+                token = tokenHandler.WriteToken(token),
+                errors = new string[] { }
+            });
         }
+
     }
 }

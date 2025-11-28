@@ -13,12 +13,17 @@ export default function LoginPage() {
   const handleLogin = async () => {
     setError("");
     try {
-      await login(username, password);
+      const res = await login(username, password); // auth.js function that calls fetch
+      if (!res.success) {
+        setError(res.errors.length ? res.errors.join("\n") : res.message);
+        return;
+      }
       navigate("/dashboard");
-    } catch (err) {
-      setError(err.message);
+    } catch {
+      setError("Network or server error");
     }
   };
+
 
   return (
     <>
