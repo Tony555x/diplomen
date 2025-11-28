@@ -1,0 +1,56 @@
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { fetchWithAuth } from "../auth";
+import "./WorkspaceProjects.css";
+
+function WorkspaceProjects() {
+    const { workspaceId } = useParams();
+    const [projects, setProjects] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const loadProjects = async () => {
+            try {
+                const result = await fetchWithAuth(`/api/workspaces/${workspaceId}/projects`);
+                if (Array.isArray(result)) {
+                    setProjects(result);
+                } else {
+                    setProjects([]);
+                }
+            } catch (err) {
+                console.error("Failed to load projects", err);
+                setError("Failed to load projects.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadProjects();
+    }, [workspaceId]);
+
+    if (loading) return <div className="loading">Loading projects...</div>;
+    if (error) return <div className="error">{error}</div>;
+
+    return (
+        <div className="workspace-projects">
+            <h2>Projects</h2>
+            {projects.length > 0 ? (
+                <div className="projects-grid">
+                    {projects.map((project) => (
+                        <div key={project.id} className="project-card">
+                            <h3>{project.name}</h3>
+                            <p>Project #{project.id}</p>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="no-projects">
+                    <p>No projects in this workspace yet.</p>
+                </div>
+            )}
+        </div>
+    );
+}
+
+export default WorkspaceProjects;

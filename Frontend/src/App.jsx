@@ -5,6 +5,7 @@ import RegisterPage from "./pages/RegisterPage";
 import Dashboard from "./pages/Dashboard";
 import HomePage from "./pages/HomePage";
 import CreateWorkspace from "./pages/CreateWorkspace";
+import WorkspacePage from "./pages/WorkspacePage";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/create-workspace" element={<CreateWorkspace />} />
+        <Route path="/workspace/:workspaceId/*" element={<WorkspacePage />} />
       </Routes>
     </BrowserRouter>
   );

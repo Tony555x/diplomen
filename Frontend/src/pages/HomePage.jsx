@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { fetchWithAuth } from "../auth";
 import Navbar from "../components/Navbar";
 import "./HomePage.css";
@@ -8,6 +8,7 @@ function HomePage() {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const loadData = async () => {
@@ -49,7 +50,7 @@ function HomePage() {
                     {data?.workspaces?.length > 0 ? (
                         <div className="card-grid">
                             {data.workspaces.map((ws) => (
-                                <div key={ws.id} className="card">
+                                <div key={ws.id} className="card" onClick={() => navigate(`/workspace/${ws.id}/projects`)}>
                                     <h3>{ws.name}</h3>
                                     <p>Workspace #{ws.id}</p>
                                 </div>

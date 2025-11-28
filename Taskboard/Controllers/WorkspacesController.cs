@@ -18,6 +18,65 @@ namespace Taskboard.Controllers
             _context = context;
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetWorkspace(int id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            // Check if user is a member of this workspace
+            var isMember = await _context.WorkspaceMembers
+                .AnyAsync(wm => wm.WorkspaceId == id && wm.UserId == userId);
+
+            if (!isMember)
+            {
+                return Forbid();
+            }
+
+            var workspace = await _context.Workspaces
+                .Where(w => w.Id == id)
+                .Select(w => new
+                {
+                    w.Id,
+                    w.Name
+                })
+                .FirstOrDefaultAsync();
+
+            if (workspace == null)
+            {
+                return NotFound(new { success = false, message = "Workspace not found." });
+            }
+
+            return Ok(workspace);
+        }
+
+        [HttpGet("{id}/projects")]
+        public async Task<IActionResult> GetWorkspaceProjects(int id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            // Check if user is a member of this workspace
+            var isMember = await _context.WorkspaceMembers
+                .AnyAsync(wm => wm.WorkspaceId == id && wm.UserId == userId);
+
+            if (!isMember)
+            {
+                return Forbid();
+            }
+
+            var projects = await _context.Projects
+                .Where(p => p.WorkspaceId == id)
+                .Select(p => new
+                {
+                    p.Id,
+                    p.Name
+                })
+                .ToListAsync();
+
+            return Ok(projects);
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateWorkspace([FromBody] CreateWorkspaceRequest request)
         {
