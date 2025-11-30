@@ -4,6 +4,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Taskboard.Data.Models
 {
+    public enum ProjectAccessLevel
+    {
+        Public,
+        Workspace,
+        Private
+    }
+
     public class Project
     {
         [Required]
@@ -15,6 +22,8 @@ namespace Taskboard.Data.Models
         public int WorkspaceId { get; set; }
         [ForeignKey(nameof(WorkspaceId))]
         public Workspace? Workspace { get; set; }
+        [Required]
+        public ProjectAccessLevel AccessLevel { get; set; } = ProjectAccessLevel.Workspace;
 
         public List<TaskItem> Tasks { get; set; } = new();
         public List<ProjectMember> Members { get; set; } = new();
