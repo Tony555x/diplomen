@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { fetchWithAuth } from "../auth";
 import CreateProjectPopup from "../components/CreateProjectPopup";
+import ProjectCard from "../components/ProjectCard";
 import "./WorkspaceProjects.css";
 
 function WorkspaceProjects() {
@@ -54,10 +55,7 @@ function WorkspaceProjects() {
             {projects.length > 0 ? (
                 <div className="projects-grid">
                     {projects.map((project) => (
-                        <div key={project.id} className="project-card">
-                            <h3>{project.name}</h3>
-                            <p>Project #{project.id}</p>
-                        </div>
+                        <ProjectCard key={project.id} project={project} />
                     ))}
                 </div>
             ) : (

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { fetchWithAuth } from "../auth";
 import Navbar from "../components/Navbar";
+import ProjectCard from "../components/ProjectCard";
 import "./HomePage.css";
 
 function HomePage() {
@@ -72,10 +73,7 @@ function HomePage() {
                     {data?.projects?.length > 0 ? (
                         <div className="card-grid">
                             {data.projects.map((proj) => (
-                                <div key={proj.id} className="card">
-                                    <h3>{proj.name}</h3>
-                                    <p>Project #{proj.id}</p>
-                                </div>
+                                <ProjectCard key={proj.id} project={proj} />
                             ))}
                         </div>
                     ) : (

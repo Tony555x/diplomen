@@ -13,6 +13,8 @@ namespace Taskboard.Data.Models
         [Required]
         public bool Completed { get; set; }
         [Required]
+        public string Status { get; set; } = "To Do";
+        [Required]
         public int ProjectId { get; set; }
         [ForeignKey(nameof(ProjectId))]
         public Project? Project { get; set; }
