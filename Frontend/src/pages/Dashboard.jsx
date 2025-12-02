@@ -40,7 +40,8 @@ function Dashboard() {
           if (!organizedTasks[status]) {
             organizedTasks[status] = [];
           }
-          organizedTasks[status].push(t.title);
+          // Store the full task object instead of just the title
+          organizedTasks[status].push(t);
         });
 
         setTasks(organizedTasks);
@@ -71,10 +72,10 @@ function Dashboard() {
       });
 
       if (result.success) {
-        // Update local state
+        // Update local state with the full task object
         setTasks({
           ...tasks,
-          [column]: [...(tasks[column] || []), taskText]
+          [column]: [...(tasks[column] || []), result.task]
         });
       }
     } catch (err) {
@@ -87,7 +88,7 @@ function Dashboard() {
     setDraggedTask({ fromColumn, index });
   };
 
-  const handleDrop = (toColumn) => {
+  const handleDrop = async (toColumn) => {
     if (!draggedTask) return;
 
     const { fromColumn, index } = draggedTask;
@@ -103,6 +104,7 @@ function Dashboard() {
     const updatedFrom = tasks[fromColumn].filter((_, i) => i !== index);
     const updatedTo = [...(tasks[toColumn] || []), task];
 
+    // Optimistically update UI
     setTasks({
       ...tasks,
       [fromColumn]: updatedFrom,
@@ -110,6 +112,24 @@ function Dashboard() {
     });
 
     setDraggedTask(null);
+
+    // Persist to database
+    try {
+      await fetchWithAuth(`/api/projects/${projectId}/tasks/${task.id}`, {
+        method: "PATCH",
+        body: {
+          status: toColumn
+        }
+      });
+    } catch (err) {
+      console.error("Failed to update task status", err);
+      // Revert the change on error
+      setTasks({
+        ...tasks,
+        [fromColumn]: [...updatedFrom, task],
+        [toColumn]: updatedTo.filter(t => t.id !== task.id)
+      });
+    }
   };
 
   if (loading) return <div className="loading">Loading dashboard...</div>;

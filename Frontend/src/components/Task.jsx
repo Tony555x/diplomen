@@ -12,7 +12,7 @@ function Task({ task, index, columnKey, onDragStart }) {
       onDragStart={handleDragStart}
       className="task-item"
     >
-      <span>{task}</span>
+      <span>{task.title}</span>
     </li>
   );
 }

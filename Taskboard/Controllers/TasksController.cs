@@ -124,11 +124,59 @@ namespace Taskboard.Controllers
 
             return Ok(project);
         }
+
+        [HttpPatch("{taskId}")]
+        public async Task<IActionResult> UpdateTaskStatus(int projectId, int taskId, [FromBody] UpdateTaskStatusRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            // Verify user has access to this project
+            var hasAccess = await _context.ProjectMembers
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+
+            if (!hasAccess)
+            {
+                return Forbid();
+            }
+
+            var task = await _context.Tasks
+                .FirstOrDefaultAsync(t => t.Id == taskId && t.ProjectId == projectId);
+
+            if (task == null)
+            {
+                return NotFound(new { success = false, message = "Task not found." });
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Status))
+            {
+                task.Status = request.Status;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                task = new
+                {
+                    task.Id,
+                    task.Title,
+                    task.Status,
+                    task.Completed
+                }
+            });
+        }
     }
 
     public class CreateTaskRequest
     {
         public string Title { get; set; } = string.Empty;
+        public string? Status { get; set; }
+    }
+
+    public class UpdateTaskStatusRequest
+    {
         public string? Status { get; set; }
     }
 }
