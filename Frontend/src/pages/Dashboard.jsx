@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { fetchWithAuth } from "../auth";
 import Column from "../components/Column";
 import Navbar from "../components/Navbar";
+import TaskDetailsPopup from "../components/TaskDetailsPopup";
 import "./Dashboard.css";
 
 function Dashboard() {
@@ -12,6 +13,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [draggedTask, setDraggedTask] = useState(null);
+  const [selectedTask, setSelectedTask] = useState(null);
 
   const columns = ["To Do", "In Progress", "Done"];
 
@@ -132,6 +134,46 @@ function Dashboard() {
     }
   };
 
+  const handleTaskClick = (task) => {
+    setSelectedTask(task);
+  };
+
+  const handleTaskUpdate = async (updatedTask) => {
+    try {
+      // Update in backend
+      await fetchWithAuth(`/api/projects/${projectId}/tasks/${updatedTask.id}`, {
+        method: "PATCH",
+        body: {
+          status: updatedTask.status,
+          title: updatedTask.title,
+          completed: updatedTask.completed
+        }
+      });
+
+      // Update local state
+      const newTasks = { "To Do": [], "In Progress": [], "Done": [] };
+
+      // Rebuild tasks with the updated task
+      Object.keys(tasks).forEach(column => {
+        tasks[column].forEach(task => {
+          if (task.id === updatedTask.id) {
+            // Place updated task in its new status column
+            newTasks[updatedTask.status].push(updatedTask);
+          } else {
+            // Keep other tasks in their current column
+            newTasks[column].push(task);
+          }
+        });
+      });
+
+      setTasks(newTasks);
+    } catch (err) {
+      console.error("Failed to update task", err);
+      throw err; // Re-throw so popup can handle it
+    }
+  };
+
+
   if (loading) return <div className="loading">Loading dashboard...</div>;
   if (error) return <div className="error">{error}</div>;
 
@@ -152,10 +194,18 @@ function Dashboard() {
               addTask={addTask}
               onDragStart={handleDragStart}
               onDrop={handleDrop}
+              onTaskClick={handleTaskClick}
             />
           ))}
         </div>
       </div>
+      {selectedTask && (
+        <TaskDetailsPopup
+          task={selectedTask}
+          onClose={() => setSelectedTask(null)}
+          onUpdate={handleTaskUpdate}
+        />
+      )}
     </>
   );
 }

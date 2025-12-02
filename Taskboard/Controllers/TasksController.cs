@@ -153,6 +153,16 @@ namespace Taskboard.Controllers
                 task.Status = request.Status;
             }
 
+            if (!string.IsNullOrWhiteSpace(request.Title))
+            {
+                task.Title = request.Title;
+            }
+
+            if (request.Completed.HasValue)
+            {
+                task.Completed = request.Completed.Value;
+            }
+
             await _context.SaveChangesAsync();
 
             return Ok(new
@@ -178,5 +188,7 @@ namespace Taskboard.Controllers
     public class UpdateTaskStatusRequest
     {
         public string? Status { get; set; }
+        public string? Title { get; set; }
+        public bool? Completed { get; set; }
     }
 }

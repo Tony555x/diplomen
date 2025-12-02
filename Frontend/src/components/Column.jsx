@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Task from "./Task";
 
-function Column({ columnKey, label, tasks, addTask, onDragStart, onDrop }) {
+function Column({ columnKey, label, tasks, addTask, onDragStart, onDrop, onTaskClick }) {
   const [newTask, setNewTask] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -43,6 +43,7 @@ function Column({ columnKey, label, tasks, addTask, onDragStart, onDrop }) {
             index={index}
             columnKey={columnKey}
             onDragStart={onDragStart}
+            onClick={onTaskClick}
           />
         ))}
       </ul>
