@@ -40,26 +40,14 @@ h1 {
   flex-direction: column;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
   border: 1px solid #374151;
+  transition: all 0.2s ease;
 }
 
-.column li {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+.column.drag-over {
+  background-color: #2a2a2a;
+  border-color: #3b82f6;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
 }
-
-.column li span {
-  width: 100%;
-  margin-bottom: 0.5rem;
-}
-
-.buttons {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-}
-
 
 .board::-webkit-scrollbar {
   height: 8px;
@@ -89,6 +77,7 @@ h1 {
   list-style: none;
   padding: 0;
   flex: 1;
+  min-height: 100px;
 }
 
 .column li {
@@ -103,22 +92,27 @@ h1 {
   font-size: 0.95rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
   border: 1px solid #374151;
+  cursor: grab;
+  transition: all 0.2s ease;
 }
 
-.buttons button {
-  font-size: 0.7rem;
-  padding: 0.2rem 0.5rem;
-  margin-left: 0.3rem;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  border-radius: 4px;
-  cursor: pointer;
-  color: rgba(255, 255, 255, 0.9);
-  background-color: #3b82f6;
-  transition: background-color 0.2s;
+.column li:hover {
+  background-color: #353535;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8);
 }
 
-.buttons button:hover {
-  background-color: #2563eb;
+.column li:active {
+  cursor: grabbing;
+}
+
+.task-item[draggable="true"] {
+  opacity: 1;
+}
+
+.task-item:active {
+  opacity: 0.5;
+  cursor: grabbing;
 }
 
 .add-task {
@@ -160,14 +154,14 @@ h1 {
   background-color: #059669;
 }
 
-.column-todo {
+.column-ToDo {
   border-top: 4px solid #3b82f6;
 }
 
-.column-inProgress {
+.column-InProgress {
   border-top: 4px solid #f59e0b;
 }
 
-.column-done {
+.column-Done {
   border-top: 4px solid #10b981;
 }

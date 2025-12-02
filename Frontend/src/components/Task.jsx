@@ -1,20 +1,18 @@
 import React from "react";
 
-function Task({ task, index, columnKey, moveTask }) {
+function Task({ task, index, columnKey, onDragStart }) {
+  const handleDragStart = (e) => {
+    e.dataTransfer.effectAllowed = "move";
+    onDragStart(columnKey, index);
+  };
+
   return (
-    <li>
+    <li
+      draggable
+      onDragStart={handleDragStart}
+      className="task-item"
+    >
       <span>{task}</span>
-      <div className="buttons">
-        {columnKey !== "todo" && (
-          <button onClick={() => moveTask(columnKey, index, "todo")}>← To Do</button>
-        )}
-        {columnKey !== "inProgress" && (
-          <button onClick={() => moveTask(columnKey, index, "inProgress")}>→ In Progress</button>
-        )}
-        {columnKey !== "done" && (
-          <button onClick={() => moveTask(columnKey, index, "done")}>→ Done</button>
-        )}
-      </div>
     </li>
   );
 }

@@ -11,6 +11,7 @@ function Dashboard() {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [draggedTask, setDraggedTask] = useState(null);
 
   const columns = ["To Do", "In Progress", "Done"];
 
@@ -82,16 +83,33 @@ function Dashboard() {
     }
   };
 
-  const moveTask = (fromColumn, index, toColumn) => {
-    // Local update only for now, as requested
+  const handleDragStart = (fromColumn, index) => {
+    setDraggedTask({ fromColumn, index });
+  };
+
+  const handleDrop = (toColumn) => {
+    if (!draggedTask) return;
+
+    const { fromColumn, index } = draggedTask;
+
+    // Don't do anything if dropped in the same column
+    if (fromColumn === toColumn) {
+      setDraggedTask(null);
+      return;
+    }
+
+    // Move the task
     const task = tasks[fromColumn][index];
     const updatedFrom = tasks[fromColumn].filter((_, i) => i !== index);
     const updatedTo = [...(tasks[toColumn] || []), task];
+
     setTasks({
       ...tasks,
       [fromColumn]: updatedFrom,
       [toColumn]: updatedTo
     });
+
+    setDraggedTask(null);
   };
 
   if (loading) return <div className="loading">Loading dashboard...</div>;
@@ -112,7 +130,9 @@ function Dashboard() {
               label={columnName}
               tasks={tasks[columnName] || []}
               addTask={addTask}
-              moveTask={moveTask} />
+              onDragStart={handleDragStart}
+              onDrop={handleDrop}
+            />
           ))}
         </div>
       </div>
