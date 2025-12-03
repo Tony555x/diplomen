@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { login } from "../auth";
+import { login, isLoggedIn } from "../auth";
 import Navbar from "../components/Navbar";
 import "./AuthPages.css";
 
@@ -10,6 +10,13 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  // Auto-redirect if already logged in
+  useEffect(() => {
+    if (isLoggedIn()) {
+      navigate("/home");
+    }
+  }, [navigate]);
+
   const handleLogin = async () => {
     setError("");
     try {
@@ -18,7 +25,7 @@ export default function LoginPage() {
         setError(res.errors.length ? res.errors.join("\n") : res.message);
         return;
       }
-      navigate("/dashboard");
+      navigate("/home");
     } catch {
       setError("Network or server error");
     }
