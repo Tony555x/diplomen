@@ -107,6 +107,108 @@ namespace Taskboard.Controllers
             });
         }
 
+        [HttpGet("{projectId}/members")]
+        public async Task<IActionResult> GetProjectMembers(int projectId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            // Verify user is a member of the project
+            var isMember = await _context.ProjectMembers
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+
+            if (!isMember)
+            {
+                return Forbid();
+            }
+
+            // Fetch all members with user details
+            var members = await _context.ProjectMembers
+                .Where(pm => pm.ProjectId == projectId)
+                .Include(pm => pm.User)
+                .Select(pm => new
+                {
+                    pm.UserId,
+                    pm.User!.Email,
+                    pm.User.UserName,
+                    pm.Role,
+                    pm.JoinedAt
+                })
+                .OrderBy(m => m.JoinedAt)
+                .ToListAsync();
+
+            return Ok(new
+            {
+                success = true,
+                members = members
+            });
+        }
+
+        [HttpPost("{projectId}/members")]
+        public async Task<IActionResult> AddProjectMember(int projectId, [FromBody] AddMemberRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            // Verify user is a member of the project
+            var isMember = await _context.ProjectMembers
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+
+            if (!isMember)
+            {
+                return Forbid();
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Email))
+            {
+                return BadRequest(new { success = false, message = "Email is required." });
+            }
+
+            // Find user by email
+            var userToAdd = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == request.Email);
+
+            if (userToAdd == null)
+            {
+                return NotFound(new { success = false, message = "User with this email not found." });
+            }
+
+            // Check if user is already a member
+            var existingMembership = await _context.ProjectMembers
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userToAdd.Id);
+
+            if (existingMembership)
+            {
+                return BadRequest(new { success = false, message = "User is already a member of this project." });
+            }
+
+            // Add member
+            var newMember = new ProjectMember
+            {
+                ProjectId = projectId,
+                UserId = userToAdd.Id,
+                Role = "Member",
+                JoinedAt = DateTime.UtcNow
+            };
+
+            _context.ProjectMembers.Add(newMember);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = "Member added successfully.",
+                member = new
+                {
+                    UserId = userToAdd.Id,
+                    userToAdd.Email,
+                    userToAdd.UserName,
+                    newMember.Role,
+                    newMember.JoinedAt
+                }
+            });
+        }
+
         [HttpPost("validate-email")]
         public async Task<IActionResult> ValidateEmail([FromBody] ValidateEmailRequest request)
         {
@@ -147,6 +249,11 @@ namespace Taskboard.Controllers
     }
 
     public class ValidateEmailRequest
+    {
+        public string Email { get; set; } = string.Empty;
+    }
+
+    public class AddMemberRequest
     {
         public string Email { get; set; } = string.Empty;
     }

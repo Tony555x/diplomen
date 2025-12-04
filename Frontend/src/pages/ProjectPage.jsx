@@ -4,6 +4,7 @@ import { fetchWithAuth } from "../auth";
 import Navbar from "../components/Navbar";
 import ProjectNavbar from "../components/ProjectNavbar";
 import ProjectTasks from "./ProjectTasks";
+import ProjectMembers from "./ProjectMembers";
 import "./ProjectPage.css";
 
 function ProjectPage() {
@@ -39,7 +40,7 @@ function ProjectPage() {
                 <Routes>
                     <Route path="/" element={<Navigate to={`/project/${projectId}/tasks`} replace />} />
                     <Route path="/tasks" element={<ProjectTasks />} />
-                    <Route path="/members" element={<div style={{ padding: '2rem', color: 'rgba(255,255,255,0.6)' }}>Members page - Coming soon</div>} />
+                    <Route path="/members" element={<ProjectMembers />} />
                     <Route path="/settings" element={<div style={{ padding: '2rem', color: 'rgba(255,255,255,0.6)' }}>Settings page - Coming soon</div>} />
                 </Routes>
             </div>
