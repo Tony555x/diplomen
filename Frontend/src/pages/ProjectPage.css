@@ -1,0 +1,12 @@
+.project-page {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.project-content {
+    flex: 1;
+    overflow-y: auto;
+    background-color: #121212;
+}

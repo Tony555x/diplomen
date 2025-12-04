@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import Dashboard from "./pages/Dashboard";
+import ProjectPage from "./pages/ProjectPage";
 import HomePage from "./pages/HomePage";
 import CreateWorkspace from "./pages/CreateWorkspace";
 import WorkspacePage from "./pages/WorkspacePage";
@@ -18,7 +18,15 @@ function App() {
           path="/dashboard/:projectId"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <ProjectPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/project/:projectId/*"
+          element={
+            <ProtectedRoute>
+              <ProjectPage />
             </ProtectedRoute>
           }
         />
