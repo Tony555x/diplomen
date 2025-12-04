@@ -1,3 +1,5 @@
+/* WorkspaceProjects specific styles - common styles are in common.css */
+
 .workspace-projects {
     padding: 2rem;
     max-width: 1200px;
@@ -31,28 +33,4 @@
 
 .new-project-btn:hover {
     background: #2563eb;
-}
-
-.projects-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-}
-
-.no-projects {
-    text-align: center;
-    padding: 3rem;
-    color: rgba(255, 255, 255, 0.6);
-}
-
-.loading,
-.error {
-    text-align: center;
-    padding: 3rem;
-    font-size: 1.2rem;
-    color: rgba(255, 255, 255, 0.6);
-}
-
-.error {
-    color: #f87171;
 }

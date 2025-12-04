@@ -141,6 +141,33 @@
     cursor: not-allowed;
 }
 
+/* Common Action Buttons */
+.btn-action {
+    padding: 0.75rem 1.5rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 1rem;
+}
+
+.btn-action:hover {
+    background: #2563eb;
+}
+
+.btn-success {
+    background: #10b981;
+    color: white;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.btn-success:hover {
+    background: #059669;
+}
+
 /* Common Error/Message Styles */
 .error-message {
     margin-bottom: 1rem;
@@ -149,6 +176,16 @@
     border: 1px solid #f87171;
     border-radius: 6px;
     color: #f87171;
+    font-size: 0.9rem;
+}
+
+.success-message {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid #10b981;
+    border-radius: 6px;
+    color: #10b981;
     font-size: 0.9rem;
 }
 
@@ -162,4 +199,78 @@
 
 .error {
     color: #f87171;
+}
+
+.empty-state,
+.no-projects {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1rem;
+}
+
+/* Common Card Styles */
+.card {
+    background: #1e1e1e;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    border: 1px solid #374151;
+    cursor: pointer;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    border-color: #4b5563;
+}
+
+.card h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.card p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+}
+
+/* Common Section Styles */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #374151;
+}
+
+.section-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Common Page Container */
+.page-container {
+    background: #1e1e1e;
+    border: 1px solid #374151;
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+/* Common Grid Layouts */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
 }
