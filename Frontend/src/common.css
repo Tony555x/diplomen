@@ -1,0 +1,165 @@
+/* Common Popup Styles */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.popup-container {
+    background: #1e1e1e;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    border: 1px solid #374151;
+}
+
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #374151;
+}
+
+.popup-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.close-btn:hover {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.popup-container form {
+    padding: 1.5rem;
+}
+
+/* Common Form Styles */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    background: #2d2d2d;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #60a5fa;
+}
+
+.form-group input:disabled,
+.form-group select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Common Button Styles */
+.button-group {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: #2563eb;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid #374151;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: #2d2d2d;
+    border-color: #4b5563;
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Common Error/Message Styles */
+.error-message {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: rgba(248, 113, 113, 0.1);
+    border: 1px solid #f87171;
+    border-radius: 6px;
+    color: #f87171;
+    font-size: 0.9rem;
+}
+
+/* Common Loading/Error States */
+.loading,
+.error {
+    padding: 2rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.error {
+    color: #f87171;
+}
