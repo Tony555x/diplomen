@@ -28,7 +28,19 @@ namespace MyAuthApi.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
-            var user = new User { UserName = request.Username };
+            // Check if email already exists
+            var existingUser = await _userManager.FindByEmailAsync(request.Email);
+            if (existingUser != null)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Registration failed",
+                    errors = new[] { "Email is already registered." }
+                });
+            }
+
+            var user = new User { UserName = request.Username, Email = request.Email };
             var result = await _userManager.CreateAsync(user, request.Password);
 
             if (!result.Succeeded)

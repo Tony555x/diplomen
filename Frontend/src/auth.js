@@ -57,14 +57,15 @@ export async function login(username, password) {
  * Register a new user.
  * Returns the full API response object { success, message, errors }.
  * @param {string} username
+ * @param {string} email
  * @param {string} password
  * @throws {object} Throws API response object if registration fails.
  */
-export async function register(username, password) {
+export async function register(username, email, password) {
   const res = await fetch(`${API_URL}/api/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password })
+    body: JSON.stringify({ username, email, password })
   });
 
   const data = await res.json();

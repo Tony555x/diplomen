@@ -6,6 +6,7 @@ import "./AuthPages.css";
 
 export default function RegisterPage() {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -13,7 +14,7 @@ export default function RegisterPage() {
   const handleRegister = async () => {
     setError("");
     try {
-      const res = await register(username, password);
+      const res = await register(username, email, password);
       if (!res.success) {
         setError(res.errors.join("\n"));
       } else {
@@ -37,6 +38,12 @@ export default function RegisterPage() {
           placeholder="Username"
           value={username}
           onChange={e => setUsername(e.target.value)}
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
         />
         <input
           type="password"
