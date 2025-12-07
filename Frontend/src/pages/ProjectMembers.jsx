@@ -7,6 +7,7 @@ import "./ProjectMembers.css";
 function ProjectMembers() {
     const { projectId } = useParams();
     const [members, setMembers] = useState([]);
+    const [roles, setRoles] = useState([]);
     const [currentUserRole, setCurrentUserRole] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -22,6 +23,7 @@ function ProjectMembers() {
             const result = await fetchWithAuth(`/api/projects/${projectId}/members`);
             if (result.success) {
                 setMembers(result.members);
+                setRoles(result.roles || []);
                 setCurrentUserRole(result.currentUserRole);
             } else {
                 setError("Failed to load members.");
@@ -93,16 +95,34 @@ function ProjectMembers() {
                 <div className="roles-section">
                     <div className="section-header">
                         <h2>Roles</h2>
-                        <button
-                            className="btn-new-role"
-                            disabled
-                            title="Coming soon"
-                        >
-                            + New Role
-                        </button>
+                        {currentUserRole?.canAddEditMembers && (
+                            <button
+                                className="btn-new-role"
+                                disabled
+                                title="Coming soon"
+                            >
+                                + New Role
+                            </button>
+                        )}
                     </div>
-                    <div className="roles-placeholder">
-                        <p>Role management coming soon...</p>
+                    <div className="roles-list">
+                        {roles.length === 0 ? (
+                            <div className="empty-state">No roles found</div>
+                        ) : (
+                            roles.map((role) => (
+                                <div key={role.id} className="role-card">
+                                    <div className="role-info">
+                                        <div className="role-name">{role.roleName}</div>
+                                        <div className="role-member-count">
+                                            {role.memberCount} {role.memberCount === 1 ? 'member' : 'members'}
+                                        </div>
+                                    </div>
+                                    {role.isOwner && (
+                                        <span className="owner-badge">Owner Role</span>
+                                    )}
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
             </div>

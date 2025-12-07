@@ -131,7 +131,7 @@ namespace Taskboard.Controllers
         }
 
         [HttpGet("{projectId}/members")]
-        public async Task<IActionResult> GetProjectMembers(int projectId)
+        public async Task<IActionResult> GetProjectMembersAndRoles(int projectId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
@@ -162,10 +162,27 @@ namespace Taskboard.Controllers
                 .OrderBy(m => m.JoinedAt)
                 .ToListAsync();
 
+            // Fetch all roles for this project
+            var roles = await _context.ProjectRoles
+                .Where(pr => pr.ProjectId == projectId)
+                .Select(pr => new
+                {
+                    pr.Id,
+                    pr.RoleName,
+                    pr.CanAddEditMembers,
+                    pr.CanEditProjectSettings,
+                    pr.IsOwner,
+                    MemberCount = pr.Members.Count
+                })
+                .OrderByDescending(r => r.IsOwner)
+                .ThenBy(r => r.RoleName)
+                .ToListAsync();
+
             return Ok(new
             {
                 success = true,
                 members = members,
+                roles = roles,
                 currentUserRole = new
                 {
                     RoleName = currentUserMembership.ProjectRole!.RoleName,
