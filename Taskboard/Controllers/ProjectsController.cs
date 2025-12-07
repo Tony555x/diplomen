@@ -222,6 +222,11 @@ namespace Taskboard.Controllers
                 return BadRequest(new { success = false, message = "Email is required." });
             }
 
+            if (request.RoleId <= 0)
+            {
+                return BadRequest(new { success = false, message = "Role is required." });
+            }
+
             // Find user by email
             var userToAdd = await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == request.Email);
@@ -240,13 +245,13 @@ namespace Taskboard.Controllers
                 return BadRequest(new { success = false, message = "User is already a member of this project." });
             }
 
-            // Get the default Member role for this project
-            var memberRole = await _context.ProjectRoles
-                .FirstOrDefaultAsync(pr => pr.ProjectId == projectId && pr.RoleName == "Member");
+            // Verify the role exists and belongs to this project
+            var role = await _context.ProjectRoles
+                .FirstOrDefaultAsync(pr => pr.Id == request.RoleId && pr.ProjectId == projectId);
 
-            if (memberRole == null)
+            if (role == null)
             {
-                return BadRequest(new { success = false, message = "Default member role not found for this project." });
+                return BadRequest(new { success = false, message = "Invalid role selected." });
             }
 
             // Add member
@@ -254,7 +259,7 @@ namespace Taskboard.Controllers
             {
                 ProjectId = projectId,
                 UserId = userToAdd.Id,
-                ProjectRoleId = memberRole.Id,
+                ProjectRoleId = role.Id,
                 JoinedAt = DateTime.UtcNow
             };
 
@@ -329,5 +334,6 @@ namespace Taskboard.Controllers
     public class AddMemberRequest
     {
         public string Email { get; set; } = string.Empty;
+        public int RoleId { get; set; }
     }
 }

@@ -130,6 +130,7 @@ function ProjectMembers() {
             {showAddMemberPopup && (
                 <AddMemberPopup
                     projectId={projectId}
+                    roles={roles}
                     onClose={() => setShowAddMemberPopup(false)}
                     onMemberAdded={handleMemberAdded}
                 />

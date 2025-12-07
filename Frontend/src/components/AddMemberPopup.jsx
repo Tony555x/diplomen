@@ -2,10 +2,20 @@ import React, { useState } from "react";
 import { fetchWithAuth } from "../auth";
 import "./AddMemberPopup.css";
 
-function AddMemberPopup({ projectId, onClose, onMemberAdded }) {
+function AddMemberPopup({ projectId, roles, onClose, onMemberAdded }) {
     const [email, setEmail] = useState("");
+    const [selectedRole, setSelectedRole] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+
+    // Set default role when roles are loaded
+    React.useEffect(() => {
+        if (roles && roles.length > 0 && !selectedRole) {
+            // Default to the first non-owner role, or first role if all are owner
+            const defaultRole = roles.find(r => !r.isOwner) || roles[0];
+            setSelectedRole(defaultRole.id.toString());
+        }
+    }, [roles, selectedRole]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -16,12 +26,20 @@ function AddMemberPopup({ projectId, onClose, onMemberAdded }) {
             return;
         }
 
+        if (!selectedRole) {
+            setError("Please select a role.");
+            return;
+        }
+
         setLoading(true);
 
         try {
             const result = await fetchWithAuth(`/api/projects/${projectId}/members`, {
                 method: "POST",
-                body: { email: email.trim() }
+                body: {
+                    email: email.trim(),
+                    roleId: parseInt(selectedRole)
+                }
             });
 
             if (result.success) {
@@ -66,6 +84,30 @@ function AddMemberPopup({ projectId, onClose, onMemberAdded }) {
                             disabled={loading}
                             autoFocus
                         />
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="member-role">Role</label>
+                        <select
+                            id="member-role"
+                            value={selectedRole}
+                            onChange={(e) => {
+                                setSelectedRole(e.target.value);
+                                setError("");
+                            }}
+                            disabled={loading || !roles || roles.length === 0}
+                        >
+                            {!roles || roles.length === 0 ? (
+                                <option value="">Loading roles...</option>
+                            ) : (
+                                roles.map((role) => (
+                                    <option key={role.id} value={role.id}>
+                                        {role.roleName}
+                                        {role.isOwner ? ' (Owner)' : ''}
+                                    </option>
+                                ))
+                            )}
+                        </select>
                     </div>
 
                     {error && <div className="error-message">{error}</div>}
