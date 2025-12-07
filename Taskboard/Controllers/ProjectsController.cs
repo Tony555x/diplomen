@@ -64,12 +64,35 @@ namespace Taskboard.Controllers
             _context.Projects.Add(project);
             await _context.SaveChangesAsync();
 
+            // Create default roles for the project
+            var ownerRole = new ProjectRole
+            {
+                ProjectId = project.Id,
+                RoleName = "Owner",
+                CanAddEditMembers = true,
+                CanEditProjectSettings = true,
+                IsOwner = true
+            };
+
+            var memberRole = new ProjectRole
+            {
+                ProjectId = project.Id,
+                RoleName = "Member",
+                CanAddEditMembers = false,
+                CanEditProjectSettings = false,
+                IsOwner = false
+            };
+
+            _context.ProjectRoles.Add(ownerRole);
+            _context.ProjectRoles.Add(memberRole);
+            await _context.SaveChangesAsync();
+
             // Add creator as owner
             var creatorMembership = new ProjectMember
             {
                 ProjectId = project.Id,
                 UserId = userId,
-                Role = "Owner",
+                ProjectRoleId = ownerRole.Id,
                 JoinedAt = DateTime.UtcNow
             };
 
@@ -85,7 +108,7 @@ namespace Taskboard.Controllers
                 {
                     ProjectId = project.Id,
                     UserId = member.Id,
-                    Role = "Member",
+                    ProjectRoleId = memberRole.Id,
                     JoinedAt = DateTime.UtcNow
                 };
 
@@ -113,11 +136,12 @@ namespace Taskboard.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
-            // Verify user is a member of the project
-            var isMember = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+            // Verify user is a member of the project and get their role
+            var currentUserMembership = await _context.ProjectMembers
+                .Include(pm => pm.ProjectRole)
+                .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
 
-            if (!isMember)
+            if (currentUserMembership == null)
             {
                 return Forbid();
             }
@@ -126,12 +150,13 @@ namespace Taskboard.Controllers
             var members = await _context.ProjectMembers
                 .Where(pm => pm.ProjectId == projectId)
                 .Include(pm => pm.User)
+                .Include(pm => pm.ProjectRole)
                 .Select(pm => new
                 {
                     pm.UserId,
                     pm.User!.Email,
                     pm.User.UserName,
-                    pm.Role,
+                    Role = pm.ProjectRole!.RoleName,
                     pm.JoinedAt
                 })
                 .OrderBy(m => m.JoinedAt)
@@ -140,7 +165,14 @@ namespace Taskboard.Controllers
             return Ok(new
             {
                 success = true,
-                members = members
+                members = members,
+                currentUserRole = new
+                {
+                    RoleName = currentUserMembership.ProjectRole!.RoleName,
+                    CanAddEditMembers = currentUserMembership.ProjectRole.CanAddEditMembers,
+                    CanEditProjectSettings = currentUserMembership.ProjectRole.CanEditProjectSettings,
+                    IsOwner = currentUserMembership.ProjectRole.IsOwner
+                }
             });
         }
 
@@ -158,7 +190,16 @@ namespace Taskboard.Controllers
             {
                 return Forbid();
             }
+            var currentUserProjectMember = await _context.ProjectMembers
+                .Include(pm => pm.ProjectRole)
+                .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
 
+            if (currentUserProjectMember == null || currentUserProjectMember.ProjectRole == null || !currentUserProjectMember.ProjectRole.CanAddEditMembers)
+            {
+                return Forbid();
+            }
+
+            
             if (string.IsNullOrWhiteSpace(request.Email))
             {
                 return BadRequest(new { success = false, message = "Email is required." });
@@ -182,17 +223,32 @@ namespace Taskboard.Controllers
                 return BadRequest(new { success = false, message = "User is already a member of this project." });
             }
 
+            // Get the default Member role for this project
+            var memberRole = await _context.ProjectRoles
+                .FirstOrDefaultAsync(pr => pr.ProjectId == projectId && pr.RoleName == "Member");
+
+            if (memberRole == null)
+            {
+                return BadRequest(new { success = false, message = "Default member role not found for this project." });
+            }
+
             // Add member
             var newMember = new ProjectMember
             {
                 ProjectId = projectId,
                 UserId = userToAdd.Id,
-                Role = "Member",
+                ProjectRoleId = memberRole.Id,
                 JoinedAt = DateTime.UtcNow
             };
 
             _context.ProjectMembers.Add(newMember);
             await _context.SaveChangesAsync();
+
+            // Reload with role information
+            var addedMember = await _context.ProjectMembers
+                .Where(pm => pm.ProjectId == projectId && pm.UserId == userToAdd.Id)
+                .Include(pm => pm.ProjectRole)
+                .FirstOrDefaultAsync();
 
             return Ok(new
             {
@@ -203,8 +259,8 @@ namespace Taskboard.Controllers
                     UserId = userToAdd.Id,
                     userToAdd.Email,
                     userToAdd.UserName,
-                    newMember.Role,
-                    newMember.JoinedAt
+                    Role = addedMember!.ProjectRole!.RoleName,
+                    addedMember.JoinedAt
                 }
             });
         }

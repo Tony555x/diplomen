@@ -15,6 +15,7 @@ public class AppDbContext : IdentityDbContext<User>
 
     public DbSet<WorkspaceMember> WorkspaceMembers{get;set;}
     public DbSet<ProjectMember> ProjectMembers {get; set;}
+    public DbSet<ProjectRole> ProjectRoles {get; set;}
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -32,6 +33,18 @@ public class AppDbContext : IdentityDbContext<User>
 
         builder.Entity<ProjectMember>()
             .HasKey(x => new { x.ProjectId, x.UserId });
+
+        builder.Entity<ProjectMember>()
+            .HasOne(pm => pm.ProjectRole)
+            .WithMany(pr => pr.Members)
+            .HasForeignKey(pm => pm.ProjectRoleId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<ProjectRole>()
+            .HasOne(pr => pr.Project)
+            .WithMany(p => p.Roles)
+            .HasForeignKey(pr => pr.ProjectId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.Entity<UserTask>()
             .HasKey(x => new { x.TaskItemId, x.UserId });

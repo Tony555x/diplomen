@@ -7,6 +7,7 @@ import "./ProjectMembers.css";
 function ProjectMembers() {
     const { projectId } = useParams();
     const [members, setMembers] = useState([]);
+    const [currentUserRole, setCurrentUserRole] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showAddMemberPopup, setShowAddMemberPopup] = useState(false);
@@ -21,6 +22,7 @@ function ProjectMembers() {
             const result = await fetchWithAuth(`/api/projects/${projectId}/members`);
             if (result.success) {
                 setMembers(result.members);
+                setCurrentUserRole(result.currentUserRole);
             } else {
                 setError("Failed to load members.");
             }
@@ -55,12 +57,14 @@ function ProjectMembers() {
                 <div className="members-section">
                     <div className="section-header">
                         <h2>Members</h2>
-                        <button
-                            className="btn-add-member"
-                            onClick={() => setShowAddMemberPopup(true)}
-                        >
-                            + Add Member
-                        </button>
+                        {currentUserRole?.canAddEditMembers && (
+                            <button
+                                className="btn-add-member"
+                                onClick={() => setShowAddMemberPopup(true)}
+                            >
+                                + Add Member
+                            </button>
+                        )}
                     </div>
                     <div className="members-list">
                         {members.length === 0 ? (

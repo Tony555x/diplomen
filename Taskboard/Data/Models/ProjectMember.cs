@@ -14,7 +14,10 @@ namespace Taskboard.Data.Models
         [ForeignKey(nameof(UserId))]
         public User? User { get; set; }
         [Required]
-        public string Role { get; set; } = String.Empty;
+        public int ProjectRoleId { get; set; }
+        
+        [ForeignKey(nameof(ProjectRoleId))]
+        public ProjectRole? ProjectRole { get; set; }
         [Required]
         public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
     }
