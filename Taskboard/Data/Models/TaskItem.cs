@@ -19,6 +19,12 @@ namespace Taskboard.Data.Models
         [ForeignKey(nameof(ProjectId))]
         public Project? Project { get; set; }
 
+        // Task Type relationship (nullable to support tasks without types)
+        public int? TaskTypeId { get; set; }
+        [ForeignKey(nameof(TaskTypeId))]
+        public TaskType? TaskType { get; set; }
+
         public List<UserTask> UserTasks {get;set;} = new();
+        public List<TaskFieldValue> FieldValues { get; set; } = new();
     }
 }

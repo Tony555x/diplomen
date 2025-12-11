@@ -28,5 +28,6 @@ namespace Taskboard.Data.Models
         public List<TaskItem> Tasks { get; set; } = new();
         public List<ProjectMember> Members { get; set; } = new();
         public List<ProjectRole> Roles { get; set; } = new();
+        public List<TaskType> TaskTypes { get; set; } = new();
     }
 }
