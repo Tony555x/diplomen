@@ -55,21 +55,23 @@ function ProjectTasks() {
         }
     }, [projectId]);
 
-    const addTask = async (column, taskText) => {
+    const addTask = async (column, taskText, taskTypeId) => {
         if (!taskText.trim()) return;
 
         try {
-            // Create task in backend
-            const result = await fetchWithAuth(`/api/projects/${projectId}/tasks`, {
-                method: "POST",
-                body: {
-                    title: taskText,
-                    status: column
+            const result = await fetchWithAuth(
+                `/api/projects/${projectId}/tasks`,
+                {
+                    method: "POST",
+                    body: {
+                        title: taskText,
+                        status: column,
+                        taskTypeId: taskTypeId || null
+                    }
                 }
-            });
+            );
 
             if (result.success) {
-                // Update local state with the full task object
                 setTasks({
                     ...tasks,
                     [column]: [...(tasks[column] || []), result.task]
@@ -77,7 +79,6 @@ function ProjectTasks() {
             }
         } catch (err) {
             console.error("Failed to create task", err);
-            // Optionally show error to user
         }
     };
 
@@ -184,6 +185,7 @@ function ProjectTasks() {
                             columnKey={columnName}
                             label={columnName}
                             tasks={tasks[columnName] || []}
+                            taskTypes={taskTypes}
                             addTask={addTask}
                             onDragStart={handleDragStart}
                             onDrop={handleDrop}

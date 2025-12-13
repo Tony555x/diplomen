@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import Task from "./Task";
 
-function Column({ columnKey, label, tasks, addTask, onDragStart, onDrop, onTaskClick }) {
+function Column({ columnKey, label, tasks, taskTypes, addTask, onDragStart, onDrop, onTaskClick }) {
   const [newTask, setNewTask] = useState("");
+  const [selectedType, setSelectedType] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
 
   const handleAdd = () => {
-    addTask(columnKey, newTask);
+    addTask(columnKey, newTask, selectedType || null);
     setNewTask("");
+    setSelectedType("");
   };
 
   const handleDragOver = (e) => {
@@ -47,14 +49,31 @@ function Column({ columnKey, label, tasks, addTask, onDragStart, onDrop, onTaskC
           />
         ))}
       </ul>
-      <div className="add-task">
+      <div className="add-task add-task-row">
         <input
+          className="add-task-input"
           type="text"
           placeholder="Add new task..."
           value={newTask}
           onChange={(e) => setNewTask(e.target.value)}
         />
-        <button onClick={handleAdd}>Add</button>
+
+        <select
+          className="add-task-type"
+          value={selectedType}
+          onChange={(e) => setSelectedType(e.target.value)}
+        >
+          <option value="">No type</option>
+          {taskTypes.map(tt => (
+            <option key={tt.id} value={tt.id}>
+              {tt.name}
+            </option>
+          ))}
+        </select>
+
+        <button className="add-task-btn" onClick={handleAdd}>
+          Add
+        </button>
       </div>
     </div>
   );

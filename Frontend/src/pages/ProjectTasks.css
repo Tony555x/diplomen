@@ -41,6 +41,8 @@ body {
     box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
 }
 
+/* Scrollbars */
+
 .board::-webkit-scrollbar {
     height: 8px;
 }
@@ -67,6 +69,7 @@ body {
     background-color: #1e1e1e;
 }
 
+/* Column header */
 
 .column h2 {
     text-align: center;
@@ -77,6 +80,8 @@ body {
     border-bottom: 2px solid #374151;
     padding-bottom: 0.5rem;
 }
+
+/* Task list */
 
 .column ul {
     list-style: none;
@@ -113,15 +118,6 @@ body {
     cursor: grabbing;
 }
 
-.task-item[draggable="true"] {
-    opacity: 1;
-}
-
-.task-item:active {
-    opacity: 0.5;
-    cursor: grabbing;
-}
-
 .task-item.completed {
     opacity: 0.7;
     border-left: 3px solid #10b981;
@@ -131,15 +127,21 @@ body {
     color: rgba(255, 255, 255, 0.6);
 }
 
+/* ========================= */
+/* Task creation row (NEW)   */
+/* ========================= */
 
-
-.add-task {
+.add-task-row {
     display: flex;
+    align-items: center;
+    gap: 0.4rem;
     margin-top: 0.8rem;
 }
 
-.add-task input {
-    flex: 1;
+/* Input grows and never overflows */
+.add-task-input {
+    flex: 1 1 auto;
+    min-width: 0;
     padding: 0.5rem;
     border-radius: 6px;
     border: 1px solid #374151;
@@ -148,29 +150,52 @@ body {
     color: rgba(255, 255, 255, 0.87);
 }
 
-.add-task input::placeholder {
+.add-task-input::placeholder {
     color: rgba(255, 255, 255, 0.4);
 }
 
-.add-task input:focus {
+.add-task-input:focus {
     border-color: #3b82f6;
     box-shadow: 0 0 3px rgba(59, 130, 246, 0.7);
 }
 
-.add-task button {
-    margin-left: 0.5rem;
-    padding: 0.5rem 0.7rem;
+/* Squished task-type selector */
+.add-task-type {
+    flex: 0 0 36px;
+    width: 36px;
+    min-width: 36px;
+    max-width: 36px;
+    padding: 0.5rem 0.25rem;
+    border-radius: 6px;
+    border: 1px solid #374151;
+    background-color: #2c2c2c;
+    color: transparent;
+    cursor: pointer;
+}
+
+/* Keep dropdown usable */
+.add-task-type option {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Add button */
+.add-task-btn {
+    flex: 0 0 auto;
+    padding: 0.5rem 0.6rem;
     border: 1px solid rgba(16, 185, 129, 0.3);
     border-radius: 6px;
     background-color: #10b981;
     color: rgba(255, 255, 255, 0.9);
     cursor: pointer;
     transition: background-color 0.2s;
+    white-space: nowrap;
 }
 
-.add-task button:hover {
+.add-task-btn:hover {
     background-color: #059669;
 }
+
+/* Column status accents */
 
 .column-ToDo {
     border-top: 4px solid #3b82f6;
