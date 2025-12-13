@@ -8,6 +8,7 @@ import "./ProjectTasks.css";
 function ProjectTasks() {
     const { projectId } = useParams();
     const [tasks, setTasks] = useState({ "To Do": [], "In Progress": [], "Done": [] });
+    const [taskTypes, setTaskTypes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [draggedTask, setDraggedTask] = useState(null);
@@ -19,19 +20,18 @@ function ProjectTasks() {
         const loadData = async () => {
             try {
                 setLoading(true);
-                // Fetch tasks
-                const tasksData = await fetchWithAuth(`/api/projects/${projectId}/tasks`);
+                // Fetch tasks and task types in parallel
+                const [tasksData, taskTypesData] = await Promise.all([
+                    fetchWithAuth(`/api/projects/${projectId}/tasks`),
+                    fetchWithAuth(`/api/projects/${projectId}/task-types`)
+                ]);
 
                 // Organize tasks by status
                 // We initialize with empty arrays for our known columns
                 const organizedTasks = { "To Do": [], "In Progress": [], "Done": [] };
 
                 tasksData.forEach(t => {
-                    // Map old "todo" etc to new keys if necessary, or use status directly
                     let status = t.status;
-                    if (status === "todo") status = "To Do";
-                    if (status === "inProgress") status = "In Progress";
-                    if (status === "done") status = "Done";
 
                     if (!organizedTasks[status]) {
                         organizedTasks[status] = [];
@@ -41,6 +41,7 @@ function ProjectTasks() {
                 });
 
                 setTasks(organizedTasks);
+                setTaskTypes(taskTypesData.taskTypes || []);
             } catch (err) {
                 console.error("Failed to load tasks data", err);
                 setError("Failed to load tasks.");
@@ -111,7 +112,7 @@ function ProjectTasks() {
 
         // Persist to database
         try {
-            await fetchWithAuth(`/api/projects/${projectId}/tasks/${task.id}`, {
+            const res = await fetchWithAuth(`/api/projects/${projectId}/tasks/${task.id}`, {
                 method: "PATCH",
                 body: {
                     status: toColumn
@@ -134,13 +135,15 @@ function ProjectTasks() {
 
     const handleTaskUpdate = async (updatedTask) => {
         try {
+            console.log(updatedTask);
             // Update in backend
             await fetchWithAuth(`/api/projects/${projectId}/tasks/${updatedTask.id}`, {
                 method: "PATCH",
                 body: {
                     status: updatedTask.status,
                     title: updatedTask.title,
-                    completed: updatedTask.completed
+                    completed: updatedTask.completed,
+                    fieldValues: updatedTask.fieldValues
                 }
             });
 
@@ -192,6 +195,7 @@ function ProjectTasks() {
             {selectedTask && (
                 <TaskDetailsPopup
                     task={selectedTask}
+                    taskTypes={taskTypes}
                     onClose={() => setSelectedTask(null)}
                     onUpdate={handleTaskUpdate}
                 />

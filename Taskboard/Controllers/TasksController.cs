@@ -36,12 +36,22 @@ namespace Taskboard.Controllers
 
             var tasks = await _context.Tasks
                 .Where(t => t.ProjectId == projectId)
+                .Include(t => t.FieldValues)
+                    .ThenInclude(fv => fv.TaskField)
                 .Select(t => new
                 {
                     t.Id,
                     t.Title,
                     t.Status,
-                    t.Completed
+                    t.Completed,
+                    t.TaskTypeId,
+                    FieldValues = t.FieldValues.Select(fv => new
+                    {
+                        fv.Id,
+                        fv.TaskFieldId,
+                        FieldName = fv.TaskField!.Name,
+                        fv.Value
+                    }).ToList()
                 })
                 .ToListAsync();
 
@@ -73,11 +83,33 @@ namespace Taskboard.Controllers
                 Title = request.Title.Trim(),
                 ProjectId = projectId,
                 Status = request.Status ?? "To Do",
-                Completed = false
+                Completed = false,
+                TaskTypeId = request.TaskTypeId
             };
 
             _context.Tasks.Add(task);
             await _context.SaveChangesAsync();
+
+            // If task has a type, create field values with default values
+            if (request.TaskTypeId.HasValue)
+            {
+                var taskFields = await _context.TaskFields
+                    .Where(tf => tf.TaskTypeId == request.TaskTypeId.Value)
+                    .ToListAsync();
+
+                foreach (var field in taskFields)
+                {
+                    var fieldValue = new TaskFieldValue
+                    {
+                        TaskId = task.Id,
+                        TaskFieldId = field.Id,
+                        Value = field.DefaultValue
+                    };
+                    _context.TaskFieldValues.Add(fieldValue);
+                }
+
+                await _context.SaveChangesAsync();
+            }
 
             return Ok(new
             {
@@ -87,7 +119,9 @@ namespace Taskboard.Controllers
                     task.Id,
                     task.Title,
                     task.Status,
-                    task.Completed
+                    task.Completed,
+                    task.TaskTypeId,
+                    FieldValues = new List<object>()
                 }
             });
         }
@@ -141,6 +175,7 @@ namespace Taskboard.Controllers
             }
 
             var task = await _context.Tasks
+                .Include(t => t.FieldValues)
                 .FirstOrDefaultAsync(t => t.Id == taskId && t.ProjectId == projectId);
 
             if (task == null)
@@ -163,6 +198,30 @@ namespace Taskboard.Controllers
                 task.Completed = request.Completed.Value;
             }
 
+            // Update field values if provided
+            if (request.FieldValues != null && request.FieldValues.Count > 0)
+            {
+                foreach (var fieldReq in request.FieldValues)
+                {
+                    var fieldValue = task.FieldValues.FirstOrDefault(fv => fv.Id == fieldReq.Id);
+
+                    if (fieldValue != null)
+                    {
+                        fieldValue.Value = fieldReq.Value;
+                    }
+                    else
+                    {
+                        var newFieldValue = new TaskFieldValue
+                        {
+                            TaskId = task.Id,
+                            TaskFieldId = fieldReq.FieldValueId,
+                            Value = fieldReq.Value
+                        };
+                        _context.TaskFieldValues.Add(newFieldValue);
+                    }
+                }
+            }
+
             await _context.SaveChangesAsync();
 
             return Ok(new
@@ -173,7 +232,8 @@ namespace Taskboard.Controllers
                     task.Id,
                     task.Title,
                     task.Status,
-                    task.Completed
+                    task.Completed,
+                    task.TaskTypeId
                 }
             });
         }
@@ -183,6 +243,7 @@ namespace Taskboard.Controllers
     {
         public string Title { get; set; } = string.Empty;
         public string? Status { get; set; }
+        public int? TaskTypeId { get; set; }
     }
 
     public class UpdateTaskStatusRequest
@@ -190,5 +251,13 @@ namespace Taskboard.Controllers
         public string? Status { get; set; }
         public string? Title { get; set; }
         public bool? Completed { get; set; }
+        public List<FieldValueRequest>? FieldValues { get; set; }
+    }
+
+    public class FieldValueRequest
+    {
+        public int Id { get; set; }
+        public int FieldValueId { get; set; }
+        public string Value { get; set; }
     }
 }

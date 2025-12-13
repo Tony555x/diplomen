@@ -20,6 +20,10 @@
     border-radius: 12px;
     width: 90%;
     max-width: 500px;
+    /* Limit height and use flex to handle scrolling body */
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
     border: 1px solid #374151;
     animation: slideIn 0.2s ease-out;
@@ -43,6 +47,8 @@
     align-items: center;
     padding: 1.5rem;
     border-bottom: 1px solid #374151;
+    /* Prevent header from shrinking */
+    flex-shrink: 0;
 }
 
 .task-popup-header h2 {
@@ -62,6 +68,11 @@
 
 .task-popup-body {
     padding: 1.5rem;
+    /* Enable scrolling */
+    overflow-y: auto;
+    /* Custom scrollbar matching dark theme */
+    scrollbar-width: thin;
+    scrollbar-color: #4b5563 #1e1e1e;
 }
 
 /* Checkbox group specific styles */
@@ -92,6 +103,8 @@
     gap: 0.75rem;
     padding: 1.5rem;
     border-top: 1px solid #374151;
+    /* Prevent footer from shrinking */
+    flex-shrink: 0;
 }
 
 .task-popup-footer button {
@@ -128,4 +141,33 @@
 .btn-save:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.custom-fields-section {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #374151;
+}
+
+.custom-fields-section h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.field-hint {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.readonly-field {
+    padding: 0.75rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid #374151;
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1rem;
 }

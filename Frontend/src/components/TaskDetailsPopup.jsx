@@ -1,11 +1,18 @@
 import React, { useState } from "react";
 import "./TaskDetailsPopup.css";
 
-function TaskDetailsPopup({ task, onClose, onUpdate }) {
+function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate }) {
     const [title, setTitle] = useState(task.title);
     const [status, setStatus] = useState(task.status);
     const [completed, setCompleted] = useState(task.completed);
+    // Task type is now read-only from the task prop
+    const taskTypeId = task.taskTypeId;
+
+    const [fieldValues, setFieldValues] = useState(task.fieldValues);
     const [isSaving, setIsSaving] = useState(false);
+
+    // Get current task type object to access its fields
+    const currentTaskType = taskTypes.find(tt => tt.id === taskTypeId);
 
     const handleSave = async () => {
         setIsSaving(true);
@@ -14,7 +21,8 @@ function TaskDetailsPopup({ task, onClose, onUpdate }) {
                 ...task,
                 title,
                 status,
-                completed
+                completed,
+                fieldValues
             });
             onClose();
         } catch (err) {
@@ -22,6 +30,99 @@ function TaskDetailsPopup({ task, onClose, onUpdate }) {
             // Keep popup open on error so user can retry
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    const handleFieldChange = (fieldId, value) => {
+        setFieldValues(prev => {
+            const next = [...prev];
+            const index = next.findIndex(fv => fv.taskFieldId === fieldId);
+            if (index !== -1) {
+                next[index].value = value;
+            }
+            return next;
+        });
+    };
+
+    const renderField = (field) => {
+        const value = fieldValues.find(fv => fv.taskFieldId === field.id)?.value || field.defaultValue || "";
+
+        switch (field.type) {
+            case "Boolean":
+                return (
+                    <div className="form-group checkbox-group" key={field.id}>
+                        <label>
+                            <input
+                                type="checkbox"
+                                checked={value === "true"}
+                                onChange={(e) => handleFieldChange(field.id, e.target.checked ? "true" : "false")}
+                            />
+                            <span>{field.name}</span>
+                        </label>
+                        {field.description && <small className="field-hint">{field.description}</small>}
+                    </div>
+                );
+            case "Select":
+            case "MultiSelect": // Treating MultiSelect as Select for simplicity for now
+                let options = [];
+                try {
+                    options = field.options ? JSON.parse(field.options) : [];
+                } catch (e) {
+                    console.error("Failed to parse options for field", field.name);
+                }
+                return (
+                    <div className="form-group" key={field.id}>
+                        <label>{field.name}</label>
+                        <select
+                            value={value}
+                            onChange={(e) => handleFieldChange(field.id, e.target.value)}
+                        >
+                            <option value="">Select...</option>
+                            {options.map((opt, idx) => (
+                                <option key={idx} value={opt}>{opt}</option>
+                            ))}
+                        </select>
+                        {field.description && <small className="field-hint">{field.description}</small>}
+                    </div>
+                );
+            case "Date":
+                return (
+                    <div className="form-group" key={field.id}>
+                        <label>{field.name}</label>
+                        <input
+                            type="date"
+                            value={value}
+                            onChange={(e) => handleFieldChange(field.id, e.target.value)}
+                        />
+                        {field.description && <small className="field-hint">{field.description}</small>}
+                    </div>
+                );
+            case "Number":
+                return (
+                    <div className="form-group" key={field.id}>
+                        <label>{field.name}</label>
+                        <input
+                            type="number"
+                            value={value}
+                            onChange={(e) => handleFieldChange(field.id, e.target.value)}
+                            placeholder={field.name}
+                        />
+                        {field.description && <small className="field-hint">{field.description}</small>}
+                    </div>
+                );
+            default: // Text
+                return (
+                    <div className="form-group" key={field.id}>
+                        <label>{field.name}</label>
+                        <input
+                            type="text"
+                            value={value}
+                            onChange={(e) => handleFieldChange(field.id, e.target.value)}
+                            placeholder={field.name}
+                        />
+                        {field.description && <small className="field-hint">{field.description}</small>}
+                    </div>
+                );
         }
     };
 
@@ -52,6 +153,13 @@ function TaskDetailsPopup({ task, onClose, onUpdate }) {
                     </div>
 
                     <div className="form-group">
+                        <label>Task Type</label>
+                        <div className="readonly-field">
+                            {currentTaskType ? currentTaskType.name : "No Type"}
+                        </div>
+                    </div>
+
+                    <div className="form-group">
                         <label htmlFor="task-status">Status</label>
                         <select
                             id="task-status"
@@ -63,6 +171,14 @@ function TaskDetailsPopup({ task, onClose, onUpdate }) {
                             <option value="Done">Done</option>
                         </select>
                     </div>
+
+                    {/* Render Custom Fields */}
+                    {currentTaskType && currentTaskType.fields && currentTaskType.fields.length > 0 && (
+                        <div className="custom-fields-section">
+                            <h3>{currentTaskType.name} Details</h3>
+                            {currentTaskType.fields.map(renderField)}
+                        </div>
+                    )}
 
                     <div className="form-group checkbox-group">
                         <label>

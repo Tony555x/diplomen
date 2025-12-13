@@ -316,6 +316,50 @@ namespace Taskboard.Controllers
                 user = user
             });
         }
+
+        [HttpGet("{projectId}/task-types")]
+        public async Task<IActionResult> GetProjectTaskTypes(int projectId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            // Verify user has access to this project
+            var hasAccess = await _context.ProjectMembers
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+
+            if (!hasAccess)
+            {
+                return Forbid();
+            }
+
+            var taskTypes = await _context.TaskTypes
+                .Where(tt => tt.ProjectId == projectId)
+                .Include(tt => tt.Fields)
+                .Select(tt => new
+                {
+                    tt.Id,
+                    tt.Name,
+                    tt.Description,
+                    Fields = tt.Fields.OrderBy(f => f.Order).Select(f => new
+                    {
+                        f.Id,
+                        f.Name,
+                        f.Description,
+                        Type = f.Type.ToString(),
+                        f.IsRequired,
+                        f.Options,
+                        f.DefaultValue,
+                        f.Order
+                    }).ToList()
+                })
+                .ToListAsync();
+
+            return Ok(new
+            {
+                success = true,
+                taskTypes = taskTypes
+            });
+        }
     }
 
     public class CreateProjectRequest

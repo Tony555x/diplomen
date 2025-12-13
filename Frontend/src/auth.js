@@ -109,6 +109,10 @@ export async function fetchWithAuth(endpoint, options = {}) {
     window.location.href = "/";
     return { success: false, message: "Session expired. Please login again." };
   }
+  if (!response.ok) {
+    const msg = await response.text().catch(() => "");
+    throw new Error(msg || `Request failed with ${response.status}`);
+  }
 
   return response.json();
 }
