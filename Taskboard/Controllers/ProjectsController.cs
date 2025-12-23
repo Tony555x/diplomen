@@ -360,6 +360,62 @@ namespace Taskboard.Controllers
                 taskTypes = taskTypes
             });
         }
+        [HttpPatch("{projectId}")]
+        public async Task<IActionResult> UpdateProject(
+            int projectId,
+            [FromBody] UpdateProjectRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return Unauthorized();
+
+            // Verify membership and load role
+            var membership = await _context.ProjectMembers
+                .Include(pm => pm.ProjectRole)
+                .FirstOrDefaultAsync(pm =>
+                    pm.ProjectId == projectId &&
+                    pm.UserId == userId);
+
+            if (membership == null)
+                return Forbid();
+
+            if (membership.ProjectRole == null ||
+                !membership.ProjectRole.CanEditProjectSettings)
+            {
+                return Forbid();
+            }
+
+            var project = await _context.Projects
+                .FirstOrDefaultAsync(p => p.Id == projectId);
+
+            if (project == null)
+                return NotFound();
+
+            if (string.IsNullOrWhiteSpace(request.Name))
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Project name is required."
+                });
+            }
+
+            project.Name = request.Name.Trim();
+            project.AccessLevel = request.AccessLevel;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                project = new
+                {
+                    project.Id,
+                    project.Name,
+                    project.AccessLevel
+                }
+            });
+        }
     }
 
     public class CreateProjectRequest
@@ -380,4 +436,10 @@ namespace Taskboard.Controllers
         public string Email { get; set; } = string.Empty;
         public int RoleId { get; set; }
     }
+    public class UpdateProjectRequest
+    {
+        public string Name { get; set; } = string.Empty;
+        public ProjectAccessLevel AccessLevel { get; set; }
+    }
+
 }

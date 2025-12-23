@@ -1,0 +1,74 @@
+.wrapper {
+    max-width: 640px;
+}
+
+.title {
+    margin-top: 0;
+    margin-bottom: 2rem;
+    font-size: 1.6rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.field {
+    margin-bottom: 1.5rem;
+}
+
+.field label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.field input,
+.field select {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #2d2d2d;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.9);
+    box-sizing: border-box;
+}
+
+.field input:focus,
+.field select:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.saveButton {
+    padding: 0.75rem 1.5rem;
+    background-color: #3b82f6;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.saveButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.error {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background-color: rgba(248, 113, 113, 0.1);
+    border: 1px solid #f87171;
+    border-radius: 6px;
+    color: #f87171;
+}
+
+.success {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background-color: rgba(16, 185, 129, 0.1);
+    border: 1px solid #10b981;
+    border-radius: 6px;
+    color: #10b981;
+}
+
+.state {
+    color: rgba(255, 255, 255, 0.6);
+}
