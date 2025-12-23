@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Task from "./Task";
+import styles from "../pages/ProjectTasks.module.css";
 
 function Column({ columnKey, label, tasks, taskTypes, addTask, onDragStart, onDrop, onTaskClick }) {
   const [newTask, setNewTask] = useState("");
@@ -31,7 +32,7 @@ function Column({ columnKey, label, tasks, taskTypes, addTask, onDragStart, onDr
 
   return (
     <div
-      className={`column column-${columnKey.replace(/\s+/g, '')} ${isDragOver ? 'drag-over' : ''}`}
+      className={`${styles.column} ${styles[`column-${columnKey.replace(/\s+/g, '')}`]} ${isDragOver ? styles.dragOver : ''}`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -49,17 +50,16 @@ function Column({ columnKey, label, tasks, taskTypes, addTask, onDragStart, onDr
           />
         ))}
       </ul>
-      <div className="add-task add-task-row">
+      <div className={styles["add-task-row"]}>
         <input
-          className="add-task-input"
+          className={styles["add-task-input"]}
           type="text"
           placeholder="Add new task..."
           value={newTask}
           onChange={(e) => setNewTask(e.target.value)}
         />
-
         <select
-          className="add-task-type"
+          className={styles["add-task-type"]}
           value={selectedType}
           onChange={(e) => setSelectedType(e.target.value)}
         >
@@ -70,8 +70,7 @@ function Column({ columnKey, label, tasks, taskTypes, addTask, onDragStart, onDr
             </option>
           ))}
         </select>
-
-        <button className="add-task-btn" onClick={handleAdd}>
+        <button className={styles["add-task-btn"]} onClick={handleAdd}>
           Add
         </button>
       </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import styles from "../pages/ProjectTasks.module.css";
 
 function Task({ task, index, columnKey, onDragStart, onClick }) {
   const handleDragStart = (e) => {
@@ -17,10 +18,11 @@ function Task({ task, index, columnKey, onDragStart, onClick }) {
       draggable
       onDragStart={handleDragStart}
       onClick={handleClick}
-      className={`task-item ${task.completed ? 'completed' : ''}`}
+      className={`${styles["task-item"]} ${task.completed ? styles.completed : ''}`}
     >
-      <span>{task.title}</span>
+      <span className={styles["task-title"]}>{task.title}</span>
     </li>
+
   );
 }
 

@@ -1,6 +1,4 @@
-/* HomePage specific styles - common styles are in common.css */
-
-.home-page {
+.homePage {
     padding: 2rem;
     max-width: 1200px;
     margin: 0 auto;
@@ -8,26 +6,26 @@
     min-height: 100vh;
 }
 
-.home-header {
+.homeHeader {
     margin-bottom: 2rem;
 }
 
-.home-header h1 {
+.homeHeader h1 {
     font-size: 2.5rem;
     color: rgba(255, 255, 255, 0.9);
     margin-bottom: 0.5rem;
 }
 
-.home-header p {
+.homeHeader p {
     color: rgba(255, 255, 255, 0.6);
     font-size: 1.1rem;
 }
 
-.home-section {
+.homeSection {
     margin-bottom: 3rem;
 }
 
-.home-section h2 {
+.homeSection h2 {
     font-size: 1.5rem;
     color: rgba(255, 255, 255, 0.85);
     margin-bottom: 1.5rem;
@@ -35,7 +33,41 @@
     padding-bottom: 0.5rem;
 }
 
-.task-list {
+.cardGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.card {
+    background: #1e1e1e;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    border: 1px solid #374151;
+    cursor: pointer;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    border-color: #4b5563;
+}
+
+.card h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.card p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+}
+
+.taskList {
     background: #1e1e1e;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
@@ -43,7 +75,7 @@
     border: 1px solid #374151;
 }
 
-.task-item {
+.taskItem {
     padding: 1rem 1.5rem;
     border-bottom: 1px solid #2c2c2c;
     display: flex;
@@ -51,27 +83,38 @@
     align-items: center;
 }
 
-.task-item:last-child {
+.taskItem:last-child {
     border-bottom: none;
 }
 
-.task-info h3 {
+.taskInfo h3 {
     margin: 0 0 0.25rem 0;
     font-size: 1rem;
     color: rgba(255, 255, 255, 0.9);
 }
 
-.task-info p {
+.taskInfo p {
     margin: 0;
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.5);
 }
 
-.task-status {
+.taskStatus {
     font-size: 0.85rem;
     padding: 0.25rem 0.75rem;
     border-radius: 12px;
     background: rgba(59, 130, 246, 0.2);
     color: #6b9eff;
     border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.loading,
+.error {
+    padding: 2rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.error {
+    color: #f87171;
 }

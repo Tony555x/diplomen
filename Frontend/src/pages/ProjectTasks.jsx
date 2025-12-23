@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { fetchWithAuth } from "../auth";
 import Column from "../components/Column";
 import TaskDetailsPopup from "../components/TaskDetailsPopup";
-import "./ProjectTasks.css";
+import styles from "./ProjectTasks.module.css";
 
 function ProjectTasks() {
     const { projectId } = useParams();
@@ -177,8 +177,8 @@ function ProjectTasks() {
 
     return (
         <>
-            <div className="project-tasks">
-                <div className="board">
+            <div className={styles.projectTasks}>
+                <div className={styles.board}>
                     {columns.map((columnName) => (
                         <Column
                             key={columnName}
