@@ -136,7 +136,15 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate }) {
         <div className="task-popup-backdrop" onClick={handleBackdropClick}>
             <div className="task-popup">
                 <div className="task-popup-header">
-                    <h2>Task Details</h2>
+                    <div className="task-header-text">
+                        <h2 className="task-header-title">{title || "Untitled task"}</h2>
+                        {currentTaskType && (
+                            <span className="task-header-type">
+                                {currentTaskType.name}
+                            </span>
+                        )}
+                    </div>
+
                     <button className="close-btn" onClick={onClose}>×</button>
                 </div>
 
@@ -150,13 +158,6 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate }) {
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="Task title"
                         />
-                    </div>
-
-                    <div className="form-group">
-                        <label>Task Type</label>
-                        <div className="readonly-field">
-                            {currentTaskType ? currentTaskType.name : "No Type"}
-                        </div>
                     </div>
 
                     <div className="form-group">
