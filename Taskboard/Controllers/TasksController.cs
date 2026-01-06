@@ -49,7 +49,7 @@ namespace Taskboard.Controllers
                     {
                         fv.Id,
                         fv.TaskFieldId,
-                        FieldName = fv.TaskField!.Name,
+                        //FieldName = fv.TaskField!.Name,
                         fv.Value
                     }).ToList()
                 })
@@ -214,7 +214,7 @@ namespace Taskboard.Controllers
                         var newFieldValue = new TaskFieldValue
                         {
                             TaskId = task.Id,
-                            TaskFieldId = fieldReq.FieldValueId,
+                            TaskFieldId = fieldReq.TaskFieldId,
                             Value = fieldReq.Value
                         };
                         _context.TaskFieldValues.Add(newFieldValue);
@@ -256,8 +256,8 @@ namespace Taskboard.Controllers
 
     public class FieldValueRequest
     {
-        public int Id { get; set; }
-        public int FieldValueId { get; set; }
+        public int? Id { get; set; }
+        public int TaskFieldId { get; set; }
         public string Value { get; set; }
     }
 }
