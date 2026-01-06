@@ -12,6 +12,8 @@
   box-sizing: border-box;
   overflow: hidden;
   flex-shrink: 0;
+  z-index:100;
+  overflow: visible;
 }
 
 .nav-left {
@@ -85,4 +87,46 @@
 .nav-btn:hover {
   background-color: #333333;
   border-color: #4b5563;
+}
+.user-menu-wrapper {
+    position: relative;
+}
+
+.user-menu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+
+    width: 180px;
+    background-color: #1e1e1e;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    padding: 0.75rem;
+
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+}
+
+.user-name {
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.logout-btn {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+
+    background-color: #3b82f6;
+    border: none;
+    border-radius: 6px;
+
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.logout-btn:hover {
+    background-color: #2563eb;
 }
