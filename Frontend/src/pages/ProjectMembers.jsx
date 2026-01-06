@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { fetchWithAuth } from "../auth";
 import AddMemberPopup from "../components/AddMemberPopup";
+import CreateRolePopup from "../components/CreateRolePopup";
 import "./ProjectMembers.css";
 
 function ProjectMembers() {
@@ -12,6 +13,8 @@ function ProjectMembers() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showAddMemberPopup, setShowAddMemberPopup] = useState(false);
+    const [showCreateRole, setShowCreateRole] = useState(false);
+
 
     useEffect(() => {
         loadMembers();
@@ -98,11 +101,11 @@ function ProjectMembers() {
                         {currentUserRole?.canAddEditMembers && (
                             <button
                                 className="btn-new-role"
-                                disabled
-                                title="Coming soon"
+                                onClick={() => setShowCreateRole(true)}
                             >
                                 + New Role
                             </button>
+
                         )}
                     </div>
                     <div className="roles-list">
@@ -135,6 +138,14 @@ function ProjectMembers() {
                     onMemberAdded={handleMemberAdded}
                 />
             )}
+            {showCreateRole && (
+                <CreateRolePopup
+                    projectId={projectId}
+                    onClose={() => setShowCreateRole(false)}
+                    onRoleCreated={loadMembers}
+                />
+            )}
+
         </>
     );
 }

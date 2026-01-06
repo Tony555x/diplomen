@@ -1,0 +1,103 @@
+import React, { useState } from "react";
+import { fetchWithAuth } from "../auth";
+import styles from "./CreateRolePopup.module.css";
+
+function CreateRolePopup({ projectId, onClose, onRoleCreated }) {
+    const [name, setName] = useState("");
+    const [canMembers, setCanMembers] = useState(false);
+    const [canSettings, setCanSettings] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState(null);
+
+    const handleCreate = async () => {
+        if (!name.trim()) {
+            setError("Role name is required.");
+            return;
+        }
+
+        try {
+            setSaving(true);
+            setError(null);
+
+            const result = await fetchWithAuth(
+                `/api/projects/${projectId}/roles`,
+                {
+                    method: "POST",
+                    body: {
+                        roleName: name,
+                        canAddEditMembers: canMembers,
+                        canEditProjectSettings: canSettings
+                    }
+                }
+            );
+
+            if (result.success) {
+                onRoleCreated();
+                onClose();
+            }
+        } catch {
+            setError("Failed to create role.");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    return (
+        <div className={styles.overlay}>
+            <div className={styles.popup}>
+                <h2>Create role</h2>
+
+                {error && <div className={styles.error}>{error}</div>}
+
+                <div className={styles.field}>
+                    <label>Role name</label>
+                    <input
+                        value={name}
+                        onChange={e => setName(e.target.value)}
+                    />
+                </div>
+
+                <div className={styles.checkbox}>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={canMembers}
+                            onChange={e => setCanMembers(e.target.checked)}
+                        />
+                        Can add / edit members
+                    </label>
+                </div>
+
+                <div className={styles.checkbox}>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={canSettings}
+                            onChange={e => setCanSettings(e.target.checked)}
+                        />
+                        Can edit project settings
+                    </label>
+                </div>
+
+                <div className={styles.actions}>
+                    <button
+                        className={styles.cancelButton}
+                        onClick={onClose}
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        className={styles.createButton}
+                        onClick={handleCreate}
+                        disabled={saving}
+                    >
+                        Create
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default CreateRolePopup;

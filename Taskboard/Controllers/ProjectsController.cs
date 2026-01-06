@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Taskboard.Data.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace Taskboard.Controllers
 {
@@ -416,6 +417,77 @@ namespace Taskboard.Controllers
                 }
             });
         }
+        [HttpPost("{projectId}/roles")]
+        public async Task<IActionResult> CreateProjectRole(
+            int projectId,
+            [FromBody] CreateProjectRoleRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return Unauthorized();
+
+            var currentMember = await _context.ProjectMembers
+                .Include(pm => pm.ProjectRole)
+                .FirstOrDefaultAsync(pm =>
+                    pm.ProjectId == projectId &&
+                    pm.UserId == userId);
+
+            if (currentMember == null ||
+                currentMember.ProjectRole == null ||
+                !currentMember.ProjectRole.CanAddEditMembers)
+            {
+                return Forbid();
+            }
+
+            if (string.IsNullOrWhiteSpace(request.RoleName))
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Role name is required."
+                });
+            }
+
+            var roleExists = await _context.ProjectRoles.AnyAsync(pr =>
+                pr.ProjectId == projectId &&
+                pr.RoleName.ToLower() == request.RoleName.Trim().ToLower());
+
+            if (roleExists)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "A role with this name already exists."
+                });
+            }
+
+            var role = new ProjectRole
+            {
+                ProjectId = projectId,
+                RoleName = request.RoleName.Trim(),
+                CanAddEditMembers = request.CanAddEditMembers,
+                CanEditProjectSettings = request.CanEditProjectSettings,
+                IsOwner = false
+            };
+
+            _context.ProjectRoles.Add(role);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                role = new
+                {
+                    role.Id,
+                    role.RoleName,
+                    role.CanAddEditMembers,
+                    role.CanEditProjectSettings,
+                    role.IsOwner,
+                    MemberCount = 0
+                }
+            });
+        }
+
     }
 
     public class CreateProjectRequest
@@ -441,5 +513,15 @@ namespace Taskboard.Controllers
         public string Name { get; set; } = string.Empty;
         public ProjectAccessLevel AccessLevel { get; set; }
     }
+    public class CreateProjectRoleRequest
+    {
+        [Required]
+        [MaxLength(100)]
+        public string RoleName { get; set; } = string.Empty;
+
+        public bool CanAddEditMembers { get; set; }
+        public bool CanEditProjectSettings { get; set; }
+    }
+
 
 }
