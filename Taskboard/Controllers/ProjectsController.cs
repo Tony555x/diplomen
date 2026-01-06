@@ -217,7 +217,7 @@ namespace Taskboard.Controllers
                 return Forbid();
             }
 
-            
+
             if (string.IsNullOrWhiteSpace(request.Email))
             {
                 return BadRequest(new { success = false, message = "Email is required." });
@@ -487,15 +487,15 @@ namespace Taskboard.Controllers
                 }
             });
         }
-        [HttpPost("{projectId}/task-types")]
         [HttpPut("{projectId}/task-types")]
+        [HttpPost("{projectId}/task-types")]
         public async Task<IActionResult> UpsertTaskType(
             int projectId,
             [FromBody] UpsertTaskTypeRequest request)
         {
-            //authorize user
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized();
+            if (userId == null)
+                return Unauthorized();
 
             var membership = await _context.ProjectMembers
                 .Include(pm => pm.ProjectRole)
@@ -504,12 +504,21 @@ namespace Taskboard.Controllers
                     pm.UserId == userId);
 
             if (membership == null ||
-                !membership.ProjectRole!.CanEditProjectSettings)
+                membership.ProjectRole == null ||
+                !membership.ProjectRole.CanEditProjectSettings)
             {
                 return Forbid();
             }
 
-            //merge update and create, find target tasktype
+            if (string.IsNullOrWhiteSpace(request.Name))
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Task type name is required."
+                });
+            }
+
             TaskType taskType;
 
             if (request.Id.HasValue)
@@ -517,47 +526,76 @@ namespace Taskboard.Controllers
                 taskType = await _context.TaskTypes
                     .Include(tt => tt.Fields)
                     .FirstOrDefaultAsync(tt =>
-                        tt.Id == request.Id &&
+                        tt.Id == request.Id.Value &&
                         tt.ProjectId == projectId);
 
-                if (taskType == null) return NotFound();
-
-                taskType.Name = request.Name;
-                taskType.Description = request.Description;
-                //DELETE ALL PREVIOUS FIELDS, DATA IS LOST EVEN FOR UNEDITED FIELDS
-                _context.TaskFields.RemoveRange(taskType.Fields);
+                if (taskType == null)
+                    return NotFound();
             }
             else
             {
                 taskType = new TaskType
                 {
-                    ProjectId = projectId,
-                    Name = request.Name,
-                    Description = request.Description
+                    ProjectId = projectId
                 };
 
                 _context.TaskTypes.Add(taskType);
             }
 
+            taskType.Name = request.Name.Trim();
+            taskType.Description = request.Description;
+
             await _context.SaveChangesAsync();
 
+            var existingFields = taskType.Fields.ToList();
+            var incomingIds = request.Fields
+                .Where(f => f.Id.HasValue)
+                .Select(f => f.Id!.Value)
+                .ToHashSet();
 
-            foreach (var field in request.Fields)
+            var fieldsToDelete = existingFields
+                .Where(f => !incomingIds.Contains(f.Id))
+                .ToList();
+
+            if (fieldsToDelete.Count > 0)
             {
-                _context.TaskFields.Add(new TaskField
-                {
-                    TaskTypeId = taskType.Id,
-                    Name = field.Name,
-                    Type = Enum.Parse<FieldType>(field.Type),
-                    IsRequired = field.IsRequired,
-                    DefaultValue = field.DefaultValue,
-                    Order = field.Order
-                });
+                _context.TaskFields.RemoveRange(fieldsToDelete);
             }
 
+            foreach (var fieldRequest in request.Fields.Where(f => f.Id.HasValue))
+            {
+                var field = existingFields.First(f => f.Id == fieldRequest.Id);
+
+                field.Name = fieldRequest.Name.Trim();
+                field.Type = fieldRequest.Type;
+                field.IsRequired = fieldRequest.IsRequired;
+                field.Options = fieldRequest.Options;
+                field.DefaultValue = fieldRequest.DefaultValue;
+                field.Order = fieldRequest.Order;
+            }
+
+            var newFields = request.Fields
+                .Where(f => !f.Id.HasValue)
+                .Select(f => new TaskField
+                {
+                    TaskTypeId = taskType.Id,
+                    Name = f.Name.Trim(),
+                    Type = f.Type,
+                    IsRequired = f.IsRequired,
+                    Options = f.Options,
+                    DefaultValue = f.DefaultValue,
+                    Order = f.Order
+                });
+
+            _context.TaskFields.AddRange(newFields);
+
             await _context.SaveChangesAsync();
 
-            return Ok(new { success = true });
+            return Ok(new
+            {
+                success = true,
+                taskTypeId = taskType.Id
+            });
         }
 
 
@@ -595,7 +633,7 @@ namespace Taskboard.Controllers
         public bool CanAddEditMembers { get; set; }
         public bool CanEditProjectSettings { get; set; }
     }
-        public class UpsertTaskTypeRequest
+    public class UpsertTaskTypeRequest
     {
         public int? Id { get; set; }
         public string Name { get; set; } = string.Empty;
@@ -605,9 +643,11 @@ namespace Taskboard.Controllers
 
     public class UpsertTaskFieldRequest
     {
+        public int? Id { get; set; } // null = new field
         public string Name { get; set; } = string.Empty;
-        public string Type { get; set; } = "Text";
+        public FieldType Type { get; set; }
         public bool IsRequired { get; set; }
+        public string? Options { get; set; }
         public string? DefaultValue { get; set; }
         public int Order { get; set; }
     }
