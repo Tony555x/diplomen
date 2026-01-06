@@ -80,7 +80,7 @@ public class AppDbContext : IdentityDbContext<User>
             .HasOne(tfv => tfv.Task)
             .WithMany(t => t.FieldValues)
             .HasForeignKey(tfv => tfv.TaskId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
 
         // TaskFieldValue -> TaskField: Restrict (prevent multiple cascade paths)
         // This avoids: Task -> TaskType -> TaskField -> TaskFieldValue
@@ -89,6 +89,6 @@ public class AppDbContext : IdentityDbContext<User>
             .HasOne(tfv => tfv.TaskField)
             .WithMany(tf => tf.FieldValues)
             .HasForeignKey(tfv => tfv.TaskFieldId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

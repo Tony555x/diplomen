@@ -487,6 +487,79 @@ namespace Taskboard.Controllers
                 }
             });
         }
+        [HttpPost("{projectId}/task-types")]
+        [HttpPut("{projectId}/task-types")]
+        public async Task<IActionResult> UpsertTaskType(
+            int projectId,
+            [FromBody] UpsertTaskTypeRequest request)
+        {
+            //authorize user
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var membership = await _context.ProjectMembers
+                .Include(pm => pm.ProjectRole)
+                .FirstOrDefaultAsync(pm =>
+                    pm.ProjectId == projectId &&
+                    pm.UserId == userId);
+
+            if (membership == null ||
+                !membership.ProjectRole!.CanEditProjectSettings)
+            {
+                return Forbid();
+            }
+
+            //merge update and create, find target tasktype
+            TaskType taskType;
+
+            if (request.Id.HasValue)
+            {
+                taskType = await _context.TaskTypes
+                    .Include(tt => tt.Fields)
+                    .FirstOrDefaultAsync(tt =>
+                        tt.Id == request.Id &&
+                        tt.ProjectId == projectId);
+
+                if (taskType == null) return NotFound();
+
+                taskType.Name = request.Name;
+                taskType.Description = request.Description;
+                //DELETE ALL PREVIOUS FIELDS, DATA IS LOST EVEN FOR UNEDITED FIELDS
+                _context.TaskFields.RemoveRange(taskType.Fields);
+            }
+            else
+            {
+                taskType = new TaskType
+                {
+                    ProjectId = projectId,
+                    Name = request.Name,
+                    Description = request.Description
+                };
+
+                _context.TaskTypes.Add(taskType);
+            }
+
+            await _context.SaveChangesAsync();
+
+
+            foreach (var field in request.Fields)
+            {
+                _context.TaskFields.Add(new TaskField
+                {
+                    TaskTypeId = taskType.Id,
+                    Name = field.Name,
+                    Type = Enum.Parse<FieldType>(field.Type),
+                    IsRequired = field.IsRequired,
+                    DefaultValue = field.DefaultValue,
+                    Order = field.Order
+                });
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true });
+        }
+
 
     }
 
@@ -522,6 +595,23 @@ namespace Taskboard.Controllers
         public bool CanAddEditMembers { get; set; }
         public bool CanEditProjectSettings { get; set; }
     }
+        public class UpsertTaskTypeRequest
+    {
+        public int? Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public List<UpsertTaskFieldRequest> Fields { get; set; } = new();
+    }
+
+    public class UpsertTaskFieldRequest
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Type { get; set; } = "Text";
+        public bool IsRequired { get; set; }
+        public string? DefaultValue { get; set; }
+        public int Order { get; set; }
+    }
+
 
 
 }

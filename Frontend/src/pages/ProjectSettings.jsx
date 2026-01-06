@@ -1,6 +1,7 @@
 import React from "react";
 import { NavLink, Routes, Route, Navigate, useParams } from "react-router-dom";
 import GeneralSettings from "./settings/GeneralSettings";
+import TaskTypesSettings from "./settings/TaskTypesSettings";
 import styles from "./ProjectSettings.module.css";
 
 function ProjectSettings() {
@@ -17,12 +18,21 @@ function ProjectSettings() {
                 >
                     General
                 </NavLink>
+                <NavLink
+                    to={`/project/${projectId}/settings/task-types`}
+                    className={({ isActive }) =>
+                        isActive ? styles.activeLink : styles.link
+                    }
+                >
+                    Task Types
+                </NavLink>
             </aside>
 
             <main className={styles.content}>
                 <Routes>
                     <Route path="/" element={<Navigate to="general" replace />} />
                     <Route path="general" element={<GeneralSettings projectId={projectId} />} />
+                    <Route path="task-types" element={<TaskTypesSettings projectId={projectId} />} />
                 </Routes>
             </main>
         </div>
