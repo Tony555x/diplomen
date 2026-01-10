@@ -172,6 +172,8 @@ function ProjectTasks() {
     };
     const handleTaskDelete = async (task) => {
         try {
+            if (!window.confirm("Delete this task? This cannot be undone.")) return;
+
             await fetchWithAuth(
                 `/api/projects/${projectId}/tasks/${task.id}`,
                 { method: "DELETE" }
