@@ -1,17 +1,20 @@
 import React, { useState } from "react";
-import "./TaskDetailsPopup.css";
+import styles from "./TaskDetailsPopup.module.css";
 
-function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate }) {
+function TaskDetailsPopup({
+    task,
+    taskTypes = [],
+    onClose,
+    onUpdate,
+    onDelete
+}) {
     const [title, setTitle] = useState(task.title);
     const [status, setStatus] = useState(task.status);
     const [completed, setCompleted] = useState(task.completed);
-    // Task type is now read-only from the task prop
-    const taskTypeId = task.taskTypeId;
-
     const [fieldValues, setFieldValues] = useState(task.fieldValues);
     const [isSaving, setIsSaving] = useState(false);
 
-    // Get current task type object to access its fields
+    const taskTypeId = task.taskTypeId;
     const currentTaskType = taskTypes.find(tt => tt.id === taskTypeId);
 
     const handleSave = async () => {
@@ -25,9 +28,6 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate }) {
                 fieldValues
             });
             onClose();
-        } catch (err) {
-            console.error("Failed to update task", err);
-            // Keep popup open on error so user can retry
         } finally {
             setIsSaving(false);
         }
@@ -39,101 +39,13 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate }) {
             const index = next.findIndex(fv => fv.taskFieldId === fieldId);
 
             if (index !== -1) {
-                next[index] = {
-                    ...next[index],
-                    value
-                };
+                next[index] = { ...next[index], value };
             } else {
-                next.push({
-                    taskFieldId: fieldId,
-                    value
-                });
+                next.push({ taskFieldId: fieldId, value });
             }
 
             return next;
         });
-    };
-
-    const renderField = (field) => {
-        const value = fieldValues.find(fv => fv.taskFieldId === field.id)?.value || field.defaultValue || "";
-
-        switch (field.type) {
-            case "Boolean":
-                return (
-                    <div className="form-group checkbox-group" key={field.id}>
-                        <label>
-                            <input
-                                type="checkbox"
-                                checked={value === "true"}
-                                onChange={(e) => handleFieldChange(field.id, e.target.checked ? "true" : "false")}
-                            />
-                            <span>{field.name}</span>
-                        </label>
-                        {field.description && <small className="field-hint">{field.description}</small>}
-                    </div>
-                );
-            case "Select":
-            case "MultiSelect": // Treating MultiSelect as Select for simplicity for now
-                let options = [];
-                try {
-                    options = field.options ? JSON.parse(field.options) : [];
-                } catch (e) {
-                    console.error("Failed to parse options for field", field.name);
-                }
-                return (
-                    <div className="form-group" key={field.id}>
-                        <label>{field.name}</label>
-                        <select
-                            value={value}
-                            onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                        >
-                            <option value="">Select...</option>
-                            {options.map((opt, idx) => (
-                                <option key={idx} value={opt}>{opt}</option>
-                            ))}
-                        </select>
-                        {field.description && <small className="field-hint">{field.description}</small>}
-                    </div>
-                );
-            case "Date":
-                return (
-                    <div className="form-group" key={field.id}>
-                        <label>{field.name}</label>
-                        <input
-                            type="date"
-                            value={value}
-                            onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                        />
-                        {field.description && <small className="field-hint">{field.description}</small>}
-                    </div>
-                );
-            case "Number":
-                return (
-                    <div className="form-group" key={field.id}>
-                        <label>{field.name}</label>
-                        <input
-                            type="number"
-                            value={value}
-                            onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                            placeholder={field.name}
-                        />
-                        {field.description && <small className="field-hint">{field.description}</small>}
-                    </div>
-                );
-            default: // Text
-                return (
-                    <div className="form-group" key={field.id}>
-                        <label>{field.name}</label>
-                        <input
-                            type="text"
-                            value={value}
-                            onChange={(e) => handleFieldChange(field.id, e.target.value)}
-                            placeholder={field.name}
-                        />
-                        {field.description && <small className="field-hint">{field.description}</small>}
-                    </div>
-                );
-        }
     };
 
     const handleBackdropClick = (e) => {
@@ -143,37 +55,50 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate }) {
     };
 
     return (
-        <div className="task-popup-backdrop" onClick={handleBackdropClick}>
-            <div className="task-popup">
-                <div className="task-popup-header">
-                    <div className="task-header-text">
-                        <h2 className="task-header-title">{title || "Untitled task"}</h2>
+        <div className={styles.backdrop} onClick={handleBackdropClick}>
+            <div className={styles.popup}>
+                <div className={styles.header}>
+                    <div className={styles.headerText}>
+                        <h2>{title || "Untitled task"}</h2>
                         {currentTaskType && (
-                            <span className="task-header-type">
+                            <span className={styles.taskType}>
                                 {currentTaskType.name}
                             </span>
                         )}
                     </div>
 
-                    <button className="close-btn" onClick={onClose}>×</button>
+                    <div className={styles.headerActions}>
+                        {onDelete && (
+                            <button
+                                className={styles.deleteBtn}
+                                onClick={() => onDelete(task)}
+                                title="Delete task"
+                            >
+                                🗑
+                            </button>
+                        )}
+                        <button
+                            className={styles.closeBtn}
+                            onClick={onClose}
+                        >
+                            ×
+                        </button>
+                    </div>
                 </div>
 
-                <div className="task-popup-body">
-                    <div className="form-group">
-                        <label htmlFor="task-title">Title</label>
+                <div className={styles.body}>
+                    <div className={styles.formGroup}>
+                        <label>Title</label>
                         <input
-                            id="task-title"
                             type="text"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            placeholder="Task title"
                         />
                     </div>
 
-                    <div className="form-group">
-                        <label htmlFor="task-status">Status</label>
+                    <div className={styles.formGroup}>
+                        <label>Status</label>
                         <select
-                            id="task-status"
                             value={status}
                             onChange={(e) => setStatus(e.target.value)}
                         >
@@ -183,34 +108,56 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate }) {
                         </select>
                     </div>
 
-                    {/* Render Custom Fields */}
-                    {currentTaskType && currentTaskType.fields && currentTaskType.fields.length > 0 && (
-                        <div className="custom-fields-section">
+                    {currentTaskType?.fields?.length > 0 && (
+                        <div className={styles.customFields}>
                             <h3>{currentTaskType.name} Details</h3>
-                            {currentTaskType.fields.map(renderField)}
+                            {currentTaskType.fields.map(field => {
+                                const value =
+                                    fieldValues.find(fv => fv.taskFieldId === field.id)?.value ??
+                                    field.defaultValue ??
+                                    "";
+
+                                return (
+                                    <div className={styles.formGroup} key={field.id}>
+                                        <label>{field.name}</label>
+                                        <input
+                                            type="text"
+                                            value={value}
+                                            onChange={(e) =>
+                                                handleFieldChange(field.id, e.target.value)
+                                            }
+                                        />
+                                        {field.description && (
+                                            <small className={styles.hint}>
+                                                {field.description}
+                                            </small>
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
                     )}
 
-                    <div className="form-group checkbox-group">
-                        <label>
-                            <input
-                                type="checkbox"
-                                checked={completed}
-                                onChange={(e) => setCompleted(e.target.checked)}
-                            />
-                            <span>Mark as completed</span>
-                        </label>
-                    </div>
+                    <label className={styles.checkbox}>
+                        <input
+                            type="checkbox"
+                            checked={completed}
+                            onChange={(e) => setCompleted(e.target.checked)}
+                        />
+                        <span>Mark as completed</span>
+                    </label>
                 </div>
 
-                <div className="task-popup-footer">
-                    <button className="btn-cancel" onClick={onClose}>Cancel</button>
+                <div className={styles.footer}>
+                    <button className={styles.cancelBtn} onClick={onClose}>
+                        Cancel
+                    </button>
                     <button
-                        className="btn-save"
+                        className={styles.saveBtn}
                         onClick={handleSave}
                         disabled={isSaving || !title.trim()}
                     >
-                        {isSaving ? "Saving..." : "Save"}
+                        {isSaving ? "Saving…" : "Save"}
                     </button>
                 </div>
             </div>

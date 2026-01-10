@@ -237,6 +237,46 @@ namespace Taskboard.Controllers
                 }
             });
         }
+        [HttpDelete("{taskId}")]
+        public async Task<IActionResult> DeleteTask(int projectId, int taskId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            // Verify user has access to this project
+            var hasAccess = await _context.ProjectMembers
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+
+            if (!hasAccess)
+            {
+                return Forbid();
+            }
+
+            var task = await _context.Tasks
+                .Include(t => t.FieldValues)
+                .FirstOrDefaultAsync(t => t.Id == taskId && t.ProjectId == projectId);
+
+            if (task == null)
+            {
+                return NotFound(new { success = false, message = "Task not found." });
+            }
+
+            // Remove related field values first (explicit for safety)
+            if (task.FieldValues.Any())
+            {
+                _context.TaskFieldValues.RemoveRange(task.FieldValues);
+            }
+
+            _context.Tasks.Remove(task);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                taskId = taskId
+            });
+        }
+
     }
 
     public class CreateTaskRequest

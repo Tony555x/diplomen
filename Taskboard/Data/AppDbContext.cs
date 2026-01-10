@@ -75,16 +75,14 @@ public class AppDbContext : IdentityDbContext<User>
             .HasForeignKey(t => t.TaskTypeId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // TaskFieldValue -> TaskItem: Cascade (when task is deleted, delete all its field values)
+        //when task is deleted, do not delete all of its fieldvalues(prevent double cascade path)
         builder.Entity<TaskFieldValue>()
             .HasOne(tfv => tfv.Task)
             .WithMany(t => t.FieldValues)
             .HasForeignKey(tfv => tfv.TaskId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // TaskFieldValue -> TaskField: Restrict (prevent multiple cascade paths)
-        // This avoids: Task -> TaskType -> TaskField -> TaskFieldValue
-        // We already have: Task -> TaskFieldValue (cascade)
+        //when field is deleted, velete all of its values
         builder.Entity<TaskFieldValue>()
             .HasOne(tfv => tfv.TaskField)
             .WithMany(tf => tf.FieldValues)

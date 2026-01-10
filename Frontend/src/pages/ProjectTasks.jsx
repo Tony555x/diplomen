@@ -170,6 +170,31 @@ function ProjectTasks() {
             throw err; // Re-throw so popup can handle it
         }
     };
+    const handleTaskDelete = async (task) => {
+        try {
+            await fetchWithAuth(
+                `/api/projects/${projectId}/tasks/${task.id}`,
+                { method: "DELETE" }
+            );
+
+            // Remove task from local state
+            setTasks(prev => {
+                const next = { "To Do": [], "In Progress": [], "Done": [] };
+
+                Object.keys(prev).forEach(column => {
+                    next[column] = prev[column].filter(t => t.id !== task.id);
+                });
+
+                return next;
+            });
+
+            setSelectedTask(null);
+        } catch (err) {
+            console.error("Failed to delete task", err);
+        }
+    };
+
+
 
 
     if (loading) return <div className="loading">Loading tasks...</div>;
@@ -200,6 +225,7 @@ function ProjectTasks() {
                     taskTypes={taskTypes}
                     onClose={() => setSelectedTask(null)}
                     onUpdate={handleTaskUpdate}
+                    onDelete={handleTaskDelete}
                 />
             )}
         </>
