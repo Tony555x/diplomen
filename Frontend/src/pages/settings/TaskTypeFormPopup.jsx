@@ -62,13 +62,16 @@ function TaskTypeFormPopup({ projectId, taskType, onClose, onSaved }) {
                     onChange={e => setName(e.target.value)}
                 />
 
-                <textarea
-                    placeholder="Description"
+                <input
+                    placeholder="Description of task type"
                     value={description}
                     onChange={e => setDescription(e.target.value)}
                 />
+                <hr style={{borderColor:"#888"}}/>
+                <h3>Fields</h3>
 
                 <div className={styles.fields}>
+                    {fields.length==0&&(<div>This task type has no fields. Click 'Add Field' to create a new one.</div>)}
                     {fields.map((f, i) => (
                         <div key={i} className={styles.fieldRow}>
                             <input
