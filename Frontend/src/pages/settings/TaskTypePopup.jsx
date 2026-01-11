@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { fetchWithAuth } from "../../auth";
-import styles from "./TaskTypeFormPopup.module.css";
+import styles from "./TaskTypePopup.module.css";
 
 const FIELD_TYPES = ["Text", "Number", "Date", "Checkbox"];
 
-function TaskTypeFormPopup({ projectId, taskType, onClose, onSaved }) {
+function TaskTypePopup({ projectId, taskType, onClose, onSaved }) {
     const isEdit = !!taskType.id;
 
     const [name, setName] = useState(taskType.name || "");
@@ -109,4 +109,4 @@ function TaskTypeFormPopup({ projectId, taskType, onClose, onSaved }) {
     );
 }
 
-export default TaskTypeFormPopup;
+export default TaskTypePopup;

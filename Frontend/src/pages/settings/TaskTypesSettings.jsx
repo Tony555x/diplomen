@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { fetchWithAuth } from "../../auth";
-import TaskTypeFormPopup from "./TaskTypeFormPopup";
+import TaskTypePopup from "./TaskTypePopup";
 import styles from "./TaskTypesSettings.module.css";
 
 function TaskTypesSettings({ projectId }) {
@@ -45,7 +45,7 @@ function TaskTypesSettings({ projectId }) {
             </div>
 
             {selectedType && (
-                <TaskTypeFormPopup
+                <TaskTypePopup
                     projectId={projectId}
                     taskType={selectedType}
                     onClose={() => setSelectedType(null)}
