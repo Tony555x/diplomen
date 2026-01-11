@@ -14,6 +14,7 @@ function ProjectMembers() {
     const [error, setError] = useState(null);
     const [showAddMemberPopup, setShowAddMemberPopup] = useState(false);
     const [showCreateRole, setShowCreateRole] = useState(false);
+    const [editingRole, setEditingRole] = useState(null);
 
 
     useEffect(() => {
@@ -101,7 +102,11 @@ function ProjectMembers() {
                         {currentUserRole?.canAddEditMembers && (
                             <button
                                 className="btn-new-role"
-                                onClick={() => setShowCreateRole(true)}
+                                onClick={() => {
+                                    setEditingRole(null);
+                                    setShowCreateRole(true);
+                                }}
+
                             >
                                 + New Role
                             </button>
@@ -113,7 +118,15 @@ function ProjectMembers() {
                             <div className="empty-state">No roles found</div>
                         ) : (
                             roles.map((role) => (
-                                <div key={role.id} className="role-card">
+                                <div
+                                    key={role.id}
+                                    className="role-card"
+                                    onClick={() => {
+                                        if (!currentUserRole?.canAddEditMembers || role.isOwner) return;
+                                        setEditingRole(role);
+                                        setShowCreateRole(true);
+                                    }}
+                                >
                                     <div className="role-info">
                                         <div className="role-name">{role.roleName}</div>
                                         <div className="role-member-count">
@@ -141,10 +154,15 @@ function ProjectMembers() {
             {showCreateRole && (
                 <CreateRolePopup
                     projectId={projectId}
-                    onClose={() => setShowCreateRole(false)}
-                    onRoleCreated={loadMembers}
+                    role={editingRole}
+                    onClose={() => {
+                        setShowCreateRole(false);
+                        setEditingRole(null);
+                    }}
+                    onRoleSaved={loadMembers}
                 />
             )}
+
 
         </>
     );

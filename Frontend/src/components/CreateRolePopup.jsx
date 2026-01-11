@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import { fetchWithAuth } from "../auth";
 import styles from "./CreateRolePopup.module.css";
 
-function CreateRolePopup({ projectId, onClose, onRoleCreated }) {
-    const [name, setName] = useState("");
-    const [canMembers, setCanMembers] = useState(false);
-    const [canSettings, setCanSettings] = useState(false);
+function CreateRolePopup({ projectId, role = null, onClose, onRoleSaved }) {
+    const [name, setName] = useState(role?.roleName ?? "");
+    const [canMembers, setCanMembers] = useState(role?.canAddEditMembers ?? false);
+    const [canSettings, setCanSettings] = useState(role?.canEditProjectSettings ?? false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState(null);
 
-    const handleCreate = async () => {
+    const handleSave = async () => {
         if (!name.trim()) {
             setError("Role name is required.");
             return;
@@ -24,6 +24,7 @@ function CreateRolePopup({ projectId, onClose, onRoleCreated }) {
                 {
                     method: "POST",
                     body: {
+                        roleId: role?.id ?? null,
                         roleName: name,
                         canAddEditMembers: canMembers,
                         canEditProjectSettings: canSettings
@@ -31,12 +32,13 @@ function CreateRolePopup({ projectId, onClose, onRoleCreated }) {
                 }
             );
 
+
             if (result.success) {
-                onRoleCreated();
+                onRoleSaved();
                 onClose();
             }
-        } catch {
-            setError("Failed to create role.");
+        } catch(err) {
+            setError(err.message);
         } finally {
             setSaving(false);
         }
@@ -45,7 +47,7 @@ function CreateRolePopup({ projectId, onClose, onRoleCreated }) {
     return (
         <div className={styles.overlay}>
             <div className={styles.popup}>
-                <h2>Create role</h2>
+                <h2>{role ? "Edit role" : "Create role"}</h2>
 
                 {error && <div className={styles.error}>{error}</div>}
 
@@ -89,10 +91,10 @@ function CreateRolePopup({ projectId, onClose, onRoleCreated }) {
 
                     <button
                         className={styles.createButton}
-                        onClick={handleCreate}
+                        onClick={handleSave}
                         disabled={saving}
                     >
-                        Create
+                        {role ? "Save" : "Create"}
                     </button>
                 </div>
             </div>

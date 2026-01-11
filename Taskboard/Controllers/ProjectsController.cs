@@ -432,12 +432,8 @@ namespace Taskboard.Controllers
                     pm.ProjectId == projectId &&
                     pm.UserId == userId);
 
-            if (currentMember == null ||
-                currentMember.ProjectRole == null ||
-                !currentMember.ProjectRole.CanAddEditMembers)
-            {
+            if (currentMember?.ProjectRole?.CanAddEditMembers != true)
                 return Forbid();
-            }
 
             if (string.IsNullOrWhiteSpace(request.RoleName))
             {
@@ -448,8 +444,32 @@ namespace Taskboard.Controllers
                 });
             }
 
+            ProjectRole? role;
+
+            if (request.RoleId.HasValue)
+            {
+                role = await _context.ProjectRoles.FirstOrDefaultAsync(r =>
+                    r.Id == request.RoleId.Value &&
+                    r.ProjectId == projectId &&
+                    !r.IsOwner);
+
+                if (role == null)
+                    return NotFound();
+            }
+            else
+            {
+                role = new ProjectRole
+                {
+                    ProjectId = projectId,
+                    IsOwner = false
+                };
+
+                _context.ProjectRoles.Add(role);
+            }
+
             var roleExists = await _context.ProjectRoles.AnyAsync(pr =>
                 pr.ProjectId == projectId &&
+                pr.Id != role.Id &&
                 pr.RoleName.ToLower() == request.RoleName.Trim().ToLower());
 
             if (roleExists)
@@ -461,16 +481,10 @@ namespace Taskboard.Controllers
                 });
             }
 
-            var role = new ProjectRole
-            {
-                ProjectId = projectId,
-                RoleName = request.RoleName.Trim(),
-                CanAddEditMembers = request.CanAddEditMembers,
-                CanEditProjectSettings = request.CanEditProjectSettings,
-                IsOwner = false
-            };
+            role.RoleName = request.RoleName.Trim();
+            role.CanAddEditMembers = request.CanAddEditMembers;
+            role.CanEditProjectSettings = request.CanEditProjectSettings;
 
-            _context.ProjectRoles.Add(role);
             await _context.SaveChangesAsync();
 
             return Ok(new
@@ -482,11 +496,11 @@ namespace Taskboard.Controllers
                     role.RoleName,
                     role.CanAddEditMembers,
                     role.CanEditProjectSettings,
-                    role.IsOwner,
-                    MemberCount = 0
+                    role.IsOwner
                 }
             });
         }
+
         [HttpPut("{projectId}/task-types")]
         [HttpPost("{projectId}/task-types")]
         public async Task<IActionResult> UpsertTaskType(
@@ -626,6 +640,8 @@ namespace Taskboard.Controllers
     }
     public class CreateProjectRoleRequest
     {
+        public int? RoleId { get; set; }
+
         [Required]
         [MaxLength(100)]
         public string RoleName { get; set; } = string.Empty;
