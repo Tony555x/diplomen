@@ -37,7 +37,7 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
         const value = fieldValues.find(fv => fv.taskFieldId === field.id)?.value ?? field.defaultValue ?? "";
 
         switch (field.type) {
-            case "Boolean":
+            case "Checkbox":
                 return (
                     <div className={styles.checkboxGroup} key={field.id}>
                         <label>
@@ -51,8 +51,7 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
                         {field.description && <small className={styles.hint}>{field.description}</small>}
                     </div>
                 );
-            case "Select":
-            case "MultiSelect":
+            case "Select": //unused
                 let options = [];
                 try { options = field.options ? JSON.parse(field.options) : []; } 
                 catch (e) { console.error("Failed to parse options", field.name); }

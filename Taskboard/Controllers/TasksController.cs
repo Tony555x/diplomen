@@ -160,7 +160,7 @@ namespace Taskboard.Controllers
         }
 
         [HttpPatch("{taskId}")]
-        public async Task<IActionResult> UpdateTaskStatus(int projectId, int taskId, [FromBody] UpdateTaskStatusRequest request)
+        public async Task<IActionResult> UpdateTask(int projectId, int taskId, [FromBody] UpdateTaskStatusRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();

@@ -8,9 +8,9 @@ namespace Taskboard.Data.Models
         Text,
         Number,
         Date,
-        Boolean,
-        Select,
-        MultiSelect
+        Checkbox,
+        Select, //unused
+        MultiSelect //unused
     }
 
     public class TaskField
