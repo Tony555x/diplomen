@@ -83,7 +83,7 @@ function ProjectMembers() {
                                         <div className="member-email">{member.email}</div>
                                     </div>
                                     <div className="member-meta">
-                                        <span className={`role-badge role-${member.role.toLowerCase()}`}>
+                                        <span className={`role-badge role-${member.role.toLowerCase()=="owner"?"owner":"member"}`}>
                                             {member.role}
                                         </span>
                                         <span className="joined-date">
