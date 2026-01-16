@@ -37,12 +37,39 @@ function CreateRolePopup({ projectId, role = null, onClose, onRoleSaved }) {
                 onRoleSaved();
                 onClose();
             }
-        } catch(err) {
+        } catch (err) {
             setError(err.message);
         } finally {
             setSaving(false);
         }
     };
+    const handleDelete = async () => {
+        if (!role) return;
+
+        if (!window.confirm("Are you sure you want to delete this role?")) {
+            return;
+        }
+
+        try {
+            setSaving(true);
+            setError(null);
+
+            const result = await fetchWithAuth(
+                `/api/projects/${projectId}/roles/${role.id}`,
+                { method: "DELETE" }
+            );
+
+            if (result.success) {
+                onRoleSaved();
+                onClose();
+            }
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
 
     return (
         <div className={styles.overlay}>
@@ -82,21 +109,34 @@ function CreateRolePopup({ projectId, role = null, onClose, onRoleSaved }) {
                 </div>
 
                 <div className={styles.actions}>
-                    <button
-                        className={styles.cancelButton}
-                        onClick={onClose}
-                    >
-                        Cancel
-                    </button>
+                    {role && !role.isOwner && (
+                        <button
+                            className={styles.deleteButton}
+                            onClick={handleDelete}
+                            disabled={saving}
+                        >
+                            Delete
+                        </button>
+                    )}
 
-                    <button
-                        className={styles.createButton}
-                        onClick={handleSave}
-                        disabled={saving}
-                    >
-                        {role ? "Save" : "Create"}
-                    </button>
+                    <div className={styles.rightActions}>
+                        <button
+                            className={styles.cancelButton}
+                            onClick={onClose}
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            className={styles.createButton}
+                            onClick={handleSave}
+                            disabled={saving}
+                        >
+                            Save
+                        </button>
+                    </div>
                 </div>
+
             </div>
         </div>
     );

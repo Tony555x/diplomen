@@ -611,6 +611,47 @@ namespace Taskboard.Controllers
                 taskTypeId = taskType.Id
             });
         }
+        [HttpDelete("{projectId}/roles/{roleId}")]
+        public async Task<IActionResult> DeleteProjectRole(int projectId, int roleId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return Unauthorized();
+
+            var currentMember = await _context.ProjectMembers
+                .Include(pm => pm.ProjectRole)
+                .FirstOrDefaultAsync(pm =>
+                    pm.ProjectId == projectId &&
+                    pm.UserId == userId);
+
+            if (currentMember?.ProjectRole?.CanAddEditMembers != true)
+                return Forbid();
+
+            var role = await _context.ProjectRoles.FirstOrDefaultAsync(r =>
+                r.Id == roleId &&
+                r.ProjectId == projectId &&
+                !r.IsOwner);
+
+            if (role == null)
+                return NotFound();
+
+            var isRoleInUse = await _context.ProjectMembers.AnyAsync(pm =>
+                pm.ProjectRoleId == roleId);
+
+            if (isRoleInUse)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "This role is still assigned to members."
+                });
+            }
+
+            _context.ProjectRoles.Remove(role);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true });
+        }
 
 
     }
