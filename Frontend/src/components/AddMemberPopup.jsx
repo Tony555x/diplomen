@@ -11,9 +11,11 @@ function AddMemberPopup({ projectId, roles, onClose, onMemberAdded }) {
     // Set default role when roles are loaded
     React.useEffect(() => {
         if (roles && roles.length > 0 && !selectedRole) {
-            // Default to the first non-owner role, or first role if all are owner
-            const defaultRole = roles.find(r => !r.isOwner) || roles[0];
-            setSelectedRole(defaultRole.id.toString());
+            // Default to the first non-owner role
+            const nonOwnerRoles = roles.filter(r => !r.isOwner);
+            if (nonOwnerRoles.length > 0) {
+                setSelectedRole(nonOwnerRoles[0].id.toString());
+            }
         }
     }, [roles, selectedRole]);
 
@@ -100,12 +102,13 @@ function AddMemberPopup({ projectId, roles, onClose, onMemberAdded }) {
                             {!roles || roles.length === 0 ? (
                                 <option value="">Loading roles...</option>
                             ) : (
-                                roles.map((role) => (
-                                    <option key={role.id} value={role.id}>
-                                        {role.roleName}
-                                        {role.isOwner ? ' (Owner)' : ''}
-                                    </option>
-                                ))
+                                roles
+                                    .filter(role => !role.isOwner)
+                                    .map((role) => (
+                                        <option key={role.id} value={role.id}>
+                                            {role.roleName}
+                                        </option>
+                                    ))
                             )}
                         </select>
                     </div>

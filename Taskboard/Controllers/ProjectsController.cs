@@ -255,6 +255,16 @@ namespace Taskboard.Controllers
                 return BadRequest(new { success = false, message = "Invalid role selected." });
             }
 
+            // Prevent assigning owner role
+            if (role.IsOwner)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Cannot assign owner role to new members."
+                });
+            }
+
             // Add member
             var newMember = new ProjectMember
             {
