@@ -288,6 +288,129 @@ namespace Taskboard.Controllers
             });
         }
 
+        [HttpPatch("{projectId}/members/{userId}")]
+        public async Task<IActionResult> UpdateProjectMember(
+            int projectId,
+            string userId,
+            [FromBody] UpdateMemberRequest request)
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (currentUserId == null)
+                return Unauthorized();
+
+            // Verify current user has permission to edit members
+            var currentMember = await _context.ProjectMembers
+                .Include(pm => pm.ProjectRole)
+                .FirstOrDefaultAsync(pm =>
+                    pm.ProjectId == projectId &&
+                    pm.UserId == currentUserId);
+
+            if (currentMember?.ProjectRole?.CanAddEditMembers != true)
+                return Forbid();
+
+            // Get the member to update
+            var memberToUpdate = await _context.ProjectMembers
+                .Include(pm => pm.ProjectRole)
+                .Include(pm => pm.User)
+                .FirstOrDefaultAsync(pm =>
+                    pm.ProjectId == projectId &&
+                    pm.UserId == userId);
+
+            if (memberToUpdate == null)
+                return NotFound(new { success = false, message = "Member not found." });
+
+            // Prevent editing owner role
+            if (memberToUpdate.ProjectRole?.IsOwner == true)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Cannot modify the owner's role."
+                });
+            }
+
+            // Verify the new role exists and belongs to this project
+            var newRole = await _context.ProjectRoles
+                .FirstOrDefaultAsync(pr =>
+                    pr.Id == request.RoleId &&
+                    pr.ProjectId == projectId);
+
+            if (newRole == null)
+            {
+                return BadRequest(new { success = false, message = "Invalid role selected." });
+            }
+
+            // Prevent assigning owner role
+            if (newRole.IsOwner)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Cannot assign owner role to members."
+                });
+            }
+
+            memberToUpdate.ProjectRoleId = newRole.Id;
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = "Member role updated successfully.",
+                member = new
+                {
+                    UserId = memberToUpdate.UserId,
+                    memberToUpdate.User!.Email,
+                    memberToUpdate.User.UserName,
+                    Role = newRole.RoleName,
+                    memberToUpdate.JoinedAt
+                }
+            });
+        }
+
+        [HttpDelete("{projectId}/members/{userId}")]
+        public async Task<IActionResult> DeleteProjectMember(int projectId, string userId)
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (currentUserId == null)
+                return Unauthorized();
+
+            // Verify current user has permission to edit members
+            var currentMember = await _context.ProjectMembers
+                .Include(pm => pm.ProjectRole)
+                .FirstOrDefaultAsync(pm =>
+                    pm.ProjectId == projectId &&
+                    pm.UserId == currentUserId);
+
+            if (currentMember?.ProjectRole?.CanAddEditMembers != true)
+                return Forbid();
+
+            // Get the member to delete
+            var memberToDelete = await _context.ProjectMembers
+                .Include(pm => pm.ProjectRole)
+                .FirstOrDefaultAsync(pm =>
+                    pm.ProjectId == projectId &&
+                    pm.UserId == userId);
+
+            if (memberToDelete == null)
+                return NotFound(new { success = false, message = "Member not found." });
+
+            // Prevent deleting owner
+            if (memberToDelete.ProjectRole?.IsOwner == true)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Cannot remove the project owner."
+                });
+            }
+
+            _context.ProjectMembers.Remove(memberToDelete);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, message = "Member removed successfully." });
+        }
+
         [HttpPost("validate-email")]
         public async Task<IActionResult> ValidateEmail([FromBody] ValidateEmailRequest request)
         {
@@ -672,6 +795,11 @@ namespace Taskboard.Controllers
     public class AddMemberRequest
     {
         public string Email { get; set; } = string.Empty;
+        public int RoleId { get; set; }
+    }
+
+    public class UpdateMemberRequest
+    {
         public int RoleId { get; set; }
     }
     public class UpdateProjectRequest

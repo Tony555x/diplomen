@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { fetchWithAuth } from "../auth";
 import AddMemberPopup from "../components/AddMemberPopup";
 import CreateRolePopup from "../components/CreateRolePopup";
+import EditMemberPopup from "../components/EditMemberPopup";
 import "./ProjectMembers.css";
 
 function ProjectMembers() {
@@ -15,6 +16,8 @@ function ProjectMembers() {
     const [showAddMemberPopup, setShowAddMemberPopup] = useState(false);
     const [showCreateRole, setShowCreateRole] = useState(false);
     const [editingRole, setEditingRole] = useState(null);
+    const [showEditMember, setShowEditMember] = useState(false);
+    const [editingMember, setEditingMember] = useState(null);
 
 
     useEffect(() => {
@@ -43,6 +46,27 @@ function ProjectMembers() {
     const handleMemberAdded = () => {
         loadMembers();
         setShowAddMemberPopup(false);
+    };
+
+    const handleMemberClick = (member) => {
+        if (!currentUserRole?.canAddEditMembers) return;
+        if (member.role?.toLowerCase() === "owner") {
+            // Allow opening popup for owner to show it's not editable
+        }
+
+        // Find the role ID for this member
+        const memberRole = roles.find(r => r.roleName === member.role);
+        setEditingMember({
+            ...member,
+            roleId: memberRole?.id
+        });
+        setShowEditMember(true);
+    };
+
+    const handleMemberUpdated = () => {
+        loadMembers();
+        setShowEditMember(false);
+        setEditingMember(null);
     };
 
     const formatDate = (dateString) => {
@@ -77,13 +101,17 @@ function ProjectMembers() {
                             <div className="empty-state">No members found</div>
                         ) : (
                             members.map((member) => (
-                                <div key={member.userId} className="member-card">
+                                <div
+                                    key={member.userId}
+                                    className={`member-card ${currentUserRole?.canAddEditMembers ? 'clickable' : ''}`}
+                                    onClick={() => handleMemberClick(member)}
+                                >
                                     <div className="member-info">
                                         <div className="member-name">{member.userName}</div>
                                         <div className="member-email">{member.email}</div>
                                     </div>
                                     <div className="member-meta">
-                                        <span className={`role-badge role-${member.role.toLowerCase()=="owner"?"owner":"member"}`}>
+                                        <span className={`role-badge role-${member.role.toLowerCase() === "owner" ? "owner" : "member"}`}>
                                             {member.role}
                                         </span>
                                         <span className="joined-date">
@@ -160,6 +188,19 @@ function ProjectMembers() {
                         setEditingRole(null);
                     }}
                     onRoleSaved={loadMembers}
+                />
+            )}
+            {showEditMember && editingMember && (
+                <EditMemberPopup
+                    projectId={projectId}
+                    member={editingMember}
+                    roles={roles}
+                    currentUserRole={currentUserRole}
+                    onClose={() => {
+                        setShowEditMember(false);
+                        setEditingMember(null);
+                    }}
+                    onMemberUpdated={handleMemberUpdated}
                 />
             )}
 

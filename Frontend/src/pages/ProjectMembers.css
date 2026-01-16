@@ -52,6 +52,17 @@
     transition: all 0.2s;
 }
 
+.member-card.clickable {
+    cursor: pointer;
+}
+
+.member-card.clickable:hover {
+    border-color: #4a9eff;
+    background: #333333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(74, 158, 255, 0.15);
+}
+
 .member-card:hover {
     border-color: #4b5563;
     background: #333333;
