@@ -53,7 +53,7 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
                 );
             case "Select": //unused
                 let options = [];
-                try { options = field.options ? JSON.parse(field.options) : []; } 
+                try { options = field.options ? JSON.parse(field.options) : []; }
                 catch (e) { console.error("Failed to parse options", field.name); }
                 return (
                     <div className={styles.formGroup} key={field.id}>
@@ -103,18 +103,7 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
                         {currentTaskType && <span className={styles.taskType}>{currentTaskType.name}</span>}
                     </div>
 
-                    <div className={styles.headerActions}>
-                        {onDelete && (
-                            <button
-                                className={styles.deleteBtn}
-                                onClick={() => onDelete(task)}
-                                title="Delete task"
-                            >
-                                🗑
-                            </button>
-                        )}
-                        <button className={styles.closeBtn} onClick={onClose}>×</button>
-                    </div>
+                    <button className={styles.closeBtn} onClick={onClose}>×</button>
                 </div>
 
                 <div className={styles.body}>
@@ -146,14 +135,25 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
                 </div>
 
                 <div className={styles.footer}>
-                    <button className={styles.cancelBtn} onClick={onClose}>Cancel</button>
-                    <button
-                        className={styles.saveBtn}
-                        onClick={handleSave}
-                        disabled={isSaving || !title.trim()}
-                    >
-                        {isSaving ? "Saving…" : "Save"}
-                    </button>
+                    {onDelete && (
+                        <button
+                            className={styles.deleteButton}
+                            onClick={() => onDelete(task)}
+                        >
+                            Delete
+                        </button>
+                    )}
+
+                    <div className={styles.rightActions}>
+                        <button className={styles.cancelButton} onClick={onClose}>Cancel</button>
+                        <button
+                            className={styles.createButton}
+                            onClick={handleSave}
+                            disabled={isSaving || !title.trim()}
+                        >
+                            {isSaving ? "Saving…" : "Save"}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

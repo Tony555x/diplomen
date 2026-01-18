@@ -115,22 +115,24 @@ function AddMemberPopup({ projectId, roles, onClose, onMemberAdded }) {
 
                     {error && <div className="error-message">{error}</div>}
 
-                    <div className="button-group">
-                        <button
-                            type="button"
-                            className="btn-secondary"
-                            onClick={onClose}
-                            disabled={loading}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            className="btn-primary"
-                            disabled={loading || !email.trim()}
-                        >
-                            {loading ? "Adding..." : "Add Member"}
-                        </button>
+                    <div className="actions">
+                        <div className="rightActions">
+                            <button
+                                type="button"
+                                className="cancelButton"
+                                onClick={onClose}
+                                disabled={loading}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                className="createButton"
+                                disabled={loading || !email.trim()}
+                            >
+                                {loading ? "Adding..." : "Add Member"}
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

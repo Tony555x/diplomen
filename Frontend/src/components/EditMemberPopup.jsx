@@ -136,19 +136,19 @@ function EditMemberPopup({ projectId, member, roles, currentUserRole, onClose, o
 
                         {error && <div className="error-message">{error}</div>}
 
-                        <div className="button-group">
+                        <div className="actions">
                             <button
                                 type="button"
-                                className="btn-danger"
+                                className="deleteButton"
                                 onClick={handleDelete}
                                 disabled={loading}
                             >
                                 Remove Member
                             </button>
-                            <div className="right-buttons">
+                            <div className="rightActions">
                                 <button
                                     type="button"
-                                    className="btn-secondary"
+                                    className="cancelButton"
                                     onClick={onClose}
                                     disabled={loading}
                                 >
@@ -156,11 +156,11 @@ function EditMemberPopup({ projectId, member, roles, currentUserRole, onClose, o
                                 </button>
                                 <button
                                     type="button"
-                                    className="btn-primary"
+                                    className="createButton"
                                     onClick={handleUpdateRole}
                                     disabled={loading || !selectedRole}
                                 >
-                                    {loading ? "Saving..." : "Save Changes"}
+                                    {loading ? "Saving..." : "Save"}
                                 </button>
                             </div>
                         </div>

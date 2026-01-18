@@ -74,7 +74,7 @@
     color: rgba(255, 255, 255, 0.6);
     cursor: pointer;
     margin-bottom: 1rem;
-    display:flex;
+    display: flex;
     justify-content: center;
     align-items: center;
 }
@@ -84,7 +84,7 @@
     color: rgba(255, 255, 255, 0.9);
 }
 
-.popup > button {
+.popup>button {
     margin-top: 0.5rem;
     padding: 0.6rem 1rem;
     background-color: #10b981;
@@ -95,40 +95,84 @@
     cursor: pointer;
 }
 
-.popup > button:hover {
+.popup>button:hover {
     background-color: #059669;
 }
 
 .actions {
     display: flex;
-    justify-content: flex-end;
-    gap: 0.75rem;
+    justify-content: space-between;
+    align-items: center;
     margin-top: 1.5rem;
 }
 
-.actions button {
-    padding: 0.6rem 1.2rem;
+.rightActions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.deleteButton {
+    padding: 0.75rem 1.5rem;
     border-radius: 6px;
-    border: none;
-    cursor: pointer;
+    background: rgba(248, 113, 113, 0.1);
+    color: #f87171;
+    border: 1px solid #f87171;
     font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-.actions button:first-child {
-    background-color: transparent;
-    color: rgba(255, 255, 255, 0.7);
-    border: 1px solid #374151;
+.deleteButton:hover:not(:disabled) {
+    background: rgba(248, 113, 113, 0.2);
 }
 
-.actions button:first-child:hover {
-    background-color: rgba(255, 255, 255, 0.06);
+.deleteButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
-.actions button:last-child {
-    background-color: #3b82f6;
+.createButton,
+.cancelButton {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.createButton {
+    background: #3b82f6;
     color: white;
 }
 
-.actions button:last-child:hover {
-    background-color: #2563eb;
+.createButton:hover:not(:disabled) {
+    background: #2563eb;
+}
+
+.createButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cancelButton {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid #374151;
+}
+
+.cancelButton:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.error {
+    background-color: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    color: #fca5a5;
+    font-size: 0.9rem;
 }

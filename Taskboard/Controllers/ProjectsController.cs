@@ -786,6 +786,56 @@ namespace Taskboard.Controllers
             return Ok(new { success = true });
         }
 
+        [HttpDelete("{projectId}/task-types/{taskTypeId}")]
+        public async Task<IActionResult> DeleteTaskType(int projectId, int taskTypeId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return Unauthorized();
+
+            // Verify user has permission to edit project settings
+            var membership = await _context.ProjectMembers
+                .Include(pm => pm.ProjectRole)
+                .FirstOrDefaultAsync(pm =>
+                    pm.ProjectId == projectId &&
+                    pm.UserId == userId);
+
+            if (membership == null ||
+                membership.ProjectRole == null ||
+                !membership.ProjectRole.CanEditProjectSettings)
+            {
+                return Forbid();
+            }
+
+            // Get the task type
+            var taskType = await _context.TaskTypes
+                .FirstOrDefaultAsync(tt =>
+                    tt.Id == taskTypeId &&
+                    tt.ProjectId == projectId);
+
+            if (taskType == null)
+                return NotFound(new { success = false, message = "Task type not found." });
+
+            // Check if any tasks are using this task type
+            var isInUse = await _context.Tasks
+                .AnyAsync(t => t.TaskTypeId == taskTypeId);
+
+            if (isInUse)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Cannot delete task type that is currently in use by tasks."
+                });
+            }
+
+            // Delete the task type (fields will be cascade deleted)
+            _context.TaskTypes.Remove(taskType);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, message = "Task type deleted successfully." });
+        }
+
 
     }
 
