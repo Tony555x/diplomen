@@ -24,7 +24,7 @@ function ProjectTasks() {
 
         const updatedFrom = tasksObj[fromColumn].filter(t => t.id !== task.id);
         const updatedTo = [...(tasksObj[toColumn] || []), task];
-
+        task.status=toColumn
         return {
             ...tasksObj,
             [fromColumn]: updatedFrom,
