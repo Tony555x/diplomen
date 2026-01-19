@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Taskboard.Models
+namespace Taskboard.Contracts
 {
     public class LoginRequest
     {

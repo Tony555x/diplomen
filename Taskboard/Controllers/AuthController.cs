@@ -4,10 +4,10 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Taskboard.Contracts;
 using Taskboard.Data.Models;
-using Taskboard.Models;
 
-namespace MyAuthApi.Controllers
+namespace Taskboard.Controllers
 {
     // Models for JSON requests
     

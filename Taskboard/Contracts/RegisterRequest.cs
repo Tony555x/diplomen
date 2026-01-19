@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Taskboard.Models
+namespace Taskboard.Contracts
 {
     public class RegisterRequest
     {

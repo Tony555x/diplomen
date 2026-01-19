@@ -1,0 +1,206 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Taskboard.Contracts.Projects;
+using Taskboard.Data.Models;
+
+namespace Taskboard.Controllers.Projects;
+
+[Authorize]
+[Route("api/projects/{projectId}/members")]
+[ApiController]
+public class ProjectMembersController : ControllerBase
+{
+    private readonly AppDbContext _context;
+
+    public ProjectMembersController(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetProjectMembersAndRoles(int projectId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return Unauthorized();
+
+        var currentUserMembership = await _context.ProjectMembers
+            .Include(pm => pm.ProjectRole)
+            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+
+        if (currentUserMembership == null) return Forbid();
+
+        var members = await _context.ProjectMembers
+            .Where(pm => pm.ProjectId == projectId)
+            .Include(pm => pm.User)
+            .Include(pm => pm.ProjectRole)
+            .Select(pm => new
+            {
+                pm.UserId,
+                pm.User!.Email,
+                pm.User.UserName,
+                Role = pm.ProjectRole!.RoleName,
+                pm.JoinedAt
+            })
+            .OrderBy(m => m.JoinedAt)
+            .ToListAsync();
+
+        var roles = await _context.ProjectRoles
+            .Where(pr => pr.ProjectId == projectId)
+            .Select(pr => new
+            {
+                pr.Id,
+                pr.RoleName,
+                pr.CanAddEditMembers,
+                pr.CanEditProjectSettings,
+                pr.IsOwner,
+                MemberCount = pr.Members.Count
+            })
+            .OrderByDescending(r => r.IsOwner)
+            .ThenBy(r => r.RoleName)
+            .ToListAsync();
+
+        return Ok(new
+        {
+            success = true,
+            members,
+            roles,
+            currentUserRole = new
+            {
+                RoleName = currentUserMembership.ProjectRole!.RoleName,
+                CanAddEditMembers = currentUserMembership.ProjectRole.CanAddEditMembers,
+                CanEditProjectSettings = currentUserMembership.ProjectRole.CanEditProjectSettings,
+                IsOwner = currentUserMembership.ProjectRole.IsOwner
+            }
+        });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AddProjectMember(int projectId, [FromBody] AddMemberRequest request)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return Unauthorized();
+
+        var currentUserProjectMember = await _context.ProjectMembers
+            .Include(pm => pm.ProjectRole)
+            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+
+        if (currentUserProjectMember?.ProjectRole?.CanAddEditMembers != true) return Forbid();
+
+        if (string.IsNullOrWhiteSpace(request.Email))
+            return BadRequest(new { success = false, message = "Email is required." });
+
+        if (request.RoleId <= 0)
+            return BadRequest(new { success = false, message = "Role is required." });
+
+        var userToAdd = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+        if (userToAdd == null) return NotFound(new { success = false, message = "User with this email not found." });
+
+        var existingMembership = await _context.ProjectMembers
+            .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userToAdd.Id);
+
+        if (existingMembership)
+            return BadRequest(new { success = false, message = "User is already a member of this project." });
+
+        var role = await _context.ProjectRoles.FirstOrDefaultAsync(pr => pr.Id == request.RoleId && pr.ProjectId == projectId);
+        if (role == null || role.IsOwner)
+            return BadRequest(new { success = false, message = role?.IsOwner == true ? "Cannot assign owner role to new members." : "Invalid role selected." });
+
+        var newMember = new ProjectMember
+        {
+            ProjectId = projectId,
+            UserId = userToAdd.Id,
+            ProjectRoleId = role.Id,
+            JoinedAt = DateTime.UtcNow
+        };
+
+        _context.ProjectMembers.Add(newMember);
+        await _context.SaveChangesAsync();
+
+        var addedMember = await _context.ProjectMembers
+            .Where(pm => pm.ProjectId == projectId && pm.UserId == userToAdd.Id)
+            .Include(pm => pm.ProjectRole)
+            .FirstOrDefaultAsync();
+
+        return Ok(new
+        {
+            success = true,
+            message = "Member added successfully.",
+            member = new
+            {
+                UserId = userToAdd.Id,
+                userToAdd.Email,
+                userToAdd.UserName,
+                Role = addedMember!.ProjectRole!.RoleName,
+                addedMember.JoinedAt
+            }
+        });
+    }
+
+    [HttpPatch("{userId}")]
+    public async Task<IActionResult> UpdateProjectMember(int projectId, string userId, [FromBody] UpdateMemberRequest request)
+    {
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (currentUserId == null) return Unauthorized();
+
+        var currentMember = await _context.ProjectMembers
+            .Include(pm => pm.ProjectRole)
+            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == currentUserId);
+
+        if (currentMember?.ProjectRole?.CanAddEditMembers != true) return Forbid();
+
+        var memberToUpdate = await _context.ProjectMembers
+            .Include(pm => pm.ProjectRole)
+            .Include(pm => pm.User)
+            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+
+        if (memberToUpdate == null) return NotFound(new { success = false, message = "Member not found." });
+        if (memberToUpdate.ProjectRole?.IsOwner == true) return BadRequest(new { success = false, message = "Cannot modify the owner's role." });
+
+        var newRole = await _context.ProjectRoles.FirstOrDefaultAsync(pr => pr.Id == request.RoleId && pr.ProjectId == projectId);
+        if (newRole == null || newRole.IsOwner) return BadRequest(new { success = false, message = "Cannot assign owner role to members." });
+
+        memberToUpdate.ProjectRoleId = newRole.Id;
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            success = true,
+            message = "Member role updated successfully.",
+            member = new
+            {
+                UserId = memberToUpdate.UserId,
+                memberToUpdate.User!.Email,
+                memberToUpdate.User.UserName,
+                Role = newRole.RoleName,
+                memberToUpdate.JoinedAt
+            }
+        });
+    }
+
+    [HttpDelete("{userId}")]
+    public async Task<IActionResult> DeleteProjectMember(int projectId, string userId)
+    {
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (currentUserId == null) return Unauthorized();
+
+        var currentMember = await _context.ProjectMembers
+            .Include(pm => pm.ProjectRole)
+            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == currentUserId);
+
+        if (currentMember?.ProjectRole?.CanAddEditMembers != true) return Forbid();
+
+        var memberToDelete = await _context.ProjectMembers
+            .Include(pm => pm.ProjectRole)
+            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+
+        if (memberToDelete == null) return NotFound(new { success = false, message = "Member not found." });
+        if (memberToDelete.ProjectRole?.IsOwner == true) return BadRequest(new { success = false, message = "Cannot remove the project owner." });
+
+        _context.ProjectMembers.Remove(memberToDelete);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { success = true, message = "Member removed successfully." });
+    }
+}
