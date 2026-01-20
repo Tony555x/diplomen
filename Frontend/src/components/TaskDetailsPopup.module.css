@@ -233,3 +233,17 @@ select,
 textarea {
     box-sizing: border-box;
 }
+
+.assigneeRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.removeBtn {
+    background: none;
+    border: none;
+    color: #f87171;
+    cursor: pointer;
+}

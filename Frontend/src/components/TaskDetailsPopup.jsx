@@ -1,17 +1,28 @@
 import React, { useState, useRef, useEffect } from "react";
 import styles from "./TaskDetailsPopup.module.css";
 import CustomField from "./CustomField";
+import { fetchWithAuth } from "../auth";
+import { useParams } from "react-router-dom";
 
 function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete }) {
+    const { projectId } = useParams();
+
     const [title, setTitle] = useState(task.title);
     const [status, setStatus] = useState(task.status);
     const [completed, setCompleted] = useState(task.completed);
     const [fieldValues, setFieldValues] = useState(task.fieldValues);
+    const [assignees, setAssignees] = useState([]);
+    const [members, setMembers] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
     const [isEditingTitle, setIsEditingTitle] = useState(false);
-    const titleInputRef = useRef(null);
 
+    const titleInputRef = useRef(null);
     const currentTaskType = taskTypes.find(tt => tt.id === task.taskTypeId);
+
+    useEffect(() => {
+        loadAssignees();
+        loadMembers();
+    }, []);
 
     useEffect(() => {
         if (isEditingTitle) {
@@ -19,6 +30,39 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
             titleInputRef.current?.select();
         }
     }, [isEditingTitle]);
+
+    const loadAssignees = async () => {
+        const result = await fetchWithAuth(
+            `/api/projects/${projectId}/tasks/${task.id}/assignees`
+        );
+        setAssignees(result || []);
+    };
+
+    const loadMembers = async () => {
+        const result = await fetchWithAuth(`/api/projects/${projectId}/members`);
+        if (result?.success) {
+            setMembers(result.members);
+        }
+    };
+
+    const handleAssign = async userId => {
+        await fetchWithAuth(
+            `/api/projects/${projectId}/tasks/${task.id}/assignees`,
+            {
+                method: "POST",
+                body: JSON.stringify({ userId })
+            }
+        );
+        loadAssignees();
+    };
+
+    const handleRemove = async userId => {
+        await fetchWithAuth(
+            `/api/projects/${projectId}/tasks/${task.id}/assignees/${userId}`,
+            { method: "DELETE" }
+        );
+        loadAssignees();
+    };
 
     const handleSave = async () => {
         setIsSaving(true);
@@ -42,6 +86,8 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
     const handleBackdropClick = e => {
         if (e.target === e.currentTarget) onClose();
     };
+
+    const assignedIds = assignees.map(a => a.userId);
 
     return (
         <div className={styles.backdrop} onClick={handleBackdropClick}>
@@ -87,6 +133,41 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
                 </div>
 
                 <div className={styles.body}>
+                    <div className={styles.customFields}>
+                        <h3>Assignees</h3>
+
+                        {assignees.length === 0 && (
+                            <div className={styles.hint}>No one assigned</div>
+                        )}
+
+                        {assignees.map(a => (
+                            <div key={a.userId} className={styles.assigneeRow}>
+                                <span>{a.userName}</span>
+                                <button
+                                    className={styles.removeBtn}
+                                    onClick={() => handleRemove(a.userId)}
+                                >
+                                    Remove
+                                </button>
+                            </div>
+                        ))}
+
+                        <select
+                            className={styles.statusSelect}
+                            onChange={e => handleAssign(e.target.value)}
+                            value=""
+                        >
+                            <option value="" disabled>Add member</option>
+                            {members
+                                .filter(m => !assignedIds.includes(m.userId))
+                                .map(m => (
+                                    <option key={m.userId} value={m.userId}>
+                                        {m.userName}
+                                    </option>
+                                ))}
+                        </select>
+                    </div>
+
                     {currentTaskType?.fields?.length > 0 && (
                         <div className={styles.customFields}>
                             <h3>{currentTaskType.name} Details</h3>
@@ -127,7 +208,9 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
                     )}
 
                     <div className={styles.rightActions}>
-                        <button className={styles.cancelButton} onClick={onClose}>Cancel</button>
+                        <button className={styles.cancelButton} onClick={onClose}>
+                            Cancel
+                        </button>
                         <button
                             className={styles.createButton}
                             onClick={handleSave}

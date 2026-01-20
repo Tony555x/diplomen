@@ -13,13 +13,16 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<Project> Projects { get; set; }
     public DbSet<TaskItem> Tasks { get; set; }
 
-    public DbSet<WorkspaceMember> WorkspaceMembers{get;set;}
-    public DbSet<ProjectMember> ProjectMembers {get; set;}
-    public DbSet<ProjectRole> ProjectRoles {get; set;}
-    
+    public DbSet<WorkspaceMember> WorkspaceMembers { get; set; }
+    public DbSet<ProjectMember> ProjectMembers { get; set; }
+    public DbSet<ProjectRole> ProjectRoles { get; set; }
+
     public DbSet<TaskType> TaskTypes { get; set; }
     public DbSet<TaskField> TaskFields { get; set; }
     public DbSet<TaskFieldValue> TaskFieldValues { get; set; }
+
+
+    public DbSet<UserTask> UserTasks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -27,7 +30,7 @@ public class AppDbContext : IdentityDbContext<User>
 
         builder.Entity<WorkspaceMember>()
             .HasKey(x => new { x.WorkspaceId, x.UserId });
-            
+
         builder.Entity<WorkspaceMember>()
             .HasOne(wm => wm.User)
             .WithMany(u => u.WorkspaceMemberships)

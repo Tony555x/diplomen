@@ -276,6 +276,84 @@ namespace Taskboard.Controllers
                 taskId = taskId
             });
         }
+        [HttpGet("{taskId}/assignees")]
+        public async Task<IActionResult> GetTaskAssignees(int projectId, int taskId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var hasAccess = await _context.ProjectMembers
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+
+            if (!hasAccess) return Forbid();
+
+            var assignees = await _context.UserTasks
+                .Where(ut => ut.TaskItemId == taskId)
+                .Select(ut => new
+                {
+                    ut.UserId,
+                    ut.User!.UserName
+                })
+                .ToListAsync();
+
+            return Ok(assignees);
+        }
+
+        [HttpPost("{taskId}/assignees")]
+        public async Task<IActionResult> AssignUserToTask(int projectId, int taskId, [FromBody] AssignUserRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var hasAccess = await _context.ProjectMembers
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+
+            if (!hasAccess) return Forbid();
+
+            var alreadyAssigned = await _context.UserTasks
+                .AnyAsync(ut => ut.TaskItemId == taskId && ut.UserId == request.UserId);
+
+            if (alreadyAssigned) return Ok();
+
+            var assignment = new UserTask
+            {
+                TaskItemId = taskId,
+                UserId = request.UserId,
+                Role = "Assignee"
+            };
+
+            _context.UserTasks.Add(assignment);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true });
+        }
+
+        [HttpDelete("{taskId}/assignees/{assignedUserId}")]
+        public async Task<IActionResult> RemoveUserFromTask(int projectId, int taskId, string assignedUserId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var hasAccess = await _context.ProjectMembers
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+
+            if (!hasAccess) return Forbid();
+
+            var assignment = await _context.UserTasks
+                .FirstOrDefaultAsync(ut => ut.TaskItemId == taskId && ut.UserId == assignedUserId);
+
+            if (assignment == null) return NotFound();
+
+            _context.UserTasks.Remove(assignment);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true });
+        }
+        public class AssignUserRequest
+        {
+            public string UserId { get; set; } = string.Empty;
+        }
+
 
     }
 
