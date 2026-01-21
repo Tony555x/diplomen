@@ -75,11 +75,14 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
     };
 
     const handleFieldChange = (fieldId, value) => {
+        console.log(value);
         setFieldValues(prev => {
-            const index = prev.findIndex(fv => fv.taskFieldId === fieldId);
-            if (index !== -1) prev[index] = { ...prev[index], value };
-            else prev.push({ taskFieldId: fieldId, value });
-            return [...prev];
+            let next=[...prev];
+            const index = next.findIndex(fv => fv.taskFieldId === fieldId);
+            if (index !== -1) next[index] = { ...next[index], value };
+            else next.push({ taskFieldId: fieldId, value });
+            console.log(next);
+            return next;
         });
     };
 

@@ -1,4 +1,3 @@
-// ProjectTasks.jsx
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { fetchWithAuth } from "../auth";
@@ -8,7 +7,6 @@ import styles from "./ProjectTasks.module.css";
 
 function ProjectTasks() {
     const { projectId } = useParams();
-
     const [tasks, setTasks] = useState({ "To Do": [], "In Progress": [], "Done": [] });
     const [taskTypes, setTaskTypes] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -18,34 +16,23 @@ function ProjectTasks() {
 
     const columns = ["To Do", "In Progress", "Done"];
 
-    // Centralized task reordering
-    const reorderTasks = (tasksObj, task, fromColumn, toColumn) => {
-        if (fromColumn === toColumn) return tasksObj;
-
-        const updatedFrom = tasksObj[fromColumn].filter(t => t.id !== task.id);
-        const updatedTo = [...(tasksObj[toColumn] || []), task];
-        task.status=toColumn
-        return {
-            ...tasksObj,
-            [fromColumn]: updatedFrom,
-            [toColumn]: updatedTo
-        };
-    };
-
     useEffect(() => {
         const loadData = async () => {
             try {
                 setLoading(true);
-
                 const [tasksData, taskTypesData] = await Promise.all([
                     fetchWithAuth(`/api/projects/${projectId}/tasks`),
                     fetchWithAuth(`/api/projects/${projectId}/task-types`)
                 ]);
 
                 const organizedTasks = { "To Do": [], "In Progress": [], "Done": [] };
+
                 tasksData.forEach(t => {
-                    const status = t.status;
-                    if (!organizedTasks[status]) organizedTasks[status] = [];
+                    let status = t.status;
+
+                    if (!organizedTasks[status]) {
+                        organizedTasks[status] = [];
+                    }
                     organizedTasks[status].push(t);
                 });
 
@@ -59,27 +46,32 @@ function ProjectTasks() {
             }
         };
 
-        if (projectId) loadData();
+        if (projectId) {
+            loadData();
+        }
     }, [projectId]);
 
-    const addTask = async (column, title, taskTypeId) => {
-        if (!title.trim()) return;
+    const addTask = async (column, taskText, taskTypeId) => {
+        if (!taskText.trim()) return;
 
         try {
-            const result = await fetchWithAuth(`/api/projects/${projectId}/tasks`, {
-                method: "POST",
-                body: {
-                    title,
-                    status: column,
-                    taskTypeId: taskTypeId || null
+            const result = await fetchWithAuth(
+                `/api/projects/${projectId}/tasks`,
+                {
+                    method: "POST",
+                    body: {
+                        title: taskText,
+                        status: column,
+                        taskTypeId: taskTypeId || null
+                    }
                 }
-            });
+            );
 
             if (result.success) {
-                setTasks(prev => ({
-                    ...prev,
-                    [column]: [...(prev[column] || []), result.task]
-                }));
+                setTasks({
+                    ...tasks,
+                    [column]: [...(tasks[column] || []), result.task]
+                });
             }
         } catch (err) {
             console.error("Failed to create task", err);
@@ -94,20 +86,38 @@ function ProjectTasks() {
         if (!draggedTask) return;
 
         const { fromColumn, index } = draggedTask;
-        const task = tasks[fromColumn][index];
 
-        const updatedTasks = reorderTasks(tasks, task, fromColumn, toColumn);
-        setTasks(updatedTasks);
+        if (fromColumn === toColumn) {
+            setDraggedTask(null);
+            return;
+        }
+
+        const task = tasks[fromColumn][index];
+        const updatedFrom = tasks[fromColumn].filter((_, i) => i !== index);
+        const updatedTo = [...(tasks[toColumn] || []), task];
+
+        setTasks({
+            ...tasks,
+            [fromColumn]: updatedFrom,
+            [toColumn]: updatedTo
+        });
+
         setDraggedTask(null);
 
         try {
-            await fetchWithAuth(`/api/projects/${projectId}/tasks/${task.id}`, {
+            const res = await fetchWithAuth(`/api/projects/${projectId}/tasks/${task.id}`, {
                 method: "PATCH",
-                body: { status: toColumn }
+                body: {
+                    status: toColumn
+                }
             });
         } catch (err) {
             console.error("Failed to update task status", err);
-            setTasks(reorderTasks(updatedTasks, task, toColumn, fromColumn)); // revert
+            setTasks({
+                ...tasks,
+                [fromColumn]: [...updatedFrom, task],
+                [toColumn]: updatedTo.filter(t => t.id !== task.id)
+            });
         }
     };
 
@@ -117,42 +127,50 @@ function ProjectTasks() {
 
     const handleTaskUpdate = async (updatedTask) => {
         try {
+            console.log(updatedTask);
             await fetchWithAuth(`/api/projects/${projectId}/tasks/${updatedTask.id}`, {
                 method: "PATCH",
                 body: {
-                    title: updatedTask.title,
                     status: updatedTask.status,
+                    title: updatedTask.title,
                     completed: updatedTask.completed,
                     fieldValues: updatedTask.fieldValues
                 }
             });
 
-            // Reorder if status changed
-            setTasks(prev => {
-                let fromColumn = null;
-                Object.keys(prev).forEach(col => {
-                    if (prev[col].some(t => t.id === updatedTask.id)) fromColumn = col;
-                });
+            const newTasks = { "To Do": [], "In Progress": [], "Done": [] };
 
-                return reorderTasks(prev, updatedTask, fromColumn, updatedTask.status);
+            Object.keys(tasks).forEach(column => {
+                tasks[column].forEach(task => {
+                    if (task.id === updatedTask.id) {
+                        newTasks[updatedTask.status].push(updatedTask);
+                    } else {
+                        newTasks[column].push(task);
+                    }
+                });
             });
+
+            setTasks(newTasks);
         } catch (err) {
             console.error("Failed to update task", err);
-            throw err; // propagate to popup
         }
     };
-
     const handleTaskDelete = async (task) => {
         try {
             if (!window.confirm("Delete this task? This cannot be undone.")) return;
 
-            await fetchWithAuth(`/api/projects/${projectId}/tasks/${task.id}`, { method: "DELETE" });
+            await fetchWithAuth(
+                `/api/projects/${projectId}/tasks/${task.id}`,
+                { method: "DELETE" }
+            );
 
             setTasks(prev => {
                 const next = { "To Do": [], "In Progress": [], "Done": [] };
+
                 Object.keys(prev).forEach(column => {
                     next[column] = prev[column].filter(t => t.id !== task.id);
                 });
+
                 return next;
             });
 
@@ -162,6 +180,9 @@ function ProjectTasks() {
         }
     };
 
+
+
+
     if (loading) return <div className="loading">Loading tasks...</div>;
     if (error) return <div className="error">{error}</div>;
 
@@ -169,7 +190,7 @@ function ProjectTasks() {
         <>
             <div className={styles.projectTasks}>
                 <div className={styles.board}>
-                    {columns.map(columnName => (
+                    {columns.map((columnName) => (
                         <Column
                             key={columnName}
                             columnKey={columnName}
@@ -184,7 +205,6 @@ function ProjectTasks() {
                     ))}
                 </div>
             </div>
-
             {selectedTask && (
                 <TaskDetailsPopup
                     task={selectedTask}
