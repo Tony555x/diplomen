@@ -77,7 +77,7 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
     const handleFieldChange = (fieldId, value) => {
         console.log(value);
         setFieldValues(prev => {
-            let next=[...prev];
+            let next = [...prev];
             const index = next.findIndex(fv => fv.taskFieldId === fieldId);
             if (index !== -1) next[index] = { ...next[index], value };
             else next.push({ taskFieldId: fieldId, value });
@@ -139,37 +139,42 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
                     <div className={styles.customFields}>
                         <h3>Assignees</h3>
 
+                        <div className={styles.avatarRow}>
+                            {assignees.map(a => (
+                                <button
+                                    key={a.userId}
+                                    className={styles.avatar}
+                                    title={`Remove ${a.userName}`}
+                                    onClick={() => handleRemove(a.userId)}
+                                >
+                                    {a.userName?.charAt(0).toUpperCase()}
+                                </button>
+                            ))}
+
+                            <div className={styles.addAvatarWrapper}>
+                                <button className={styles.addAvatar}>+</button>
+                                <select
+                                    className={styles.addSelect}
+                                    onChange={e => handleAssign(e.target.value)}
+                                    value=""
+                                >
+                                    <option value="" disabled />
+                                    {members
+                                        .filter(m => !assignedIds.includes(m.userId))
+                                        .map(m => (
+                                            <option key={m.userId} value={m.userId}>
+                                                {m.userName}
+                                            </option>
+                                        ))}
+                                </select>
+                            </div>
+                        </div>
+
                         {assignees.length === 0 && (
                             <div className={styles.hint}>No one assigned</div>
                         )}
-
-                        {assignees.map(a => (
-                            <div key={a.userId} className={styles.assigneeRow}>
-                                <span>{a.userName}</span>
-                                <button
-                                    className={styles.removeBtn}
-                                    onClick={() => handleRemove(a.userId)}
-                                >
-                                    Remove
-                                </button>
-                            </div>
-                        ))}
-
-                        <select
-                            className={styles.statusSelect}
-                            onChange={e => handleAssign(e.target.value)}
-                            value=""
-                        >
-                            <option value="" disabled>Add member</option>
-                            {members
-                                .filter(m => !assignedIds.includes(m.userId))
-                                .map(m => (
-                                    <option key={m.userId} value={m.userId}>
-                                        {m.userName}
-                                    </option>
-                                ))}
-                        </select>
                     </div>
+
 
                     {currentTaskType?.fields?.length > 0 && (
                         <div className={styles.customFields}>

@@ -247,3 +247,60 @@ textarea {
     color: #f87171;
     cursor: pointer;
 }
+.avatarRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #374151;
+    background: #2d2d2d;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, transform 0.15s;
+}
+
+.avatar:hover {
+    background: #374151;
+    transform: scale(1.05);
+}
+
+.addAvatarWrapper {
+    position: relative;
+}
+
+.addAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px dashed #4b5563;
+    background: #1f2933;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.addAvatar:hover {
+    background: #2d2d2d;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.addSelect {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
