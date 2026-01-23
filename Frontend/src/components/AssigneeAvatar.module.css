@@ -1,0 +1,61 @@
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #374151;
+    background: #2d2d2d;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, transform 0.15s;
+}
+
+.avatar:hover {
+    background: #374151;
+    transform: scale(1.05);
+}
+
+.portalPopup {
+    position: absolute;
+    background: #1f2933;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    z-index: 9999;
+    min-width: 140px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.username {
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 0.25rem;
+    text-align: center;
+}
+
+.popupBtn {
+    background: #2d2d2d;
+    color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #374151;
+    border-radius: 6px;
+    padding: 0.3rem 0.5rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.popupBtn:hover:not(:disabled) {
+    background: #374151;
+}
+
+.popupBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

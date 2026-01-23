@@ -160,9 +160,7 @@
 }
 
 .customFields {
-    margin-top: 1.5rem;
     padding-top: 1rem;
-    border-top: 1px solid #374151;
 }
 
 .footer {
@@ -247,41 +245,36 @@ textarea {
     color: #f87171;
     cursor: pointer;
 }
-.avatarRow {
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.25rem;
+}
+
+.assigneesRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.assigneesList {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-top: 0.5rem;
+    flex-wrap: wrap;
 }
-
-.avatar {
+.addAssignee {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+.addAssigneeButton {
     width: 32px;
     height: 32px;
-    border-radius: 50%;
-    border: 1px solid #374151;
-    background: #2d2d2d;
-    color: rgba(255, 255, 255, 0.9);
-    font-weight: 600;
-    font-size: 0.85rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.15s, transform 0.15s;
-}
-
-.avatar:hover {
-    background: #374151;
-    transform: scale(1.05);
-}
-
-.addAvatarWrapper {
-    position: relative;
-}
-
-.addAvatar {
-    width: 32px;
-    height: 32px;
+    padding:0;
     border-radius: 50%;
     border: 1px dashed #4b5563;
     background: #1f2933;
@@ -293,14 +286,41 @@ textarea {
     justify-content: center;
 }
 
-.addAvatar:hover {
+.addAssigneeButton:hover {
     background: #2d2d2d;
     color: rgba(255, 255, 255, 0.9);
 }
 
-.addSelect {
+.addAssigneeSelect {
     position: absolute;
     inset: 0;
     opacity: 0;
+    cursor: pointer;
+}
+
+.dueDateField {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.2rem;
+}
+
+.dueDateLabel {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.dueDateInput {
+    background: #2d2d2d;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    padding: 0.35rem 0.5rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.8rem;
+}
+
+.dueDateInput::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.7;
     cursor: pointer;
 }

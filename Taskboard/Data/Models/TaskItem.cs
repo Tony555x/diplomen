@@ -26,5 +26,7 @@ namespace Taskboard.Data.Models
 
         public List<UserTask> UserTasks {get;set;} = new();
         public List<TaskFieldValue> FieldValues { get; set; } = new();
+
+        public DateTime? DueDate { get; set; }
     }
 }

@@ -349,10 +349,44 @@ namespace Taskboard.Controllers
 
             return Ok(new { success = true });
         }
-        public class AssignUserRequest
+        [HttpGet("{taskId}/due-date")]
+        public async Task<IActionResult> GetTaskDueDate(int projectId, int taskId)
         {
-            public string UserId { get; set; } = string.Empty;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var hasAccess = await _context.ProjectMembers
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+            if (!hasAccess) return Forbid();
+
+            var task = await _context.Tasks
+                .FirstOrDefaultAsync(t => t.Id == taskId && t.ProjectId == projectId);
+
+            if (task == null) return NotFound(new { success = false, message = "Task not found." });
+
+            return Ok(new { dueDate = task.DueDate });
         }
+        [HttpPut("{taskId}/due-date")]
+        public async Task<IActionResult> SetTaskDueDate(int projectId, int taskId, [FromBody] SetDueDateRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var hasAccess = await _context.ProjectMembers
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+            if (!hasAccess) return Forbid();
+
+            var task = await _context.Tasks
+                .FirstOrDefaultAsync(t => t.Id == taskId && t.ProjectId == projectId);
+
+            if (task == null) return NotFound(new { success = false, message = "Task not found." });
+
+            task.DueDate = request.DueDate;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, dueDate = task.DueDate });
+        }
+
 
 
     }
@@ -377,5 +411,13 @@ namespace Taskboard.Controllers
         public int? Id { get; set; }
         public int TaskFieldId { get; set; }
         public string Value { get; set; }
+    }
+    public class AssignUserRequest
+    {
+        public string UserId { get; set; } = string.Empty;
+    }
+    public class SetDueDateRequest
+    {
+        public DateTime? DueDate { get; set; }
     }
 }

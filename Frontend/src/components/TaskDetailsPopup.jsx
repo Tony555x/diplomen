@@ -3,6 +3,7 @@ import styles from "./TaskDetailsPopup.module.css";
 import CustomField from "./CustomField";
 import { fetchWithAuth } from "../auth";
 import { useParams } from "react-router-dom";
+import AssigneeAvatar from "./AssigneeAvatar"
 
 function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete }) {
     const { projectId } = useParams();
@@ -15,6 +16,7 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
     const [members, setMembers] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
     const [isEditingTitle, setIsEditingTitle] = useState(false);
+    const [dueDate, setDueDate] = useState(null);
 
     const titleInputRef = useRef(null);
     const currentTaskType = taskTypes.find(tt => tt.id === task.taskTypeId);
@@ -22,6 +24,7 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
     useEffect(() => {
         loadAssignees();
         loadMembers();
+        loadDueDate();
     }, []);
 
     useEffect(() => {
@@ -30,6 +33,24 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
             titleInputRef.current?.select();
         }
     }, [isEditingTitle]);
+
+    const loadDueDate = async () => {
+        const result = await fetchWithAuth(
+            `/api/projects/${projectId}/tasks/${task.id}/due-date`
+        );
+        setDueDate(result?.dueDate ?? null);
+    };
+    const handleDueDateChange = async value => {
+        setDueDate(value);
+
+        await fetchWithAuth(
+            `/api/projects/${projectId}/tasks/${task.id}/due-date`,
+            {
+                method: "PUT",
+                body: JSON.stringify({ dueDate: value })
+            }
+        );
+    };
 
     const loadAssignees = async () => {
         const result = await fetchWithAuth(
@@ -136,48 +157,60 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
                 </div>
 
                 <div className={styles.body}>
-                    <div className={styles.customFields}>
-                        <h3>Assignees</h3>
+                    <>
+                        <div className={styles.sectionHeader}>
+                            <h3>Assignees</h3>
 
-                        <div className={styles.avatarRow}>
-                            {assignees.map(a => (
-                                <button
-                                    key={a.userId}
-                                    className={styles.avatar}
-                                    title={`Remove ${a.userName}`}
-                                    onClick={() => handleRemove(a.userId)}
-                                >
-                                    {a.userName?.charAt(0).toUpperCase()}
-                                </button>
-                            ))}
+                            <h3>Due Date</h3>
+                        </div>
 
-                            <div className={styles.addAvatarWrapper}>
-                                <button className={styles.addAvatar}>+</button>
-                                <select
-                                    className={styles.addSelect}
-                                    onChange={e => handleAssign(e.target.value)}
-                                    value=""
-                                >
-                                    <option value="" disabled />
-                                    {members
-                                        .filter(m => !assignedIds.includes(m.userId))
-                                        .map(m => (
-                                            <option key={m.userId} value={m.userId}>
-                                                {m.userName}
-                                            </option>
-                                        ))}
-                                </select>
+                        <div className={styles.assigneesRow}>
+                            <div className={styles.assigneesList}>
+                                {assignees.map(a => (
+                                    <AssigneeAvatar
+                                        key={a.userId}
+                                        assignee={a}
+                                        onRemove={handleRemove}
+                                    />
+                                ))}
+
+                                <div className={styles.addAssignee}>
+                                    <button className={styles.addAssigneeButton}>+</button>
+                                    <select
+                                        className={styles.addAssigneeSelect}
+                                        onChange={e => handleAssign(e.target.value)}
+                                        value=""
+                                    >
+                                        <option value="" disabled />
+                                        {members
+                                            .filter(m => !assignedIds.includes(m.userId))
+                                            .map(m => (
+                                                <option key={m.userId} value={m.userId}>
+                                                    {m.userName}
+                                                </option>
+                                            ))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className={styles.dueDateField}>
+                                <input
+                                    type="date"
+                                    className={styles.dueDateInput}
+                                    value={dueDate ? dueDate.slice(0, 10) : ""}
+                                    onChange={e => handleDueDateChange(e.target.value || null)}
+                                />
                             </div>
                         </div>
 
                         {assignees.length === 0 && (
                             <div className={styles.hint}>No one assigned</div>
                         )}
-                    </div>
+                    </>
 
 
                     {currentTaskType?.fields?.length > 0 && (
-                        <div className={styles.customFields}>
+                        <>
                             <h3>{currentTaskType.name} Details</h3>
                             {currentTaskType.fields.map(field => {
                                 const value =
@@ -192,7 +225,7 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
                                     />
                                 );
                             })}
-                        </div>
+                        </>
                     )}
 
                     <label className={styles.checkbox}>
