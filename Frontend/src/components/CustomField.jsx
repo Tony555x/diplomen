@@ -49,7 +49,13 @@ function CustomField({ field, value, onChange }) {
             return (
                 <div className={styles.formGroup} key={field.id}>
                     <label>{field.name}</label>
-                    <input type="text" value={value} onChange={handleChange} />
+                    <textarea
+                        value={value}
+                        onChange={handleChange}
+                        rows={4}
+                        className={styles.textarea}
+                    />
+
                     {field.description && <small className={styles.hint}>{field.description}</small>}
                 </div>
             );

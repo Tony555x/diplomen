@@ -157,14 +157,41 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
                 </div>
 
                 <div className={styles.body}>
-                    <>
-                        <div className={styles.sectionHeader}>
+                    <div className={styles.leftColumn}>
+                        {currentTaskType?.fields?.length > 0 && (
+                            <>
+                                <h3>{currentTaskType.name} Details</h3>
+                                {currentTaskType.fields.map(field => {
+                                    const value =
+                                        fieldValues.find(fv => fv.taskFieldId === field.id)?.value ??
+                                        field.defaultValue ??
+                                        "";
+                                    return (
+                                        <CustomField
+                                            key={field.id}
+                                            field={field}
+                                            value={value}
+                                            onChange={handleFieldChange}
+                                        />
+                                    );
+                                })}
+                            </>
+                        )}
+
+                        <label className={styles.checkbox}>
+                            <input
+                                type="checkbox"
+                                checked={completed}
+                                onChange={e => setCompleted(e.target.checked)}
+                            />
+                            <span>Mark as completed</span>
+                        </label>
+                    </div>
+
+                    <div className={styles.rightColumn}>
+                        <div>
                             <h3>Assignees</h3>
 
-                            <h3>Due Date</h3>
-                        </div>
-
-                        <div className={styles.assigneesRow}>
                             <div className={styles.assigneesList}>
                                 {assignees.map(a => (
                                     <AssigneeAvatar
@@ -193,50 +220,24 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
                                 </div>
                             </div>
 
-                            <div className={styles.dueDateField}>
-                                <input
-                                    type="date"
-                                    className={styles.dueDateInput}
-                                    value={dueDate ? dueDate.slice(0, 10) : ""}
-                                    onChange={e => handleDueDateChange(e.target.value || null)}
-                                />
-                            </div>
+                            {assignees.length === 0 && (
+                                <div className={styles.hint}>No one assigned</div>
+                            )}
                         </div>
 
-                        {assignees.length === 0 && (
-                            <div className={styles.hint}>No one assigned</div>
-                        )}
-                    </>
+                        <div>
+                            <h3>Due Date</h3>
 
-
-                    {currentTaskType?.fields?.length > 0 && (
-                        <>
-                            <h3>{currentTaskType.name} Details</h3>
-                            {currentTaskType.fields.map(field => {
-                                const value =
-                                    fieldValues.find(fv => fv.taskFieldId === field.id)?.value ??
-                                    field.defaultValue ?? "";
-                                return (
-                                    <CustomField
-                                        key={field.id}
-                                        field={field}
-                                        value={value}
-                                        onChange={handleFieldChange}
-                                    />
-                                );
-                            })}
-                        </>
-                    )}
-
-                    <label className={styles.checkbox}>
-                        <input
-                            type="checkbox"
-                            checked={completed}
-                            onChange={e => setCompleted(e.target.checked)}
-                        />
-                        <span>Mark as completed</span>
-                    </label>
+                            <input
+                                type="date"
+                                className={styles.dueDateInput}
+                                value={dueDate ? dueDate.slice(0, 10) : ""}
+                                onChange={e => handleDueDateChange(e.target.value || null)}
+                            />
+                        </div>
+                    </div>
                 </div>
+
 
                 <div className={styles.footer}>
                     {onDelete && (

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Task from "./Task";
 import styles from "../pages/ProjectTasks.module.css";
 
@@ -6,6 +6,10 @@ function Column({ columnKey, label, tasks, taskTypes, addTask, onDragStart, onDr
   const [newTask, setNewTask] = useState("");
   const [selectedType, setSelectedType] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
+
+  useEffect(()=>{
+    if(taskTypes.length>0)setSelectedType(taskTypes[0].id)
+  })
 
   const handleAdd = () => {
     addTask(columnKey, newTask, selectedType || null);
