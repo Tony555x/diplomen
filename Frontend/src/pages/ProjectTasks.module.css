@@ -133,9 +133,8 @@ body {
 
 .add-task-row {
     display: grid;
-    grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto;
-    gap: 0.4rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
     margin-top: 0.8rem;
 }
 
@@ -204,4 +203,73 @@ body {
 
 .column-Done {
     border-top: 4px solid #10b981;
+}
+
+/* Add Task button (including the final "Add" in form) */
+.add-task-button {
+    background-color: #1e1e1e; /* column background */
+    border: 1px solid #374151;
+    color: rgba(255, 255, 255, 0.87); /* match task text */
+    font-size: 0.9rem;               /* match task font size */
+    line-height: 1.2;
+    text-align: center;
+    border-radius: 6px;
+    padding: 0.5rem 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%; /* full width inside grid column */
+    min-width: 0;
+}
+
+.add-task-button:hover {
+    background-color: #2a2a2a;
+    border-color: #3b82f6; /* subtle accent on hover */
+}
+
+/* Add Folder button */
+.add-folder-button {
+    background-color: #1e1e1e;
+    border: 1px solid #374151;
+    color: rgba(255, 255, 255, 0.87);
+    font-size: 0.9rem; /* match task font size */
+    line-height: 1.2;
+    text-align: center;
+    border-radius: 6px;
+    padding: 0.5rem 0;
+    cursor: not-allowed; /* placeholder, no action */
+    opacity: 0.5;
+    width: 100%; /* same width as Add Task */
+    min-width: 0;
+}
+/* Form row when adding a task */
+.add-task-row-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto auto; /* input, select, add, cancel */
+    gap: 0.5rem;
+    margin-top: 0.8rem;
+    align-items: center;
+}
+
+/* Cancel button */
+.cancel-task-button {
+    background-color: #1e1e1e;
+    border: 1px solid #374151;
+    color: rgba(255, 255, 255, 0.87);
+    font-size: 0.9rem;
+    line-height: 1;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 2rem;       /* square button */
+    height: 2rem;
+    padding: 0;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.cancel-task-button:hover {
+    background-color: #2a2a2a;
+    border-color: #f87171; /* subtle red hover accent */
 }
