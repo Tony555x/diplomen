@@ -84,7 +84,7 @@ function Column({
             className={styles["add-folder-button"]}
             disabled
           >
-            Add Folder
+            Add Collection
           </button>
         </div>
       ) : (
