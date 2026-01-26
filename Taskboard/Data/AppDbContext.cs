@@ -23,6 +23,7 @@ public class AppDbContext : IdentityDbContext<User>
 
 
     public DbSet<UserTask> UserTasks { get; set; }
+    public DbSet<Collection> Collections { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -91,5 +92,28 @@ public class AppDbContext : IdentityDbContext<User>
             .WithMany(tf => tf.FieldValues)
             .HasForeignKey(tfv => tfv.TaskFieldId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Collection Configurations
+        // Collection -> Project: Cascade (when project is deleted, delete all its collections)
+        builder.Entity<Collection>()
+            .HasOne(c => c.Project)
+            .WithMany()
+            .HasForeignKey(c => c.ProjectId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Collection -> ParentCollection: Restrict (prevent deleting parent if it has children)
+        builder.Entity<Collection>()
+            .HasOne(c => c.ParentCollection)
+            .WithMany(c => c.ChildCollections)
+            .HasForeignKey(c => c.ParentCollectionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // TaskItem -> Collection: Restrict (prevent cascade path conflicts)
+        // Tasks must be manually moved to null/root before deleting a collection
+        builder.Entity<TaskItem>()
+            .HasOne(t => t.Collection)
+            .WithMany(c => c.Tasks)
+            .HasForeignKey(t => t.CollectionId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

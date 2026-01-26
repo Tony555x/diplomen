@@ -28,5 +28,10 @@ namespace Taskboard.Data.Models
         public List<TaskFieldValue> FieldValues { get; set; } = new();
 
         public DateTime? DueDate { get; set; }
+
+        // Collection relationship (nullable - tasks can be at root level)
+        public int? CollectionId { get; set; }
+        [ForeignKey(nameof(CollectionId))]
+        public Collection? Collection { get; set; }
     }
 }

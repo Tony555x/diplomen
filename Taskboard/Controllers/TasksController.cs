@@ -45,6 +45,7 @@ namespace Taskboard.Controllers
                     t.Status,
                     t.Completed,
                     t.TaskTypeId,
+                    t.CollectionId,
                     FieldValues = t.FieldValues.Select(fv => new
                     {
                         fv.Id,
@@ -78,13 +79,26 @@ namespace Taskboard.Controllers
                 return BadRequest(new { success = false, message = "Task title is required." });
             }
 
+            // If collectionId is provided, verify it exists and belongs to the same project
+            if (request.CollectionId.HasValue)
+            {
+                var collectionExists = await _context.Collections
+                    .AnyAsync(c => c.Id == request.CollectionId.Value && c.ProjectId == projectId);
+
+                if (!collectionExists)
+                {
+                    return BadRequest(new { success = false, message = "Collection not found." });
+                }
+            }
+
             var task = new TaskItem
             {
                 Title = request.Title.Trim(),
                 ProjectId = projectId,
                 Status = request.Status ?? "To Do",
                 Completed = false,
-                TaskTypeId = request.TaskTypeId
+                TaskTypeId = request.TaskTypeId,
+                CollectionId = request.CollectionId
             };
 
             _context.Tasks.Add(task);
@@ -121,6 +135,7 @@ namespace Taskboard.Controllers
                     task.Status,
                     task.Completed,
                     task.TaskTypeId,
+                    task.CollectionId,
                     FieldValues = new List<object>()
                 }
             });
@@ -220,6 +235,26 @@ namespace Taskboard.Controllers
                         _context.TaskFieldValues.Add(newFieldValue);
                     }
                 }
+            }
+
+            // Update CollectionId if provided
+            if (request.CollectionId.HasValue)
+            {
+                // Verify collection exists and belongs to the same project
+                var collectionExists = await _context.Collections
+                    .AnyAsync(c => c.Id == request.CollectionId.Value && c.ProjectId == projectId);
+
+                if (!collectionExists)
+                {
+                    return BadRequest(new { success = false, message = "Collection not found." });
+                }
+
+                task.CollectionId = request.CollectionId.Value;
+            }
+            else if (request.CollectionId == null && request.CollectionId != task.CollectionId)
+            {
+                // Explicitly set to null if passed as null
+                task.CollectionId = null;
             }
 
             await _context.SaveChangesAsync();
@@ -396,6 +431,7 @@ namespace Taskboard.Controllers
         public string Title { get; set; } = string.Empty;
         public string? Status { get; set; }
         public int? TaskTypeId { get; set; }
+        public int? CollectionId { get; set; }
     }
 
     public class UpdateTaskStatusRequest
@@ -404,6 +440,7 @@ namespace Taskboard.Controllers
         public string? Title { get; set; }
         public bool? Completed { get; set; }
         public List<FieldValueRequest>? FieldValues { get; set; }
+        public int? CollectionId { get; set; }
     }
 
     public class FieldValueRequest

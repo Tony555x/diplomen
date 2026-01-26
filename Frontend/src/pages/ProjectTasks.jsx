@@ -8,12 +8,14 @@ import styles from "./ProjectTasks.module.css";
 function ProjectTasks() {
     const { projectId } = useParams();
     const [tasks, setTasks] = useState({ "To Do": [], "In Progress": [], "Done": [] });
+    const [collections, setCollections] = useState([]);
     const [taskTypes, setTaskTypes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [draggedTask, setDraggedTask] = useState(null);
     const [selectedTask, setSelectedTask] = useState(null);
-    
+    const [selectedCollectionId, setSelectedCollectionId] = useState(null);
+
 
     const columns = ["To Do", "In Progress", "Done"];
 
@@ -21,9 +23,10 @@ function ProjectTasks() {
         const loadData = async () => {
             try {
                 setLoading(true);
-                const [tasksData, taskTypesData] = await Promise.all([
+                const [tasksData, taskTypesData, collectionsData] = await Promise.all([
                     fetchWithAuth(`/api/projects/${projectId}/tasks`),
-                    fetchWithAuth(`/api/projects/${projectId}/task-types`)
+                    fetchWithAuth(`/api/projects/${projectId}/task-types`),
+                    fetchWithAuth(`/api/projects/${projectId}/collections`)
                 ]);
 
                 const organizedTasks = { "To Do": [], "In Progress": [], "Done": [] };
@@ -39,6 +42,7 @@ function ProjectTasks() {
 
                 setTasks(organizedTasks);
                 setTaskTypes(taskTypesData.taskTypes || []);
+                setCollections(collectionsData || []);
             } catch (err) {
                 console.error("Failed to load tasks data", err);
                 setError("Failed to load tasks.");
@@ -52,7 +56,7 @@ function ProjectTasks() {
         }
     }, [projectId]);
 
-    const addTask = async (column, taskText, taskTypeId) => {
+    const addTask = async (column, taskText, taskTypeId, collectionId) => {
         if (!taskText.trim()) return;
 
         try {
@@ -63,7 +67,8 @@ function ProjectTasks() {
                     body: {
                         title: taskText,
                         status: column,
-                        taskTypeId: taskTypeId || null
+                        taskTypeId: taskTypeId || null,
+                        collectionId: collectionId || null
                     }
                 }
             );
@@ -76,6 +81,30 @@ function ProjectTasks() {
             }
         } catch (err) {
             console.error("Failed to create task", err);
+        }
+    };
+
+    const addCollection = async (column, collectionName, parentCollectionId) => {
+        if (!collectionName.trim()) return;
+
+        try {
+            const result = await fetchWithAuth(
+                `/api/projects/${projectId}/collections`,
+                {
+                    method: "POST",
+                    body: {
+                        name: collectionName,
+                        status: column,
+                        parentCollectionId: parentCollectionId || null
+                    }
+                }
+            );
+
+            if (result.success) {
+                setCollections([...collections, result.collection]);
+            }
+        } catch (err) {
+            console.error("Failed to create collection", err);
         }
     };
 
@@ -197,8 +226,12 @@ function ProjectTasks() {
                             columnKey={columnName}
                             label={columnName}
                             tasks={tasks[columnName] || []}
+                            collections={collections}
                             taskTypes={taskTypes}
                             addTask={addTask}
+                            addCollection={addCollection}
+                            selectedCollectionId={selectedCollectionId}
+                            onSelectCollection={setSelectedCollectionId}
                             onDragStart={handleDragStart}
                             onDrop={handleDrop}
                             onTaskClick={handleTaskClick}
