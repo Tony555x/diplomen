@@ -1,53 +1,82 @@
 import React, { useState } from "react";
 import Task from "./Task";
-import styles from "../pages/ProjectTasks.module.css";
+import styles from "./Collection.module.css";
 
 function Collection({
     collection,
     tasks,
     collections,
     taskTypes,
-    isExpanded,
-    isSelected,
-    onToggleExpand,
-    onSelect,
+    selectedCollectionId,
+    onSelectCollection,
     onDragStart,
-    onTaskClick,
-    selectedCollectionId, // Added prop
-    onSelectCollection // Added prop
+    onTaskClick
 }) {
-    const childCollections = collections.filter(c => c.parentCollectionId === collection.id);
-    const childTasks = tasks.filter(t => t.collectionId === collection.id);
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    const isSelected = selectedCollectionId === collection.id;
+    const childCollections = collections.filter(
+        c => c.parentCollectionId === collection.id
+    );
+    const childTasks = tasks.filter(
+        t => t.collectionId === collection.id
+    );
+
+    const handleSelect = () => {
+        if (!isSelected && !isExpanded) {
+            onSelectCollection(collection.id);
+            setIsExpanded(true);
+            return;
+        }
+        if (!isSelected && isExpanded) {
+            onSelectCollection(collection.id);
+            return;
+        }
+        if (isSelected && isExpanded) {
+            onSelectCollection(null);
+            setIsExpanded(false);
+            return;
+        }
+        if (isSelected && !isExpanded) {
+            setIsExpanded(true);
+        }
+    };
 
     return (
         <li className={styles.collection}>
             <div
-                className={`${styles.collectionHeader} ${isSelected ? styles.selected : ""}`}
-                onClick={onSelect}
+                className={`${styles.collectionHeader} ${isSelected ? styles.selected : ""
+                    }`}
+                onClick={handleSelect}
             >
                 <button
                     className={styles.expandButton}
                     onClick={(e) => {
                         e.stopPropagation();
-                        onToggleExpand();
+                        setIsExpanded(prev => !prev);
                     }}
                 >
                     {isExpanded ? "▼" : "▶"}
                 </button>
-                <span className={styles.collectionName}>{collection.name}</span>
+                <span className={styles.collectionName}>
+                    {collection.name}
+                </span>
             </div>
 
             {isExpanded && (
-                <ul className={styles.collectionContent}>
-                    {childCollections.map((childCollection) => (
-                        <CollectionWrapper
-                            key={`collection-${childCollection.id}`}
-                            collection={childCollection}
+                <div
+                    className={styles.collectionContent}
+                    style={{ marginLeft: "0.25rem" }}
+                >
+                    {childCollections.map(child => (
+                        <Collection
+                            key={`collection-${child.id}`}
+                            collection={child}
                             tasks={tasks}
                             collections={collections}
                             taskTypes={taskTypes}
-                            selectedCollectionId={selectedCollectionId} // Passed down
-                            onSelectCollection={onSelectCollection} // Passed down
+                            selectedCollectionId={selectedCollectionId}
+                            onSelectCollection={onSelectCollection}
                             onDragStart={onDragStart}
                             onTaskClick={onTaskClick}
                         />
@@ -63,54 +92,10 @@ function Collection({
                             onClick={onTaskClick}
                         />
                     ))}
-                </ul>
+                </div>
             )}
         </li>
     );
 }
 
-// Wrapper component to manage expand/select state
-function CollectionWrapper({
-    collection,
-    tasks,
-    collections,
-    taskTypes,
-    selectedCollectionId, // Added prop
-    onSelectCollection, // Added prop
-    onDragStart,
-    onTaskClick
-}) {
-    const [isExpanded, setIsExpanded] = useState(true);
-    const isSelected = selectedCollectionId === collection.id; // Derived from prop
-
-    const handleSelect = () => {
-        if (isSelected) {
-            onSelectCollection(null); // Deselect if already selected
-        } else {
-            onSelectCollection(collection.id);
-        }
-    };
-
-    return (
-        <Collection
-            collection={{
-                ...collection,
-                selectedCollectionId, // Passed to Collection
-                onSelectCollection // Passed to Collection
-            }}
-            tasks={tasks}
-            collections={collections}
-            taskTypes={taskTypes}
-            isExpanded={isExpanded}
-            isSelected={isSelected}
-            onToggleExpand={() => setIsExpanded(!isExpanded)}
-            onSelect={handleSelect} // Updated handler
-            onDragStart={onDragStart}
-            onTaskClick={onTaskClick}
-            selectedCollectionId={selectedCollectionId} // Passed to Collection
-            onSelectCollection={onSelectCollection} // Passed to Collection
-        />
-    );
-}
-
-export default CollectionWrapper;
+export default Collection;

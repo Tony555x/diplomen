@@ -7,15 +7,16 @@ import styles from "./ProjectTasks.module.css";
 
 function ProjectTasks() {
     const { projectId } = useParams();
-    const [tasks, setTasks] = useState({ "To Do": [], "In Progress": [], "Done": [] });
+
+    const [tasks, setTasks] = useState([]);
     const [collections, setCollections] = useState([]);
     const [taskTypes, setTaskTypes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [draggedTask, setDraggedTask] = useState(null);
+
+    const [draggedTaskId, setDraggedTaskId] = useState(null);
     const [selectedTask, setSelectedTask] = useState(null);
     const [selectedCollectionId, setSelectedCollectionId] = useState(null);
-
 
     const columns = ["To Do", "In Progress", "Done"];
 
@@ -23,41 +24,30 @@ function ProjectTasks() {
         const loadData = async () => {
             try {
                 setLoading(true);
-                const [tasksData, taskTypesData, collectionsData] = await Promise.all([
-                    fetchWithAuth(`/api/projects/${projectId}/tasks`),
-                    fetchWithAuth(`/api/projects/${projectId}/task-types`),
-                    fetchWithAuth(`/api/projects/${projectId}/collections`)
-                ]);
 
-                const organizedTasks = { "To Do": [], "In Progress": [], "Done": [] };
+                const [tasksData, taskTypesData, collectionsData] =
+                    await Promise.all([
+                        fetchWithAuth(`/api/projects/${projectId}/tasks`),
+                        fetchWithAuth(`/api/projects/${projectId}/task-types`),
+                        fetchWithAuth(`/api/projects/${projectId}/collections`)
+                    ]);
 
-                tasksData.forEach(t => {
-                    let status = t.status;
-
-                    if (!organizedTasks[status]) {
-                        organizedTasks[status] = [];
-                    }
-                    organizedTasks[status].push(t);
-                });
-
-                setTasks(organizedTasks);
+                setTasks(tasksData || []);
                 setTaskTypes(taskTypesData.taskTypes || []);
                 setCollections(collectionsData || []);
             } catch (err) {
-                console.error("Failed to load tasks data", err);
+                console.error(err);
                 setError("Failed to load tasks.");
             } finally {
                 setLoading(false);
             }
         };
 
-        if (projectId) {
-            loadData();
-        }
+        if (projectId) loadData();
     }, [projectId]);
 
-    const addTask = async (column, taskText, taskTypeId, collectionId) => {
-        if (!taskText.trim()) return;
+    const addTask = async (status, title, taskTypeId, collectionId) => {
+        if (!title.trim()) return;
 
         try {
             const result = await fetchWithAuth(
@@ -65,8 +55,8 @@ function ProjectTasks() {
                 {
                     method: "POST",
                     body: {
-                        title: taskText,
-                        status: column,
+                        title,
+                        status,
                         taskTypeId: taskTypeId || null,
                         collectionId: collectionId || null
                     }
@@ -74,18 +64,15 @@ function ProjectTasks() {
             );
 
             if (result.success) {
-                setTasks({
-                    ...tasks,
-                    [column]: [...(tasks[column] || []), result.task]
-                });
+                setTasks(prev => [...prev, result.task]);
             }
         } catch (err) {
-            console.error("Failed to create task", err);
+            console.error(err);
         }
     };
 
-    const addCollection = async (column, collectionName, parentCollectionId) => {
-        if (!collectionName.trim()) return;
+    const addCollection = async (status, name, parentCollectionId) => {
+        if (!name.trim()) return;
 
         try {
             const result = await fetchWithAuth(
@@ -93,125 +80,96 @@ function ProjectTasks() {
                 {
                     method: "POST",
                     body: {
-                        name: collectionName,
-                        status: column,
+                        name,
+                        status,
                         parentCollectionId: parentCollectionId || null
                     }
                 }
             );
 
             if (result.success) {
-                setCollections([...collections, result.collection]);
+                setCollections(prev => [...prev, result.collection]);
             }
         } catch (err) {
-            console.error("Failed to create collection", err);
+            console.error(err);
         }
     };
 
-    const handleDragStart = (fromColumn, index) => {
-        setDraggedTask({ fromColumn, index });
+    const handleDragStart = (taskId) => {
+        setDraggedTaskId(taskId);
     };
 
-    const handleDrop = async (toColumn) => {
-        if (!draggedTask) return;
+    const handleDrop = async (status) => {
+        if (!draggedTaskId) return;
 
-        const { fromColumn, index } = draggedTask;
-
-        if (fromColumn === toColumn) {
-            setDraggedTask(null);
+        const task = tasks.find(t => t.id === draggedTaskId);
+        if (!task || task.status === status) {
+            setDraggedTaskId(null);
             return;
         }
 
-        const task = tasks[fromColumn][index];
-        const updatedFrom = tasks[fromColumn].filter((_, i) => i !== index);
-        const updatedTo = [...(tasks[toColumn] || []), task];
+        const updatedTask = { ...task, status };
 
-        setTasks({
-            ...tasks,
-            [fromColumn]: updatedFrom,
-            [toColumn]: updatedTo
-        });
+        setTasks(prev =>
+            prev.map(t => (t.id === task.id ? updatedTask : t))
+        );
 
-        setDraggedTask(null);
+        setDraggedTaskId(null);
 
         try {
-            const res = await fetchWithAuth(`/api/projects/${projectId}/tasks/${task.id}`, {
-                method: "PATCH",
-                body: {
-                    status: toColumn
+            await fetchWithAuth(
+                `/api/projects/${projectId}/tasks/${task.id}`,
+                {
+                    method: "PATCH",
+                    body: { status }
                 }
-            });
+            );
         } catch (err) {
-            console.error("Failed to update task status", err);
-            setTasks({
-                ...tasks,
-                [fromColumn]: [...updatedFrom, task],
-                [toColumn]: updatedTo.filter(t => t.id !== task.id)
-            });
+            console.error(err);
+            setTasks(prev =>
+                prev.map(t => (t.id === task.id ? task : t))
+            );
         }
-    };
-
-    const handleTaskClick = (task) => {
-        setSelectedTask(task);
     };
 
     const handleTaskUpdate = async (updatedTask) => {
         try {
-            console.log(updatedTask);
-            await fetchWithAuth(`/api/projects/${projectId}/tasks/${updatedTask.id}`, {
-                method: "PATCH",
-                body: {
-                    status: updatedTask.status,
-                    title: updatedTask.title,
-                    completed: updatedTask.completed,
-                    fieldValues: updatedTask.fieldValues
-                }
-            });
-
-            const newTasks = { "To Do": [], "In Progress": [], "Done": [] };
-
-            Object.keys(tasks).forEach(column => {
-                tasks[column].forEach(task => {
-                    if (task.id === updatedTask.id) {
-                        newTasks[updatedTask.status].push(updatedTask);
-                    } else {
-                        newTasks[column].push(task);
+            await fetchWithAuth(
+                `/api/projects/${projectId}/tasks/${updatedTask.id}`,
+                {
+                    method: "PATCH",
+                    body: {
+                        status: updatedTask.status,
+                        title: updatedTask.title,
+                        completed: updatedTask.completed,
+                        fieldValues: updatedTask.fieldValues
                     }
-                });
-            });
+                }
+            );
 
-            setTasks(newTasks);
+            setTasks(prev =>
+                prev.map(t => (t.id === updatedTask.id ? updatedTask : t))
+            );
         } catch (err) {
-            console.error("Failed to update task", err);
+            console.error(err);
         }
     };
-    const handleTaskDelete = async (task) => {
-        try {
-            if (!window.confirm("Delete this task? This cannot be undone.")) return;
 
+    const handleTaskDelete = async (task) => {
+        if (!window.confirm("Delete this task? This cannot be undone.")) return;
+
+        try {
             await fetchWithAuth(
                 `/api/projects/${projectId}/tasks/${task.id}`,
                 { method: "DELETE" }
             );
 
-            setTasks(prev => {
-                const next = { "To Do": [], "In Progress": [], "Done": [] };
-
-                Object.keys(prev).forEach(column => {
-                    next[column] = prev[column].filter(t => t.id !== task.id);
-                });
-
-                return next;
-            });
-
+            setTasks(prev => prev.filter(t => t.id !== task.id));
             setSelectedTask(null);
         } catch (err) {
-            console.error("Failed to delete task", err);
+            console.error(err);
         }
     };
-
-
-
 
     if (loading) return <div className="loading">Loading tasks...</div>;
     if (error) return <div className="error">{error}</div>;
@@ -220,12 +178,12 @@ function ProjectTasks() {
         <>
             <div className={styles.projectTasks}>
                 <div className={styles.board}>
-                    {columns.map((columnName) => (
+                    {columns.map(column => (
                         <Column
-                            key={columnName}
-                            columnKey={columnName}
-                            label={columnName}
-                            tasks={tasks[columnName] || []}
+                            key={column}
+                            columnKey={column}
+                            label={column}
+                            tasks={tasks}
                             collections={collections}
                             taskTypes={taskTypes}
                             addTask={addTask}
@@ -234,11 +192,12 @@ function ProjectTasks() {
                             onSelectCollection={setSelectedCollectionId}
                             onDragStart={handleDragStart}
                             onDrop={handleDrop}
-                            onTaskClick={handleTaskClick}
+                            onTaskClick={setSelectedTask}
                         />
                     ))}
                 </div>
             </div>
+
             {selectedTask && (
                 <TaskDetailsPopup
                     task={selectedTask}

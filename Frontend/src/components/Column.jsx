@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Task from "./Task";
-import CollectionWrapper from "./Collection";
+import Collection from "./Collection";
 import styles from "../pages/ProjectTasks.module.css";
 
 function Column({
@@ -30,79 +30,65 @@ function Column({
     }
   }, [taskTypes, selectedType]);
 
-  const handleAdd = () => {
-    if (!newTask.trim()) return;
-    addTask(columnKey, newTask, selectedType || null, selectedCollectionId);
+  const rootCollections = collections.filter(
+    c => c.status === columnKey && !c.parentCollectionId
+  );
+
+  const rootTasks = tasks.filter(
+    t => t.status === columnKey && !t.collectionId
+  );
+
+  const handleAddTask = () => {
+    addTask(columnKey, newTask, selectedType, selectedCollectionId);
     setNewTask("");
-    setSelectedType("");
     setIsAddingTask(false);
   };
 
   const handleAddCollection = () => {
-    if (!newCollectionName.trim()) return;
     addCollection(columnKey, newCollectionName, selectedCollectionId);
     setNewCollectionName("");
     setIsAddingCollection(false);
   };
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setIsDragOver(false);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    onDrop(columnKey);
-  };
-
   return (
     <div
-      className={`${styles.column} ${styles[`column-${columnKey.replace(/\s+/g, "")}`]
-        } ${isDragOver ? styles.dragOver : ""}`}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
+      className={`${styles.column} ${isDragOver ? styles.dragOver : ""}`}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setIsDragOver(true);
+      }}
+      onDragLeave={() => setIsDragOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setIsDragOver(false);
+        onDrop(columnKey);
+      }}
     >
       <h2>{label}</h2>
 
       <ul>
-        {/* Render root-level collections for this column */}
-        {collections
-          .filter(c => c.status === columnKey && !c.parentCollectionId)
-          .map((collection) => (
-            <CollectionWrapper
-              key={`collection-${collection.id}`}
-              collection={collection}
-              tasks={tasks}
-              collections={collections}
-              taskTypes={taskTypes}
-              selectedCollectionId={selectedCollectionId}
-              onSelectCollection={onSelectCollection}
-              onDragStart={onDragStart}
-              onTaskClick={onTaskClick}
-            />
-          ))}
+        {rootCollections.map(collection => (
+          <Collection
+            key={collection.id}
+            collection={collection}
+            tasks={tasks}
+            collections={collections}
+            taskTypes={taskTypes}
+            selectedCollectionId={selectedCollectionId}
+            onSelectCollection={onSelectCollection}
+            onDragStart={onDragStart}
+            onTaskClick={onTaskClick}
+          />
+        ))}
 
-        {/* Render root-level tasks for this column */}
-        {tasks
-          .filter(t => t.status === columnKey && !t.collectionId)
-          .map((task, index) => (
-            <Task
-              key={`task-${task.id}`}
-              task={task}
-              index={index}
-              columnKey={columnKey}
-              onDragStart={onDragStart}
-              onClick={onTaskClick}
-            />
-          ))}
+        {rootTasks.map(task => (
+          <Task
+            key={task.id}
+            task={task}
+            onDragStart={() => onDragStart(task.id)}
+            onClick={() => onTaskClick(task)}
+          />
+        ))}
       </ul>
 
       {!isAddingTask && !isAddingCollection ? (
@@ -125,20 +111,19 @@ function Column({
         <div className={styles["add-task-row-form"]}>
           <input
             className={styles["add-task-input"]}
-            type="text"
-            placeholder="Add new task..."
             value={newTask}
-            onChange={(e) => setNewTask(e.target.value)}
+            onChange={e => setNewTask(e.target.value)}
+            placeholder="Add new task..."
             autoFocus
           />
 
           <select
             className={styles["add-task-type"]}
             value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value)}
+            onChange={e => setSelectedType(e.target.value)}
           >
             <option value="">No type</option>
-            {taskTypes.map((tt) => (
+            {taskTypes.map(tt => (
               <option key={tt.id} value={tt.id}>
                 {tt.name}
               </option>
@@ -147,7 +132,7 @@ function Column({
 
           <button
             className={styles["add-task-button"]}
-            onClick={handleAdd}
+            onClick={handleAddTask}
           >
             Add
           </button>
@@ -163,10 +148,9 @@ function Column({
         <div className={styles["add-task-row-form"]}>
           <input
             className={styles["add-task-input"]}
-            type="text"
-            placeholder="Collection name..."
             value={newCollectionName}
-            onChange={(e) => setNewCollectionName(e.target.value)}
+            onChange={e => setNewCollectionName(e.target.value)}
+            placeholder="Collection name..."
             autoFocus
           />
 
@@ -185,7 +169,6 @@ function Column({
           </button>
         </div>
       )}
-
     </div>
   );
 }
