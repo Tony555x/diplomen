@@ -59,6 +59,7 @@ function Column({
 
   const handleDrop = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragOver(false);
     onDrop(columnKey);
   };
@@ -84,8 +85,10 @@ function Column({
             selectedCollectionId={selectedCollectionId}
             onSelectCollection={onSelectCollection}
             onDragStart={onDragStart}
+            onDrop={onDrop}
             onTaskClick={onTaskClick}
           />
+
         ))}
 
         {rootTasks.map(t => (

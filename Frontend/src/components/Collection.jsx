@@ -10,9 +10,11 @@ function Collection({
     selectedCollectionId,
     onSelectCollection,
     onDragStart,
-    onTaskClick
+    onTaskClick,
+    onDrop // add this prop
 }) {
     const [isExpanded, setIsExpanded] = useState(false);
+    const [isDragOver, setIsDragOver] = useState(false);
     const isSelected = selectedCollectionId === collection.id;
 
     const childCollections = collections.filter(
@@ -40,8 +42,28 @@ function Collection({
         }
     };
 
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragOver(true);
+    };
+
+    const handleDragLeave = () => setIsDragOver(false);
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragOver(false);
+        onDrop(collection.id);
+    };
+
     return (
-        <li className={styles.collection}>
+        <li
+            className={`${styles.collection} ${isDragOver ? styles.dragOver : ""}`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+        >
             <div
                 className={`${styles.collectionHeader} ${isSelected ? styles.selected : ""}`}
                 onClick={handleSelect}
@@ -59,7 +81,7 @@ function Collection({
             </div>
 
             {isExpanded && (
-                <ul className={styles.collectionContent} style={{ marginLeft: "0.25rem" }}>
+                <ul className={styles.collectionContent}>
                     {childCollections.map(child => (
                         <Collection
                             key={`collection-${child.id}`}
@@ -71,6 +93,7 @@ function Collection({
                             onSelectCollection={onSelectCollection}
                             onDragStart={onDragStart}
                             onTaskClick={onTaskClick}
+                            onDrop={onDrop} // pass it down
                         />
                     ))}
 

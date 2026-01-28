@@ -99,39 +99,55 @@ function ProjectTasks() {
         setDraggedTaskId(task.id);
     };
 
-    const handleDrop = async (status) => {
+    const handleDrop = async (target) => {
         if (!draggedTaskId) return;
 
         const task = tasks.find(t => t.id === draggedTaskId);
-        if (!task || task.status === status) {
+        if (!task) {
             setDraggedTaskId(null);
             return;
         }
 
-        const updatedTask = { ...task, status };
+        // Determine new status and collectionId
+        let updatedTask = { ...task };
+        if (typeof target === "string") {
+            // Dropped on a column
+            if (task.status === target && !task.collectionId) {
+                setDraggedTaskId(null);
+                return;
+            }
+            updatedTask.status = target;
+            updatedTask.collectionId = null;
+        } else {
+            // Dropped on a collection
+            if (task.collectionId === target) {
+                setDraggedTaskId(null);
+                return;
+            }
+            const collection = collections.find(c => c.id === target);
+            updatedTask.status = collection.status;
+            updatedTask.collectionId = target;
+            console.log(target)
+        }
 
-        setTasks(prev =>
-            prev.map(t => (t.id === task.id ? updatedTask : t))
-        );
-
+        // Optimistically update UI
+        setTasks(prev => prev.map(t => (t.id === task.id ? updatedTask : t)));
         setDraggedTaskId(null);
 
         try {
-            await fetchWithAuth(
-                `/api/projects/${projectId}/tasks/${task.id}`,
-                {
-                    method: "PATCH",
-                    body: { status }
+            await fetchWithAuth(`/api/projects/${projectId}/tasks/${task.id}`, {
+                method: "PATCH",
+                body: {
+                    status: updatedTask.status,
+                    collectionId: updatedTask.collectionId
                 }
-            );
+            });
         } catch (err) {
             console.error(err);
-            setTasks(prev =>
-                prev.map(t => (t.id === task.id ? task : t))
-            );
+            // Revert if request fails
+            setTasks(prev => prev.map(t => (t.id === task.id ? task : t)));
         }
     };
-
     const handleTaskUpdate = async (updatedTask) => {
         try {
             await fetchWithAuth(
@@ -205,6 +221,7 @@ function ProjectTasks() {
                     onClose={() => setSelectedTask(null)}
                     onUpdate={handleTaskUpdate}
                     onDelete={handleTaskDelete}
+                    onDrop={handleDrop}
                 />
             )}
         </>
