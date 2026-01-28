@@ -13,14 +13,12 @@ function Collection({
     onTaskClick
 }) {
     const [isExpanded, setIsExpanded] = useState(false);
-
     const isSelected = selectedCollectionId === collection.id;
+
     const childCollections = collections.filter(
         c => c.parentCollectionId === collection.id
     );
-    const childTasks = tasks.filter(
-        t => t.collectionId === collection.id
-    );
+    const childTasks = tasks.filter(t => t.collectionId === collection.id);
 
     const handleSelect = () => {
         if (!isSelected && !isExpanded) {
@@ -45,8 +43,7 @@ function Collection({
     return (
         <li className={styles.collection}>
             <div
-                className={`${styles.collectionHeader} ${isSelected ? styles.selected : ""
-                    }`}
+                className={`${styles.collectionHeader} ${isSelected ? styles.selected : ""}`}
                 onClick={handleSelect}
             >
                 <button
@@ -58,16 +55,11 @@ function Collection({
                 >
                     {isExpanded ? "▼" : "▶"}
                 </button>
-                <span className={styles.collectionName}>
-                    {collection.name}
-                </span>
+                <span className={styles.collectionName}>{collection.name}</span>
             </div>
 
             {isExpanded && (
-                <div
-                    className={styles.collectionContent}
-                    style={{ marginLeft: "0.25rem" }}
-                >
+                <ul className={styles.collectionContent} style={{ marginLeft: "0.25rem" }}>
                     {childCollections.map(child => (
                         <Collection
                             key={`collection-${child.id}`}
@@ -92,7 +84,7 @@ function Collection({
                             onClick={onTaskClick}
                         />
                     ))}
-                </div>
+                </ul>
             )}
         </li>
     );

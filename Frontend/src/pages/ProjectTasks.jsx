@@ -95,8 +95,8 @@ function ProjectTasks() {
         }
     };
 
-    const handleDragStart = (taskId) => {
-        setDraggedTaskId(taskId);
+    const handleDragStart = (task) => {
+        setDraggedTaskId(task.id);
     };
 
     const handleDrop = async (status) => {
