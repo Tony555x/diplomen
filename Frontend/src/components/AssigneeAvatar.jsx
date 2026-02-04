@@ -49,7 +49,6 @@ function AssigneeAvatar({ assignee, onRemove }) {
             </button>
             <button
                 onClick={() => {
-                    console.log("w")
                     onRemove(assignee.userId);
                     setOpen(false);
                 }}

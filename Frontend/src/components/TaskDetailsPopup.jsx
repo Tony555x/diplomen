@@ -82,7 +82,6 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
     };
 
     const handleRemove = async userId => {
-        console.log("t");
         await fetchWithAuth(
             `/api/projects/${projectId}/tasks/${task.id}/assignees/${userId}`,
             { method: "DELETE" }
