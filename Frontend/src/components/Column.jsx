@@ -11,7 +11,7 @@ function Column({
   taskTypes,
   addTask,
   addCollection,
-  selectedCollectionId,
+  selectedCollectionKey,
   onSelectCollection,
   onDragStart,
   onDrop,
@@ -36,8 +36,9 @@ function Column({
     }
   }, [taskTypes, selectedType]);
 
+  // Show all root collections in every column (collections are now column-agnostic)
   const rootCollections = collections.filter(
-    c => c.status === columnKey && !c.parentCollectionId
+    c => !c.parentCollectionId
   );
 
   const rootTasks = tasks.filter(
@@ -45,13 +46,13 @@ function Column({
   );
 
   const handleAddTask = () => {
-    addTask(columnKey, newTask, selectedType, selectedCollectionId);
+    addTask(columnKey, newTask, selectedType, selectedCollectionKey);
     setNewTask("");
     setIsAddingTask(false);
   };
 
   const handleAddCollection = () => {
-    addCollection(columnKey, newCollectionName, selectedCollectionId);
+    addCollection(newCollectionName, selectedCollectionKey);
     setNewCollectionName("");
     setIsAddingCollection(false);
   };
@@ -152,10 +153,11 @@ function Column({
           <Collection
             key={c.id}
             collection={c}
+            columnKey={columnKey}
             tasks={tasks}
             collections={collections}
             taskTypes={taskTypes}
-            selectedCollectionId={selectedCollectionId}
+            selectedCollectionKey={selectedCollectionKey}
             onSelectCollection={onSelectCollection}
             onDragStart={onDragStart}
             onDrop={onDrop}

@@ -40,7 +40,6 @@ namespace Taskboard.Controllers.Projects
                 {
                     c.Id,
                     c.Name,
-                    c.Status,
                     c.ParentCollectionId,
                     c.CreatedAt
                 })
@@ -85,7 +84,6 @@ namespace Taskboard.Controllers.Projects
             {
                 Name = request.Name.Trim(),
                 ProjectId = projectId,
-                Status = request.Status ?? "To Do",
                 ParentCollectionId = request.ParentCollectionId,
                 CreatedAt = DateTime.UtcNow
             };
@@ -100,7 +98,6 @@ namespace Taskboard.Controllers.Projects
                 {
                     collection.Id,
                     collection.Name,
-                    collection.Status,
                     collection.ParentCollectionId,
                     collection.CreatedAt
                 }
@@ -144,7 +141,6 @@ namespace Taskboard.Controllers.Projects
                 {
                     collection.Id,
                     collection.Name,
-                    collection.Status,
                     collection.ParentCollectionId
                 }
             });
@@ -202,7 +198,6 @@ namespace Taskboard.Controllers.Projects
     public class CreateCollectionRequest
     {
         public string Name { get; set; } = string.Empty;
-        public string? Status { get; set; }
         public int? ParentCollectionId { get; set; }
     }
 

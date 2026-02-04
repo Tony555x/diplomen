@@ -16,7 +16,7 @@ function ProjectTasks() {
 
     const [draggedTaskId, setDraggedTaskId] = useState(null);
     const [selectedTask, setSelectedTask] = useState(null);
-    const [selectedCollectionId, setSelectedCollectionId] = useState(null);
+    const [selectedCollectionKey, setSelectedCollectionKey] = useState(null); // Format: "collectionId-columnKey"
 
     const columns = ["To Do", "In Progress", "Done"];
 
@@ -46,8 +46,15 @@ function ProjectTasks() {
         if (projectId) loadData();
     }, [projectId]);
 
-    const addTask = async (status, title, taskTypeId, collectionId) => {
+    const addTask = async (status, title, taskTypeId, selectedCollectionKey) => {
         if (!title.trim()) return;
+
+        // Extract collectionId from selectedCollectionKey (format: "collectionId-columnKey")
+        let collectionId = null;
+        if (selectedCollectionKey) {
+            const parts = selectedCollectionKey.split('-');
+            collectionId = parseInt(parts[0]);
+        }
 
         try {
             const result = await fetchWithAuth(
@@ -58,7 +65,7 @@ function ProjectTasks() {
                         title,
                         status,
                         taskTypeId: taskTypeId || null,
-                        collectionId: collectionId || null
+                        collectionId: collectionId
                     }
                 }
             );
@@ -71,8 +78,15 @@ function ProjectTasks() {
         }
     };
 
-    const addCollection = async (status, name, parentCollectionId) => {
+    const addCollection = async (name, selectedCollectionKey) => {
         if (!name.trim()) return;
+
+        // Extract parentCollectionId from selectedCollectionKey
+        let parentCollectionId = null;
+        if (selectedCollectionKey) {
+            const parts = selectedCollectionKey.split('-');
+            parentCollectionId = parseInt(parts[0]);
+        }
 
         try {
             const result = await fetchWithAuth(
@@ -81,8 +95,7 @@ function ProjectTasks() {
                     method: "POST",
                     body: {
                         name,
-                        status,
-                        parentCollectionId: parentCollectionId || null
+                        parentCollectionId: parentCollectionId
                     }
                 }
             );
@@ -111,23 +124,24 @@ function ProjectTasks() {
         // Determine new status and collectionId
         let updatedTask = { ...task };
         if (typeof target === "string") {
-            // Dropped on a column
+            // Dropped on a column (not in a collection)
             if (task.status === target && !task.collectionId) {
+                // Already in this column and not in a collection
                 setDraggedTaskId(null);
                 return;
             }
             updatedTask.status = target;
-            updatedTask.collectionId = null;
+            updatedTask.collectionId = null; // Remove from collection when dropped on column
         } else {
             // Dropped on a collection
-            if (task.collectionId === target) {
+            if (task.collectionId === target && task.status === updatedTask.status) {
+                // Already in this collection in this column
                 setDraggedTaskId(null);
                 return;
             }
-            const collection = collections.find(c => c.id === target);
-            updatedTask.status = collection.status;
+            // When dropping into a collection, keep the task's current status
+            // (the collection instance in each column shows tasks with that column's status)
             updatedTask.collectionId = target;
-            console.log(target)
         }
 
         // Optimistically update UI
@@ -253,8 +267,8 @@ function ProjectTasks() {
                             taskTypes={taskTypes}
                             addTask={addTask}
                             addCollection={addCollection}
-                            selectedCollectionId={selectedCollectionId}
-                            onSelectCollection={setSelectedCollectionId}
+                            selectedCollectionKey={selectedCollectionKey}
+                            onSelectCollection={setSelectedCollectionKey}
                             onDragStart={handleDragStart}
                             onDrop={handleDrop}
                             onTaskClick={setSelectedTask}

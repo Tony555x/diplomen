@@ -4,10 +4,11 @@ import styles from "./Collection.module.css";
 
 function Collection({
     collection,
+    columnKey,
     tasks,
     collections,
     taskTypes,
-    selectedCollectionId,
+    selectedCollectionKey,
     onSelectCollection,
     onDragStart,
     onTaskClick,
@@ -26,12 +27,15 @@ function Collection({
 
     const inputRef = useRef(null);
 
-    const isSelected = selectedCollectionId === collection.id;
+    // Check if THIS specific instance (collection + column) is selected
+    const collectionKey = `${collection.id}-${columnKey}`;
+    const isSelected = selectedCollectionKey === collectionKey;
 
     const childCollections = collections.filter(
         c => c.parentCollectionId === collection.id
     );
-    const childTasks = tasks.filter(t => t.collectionId === collection.id);
+    // Only show tasks that match this column's status
+    const childTasks = tasks.filter(t => t.collectionId === collection.id && t.status === columnKey);
 
     useEffect(() => {
         if (isRenaming && inputRef.current) {
@@ -80,7 +84,7 @@ function Collection({
             >
                 <div
                     className={`${styles.collectionHeader} ${isSelected ? styles.selected : ""}`}
-                    onClick={() => onSelectCollection(collection.id)}
+                    onClick={() => onSelectCollection(isSelected ? null : collectionKey)}
                 >
                     <button
                         className={styles.expandButton}
@@ -134,10 +138,11 @@ function Collection({
                             <Collection
                                 key={child.id}
                                 collection={child}
+                                columnKey={columnKey}
                                 tasks={tasks}
                                 collections={collections}
                                 taskTypes={taskTypes}
-                                selectedCollectionId={selectedCollectionId}
+                                selectedCollectionKey={selectedCollectionKey}
                                 onSelectCollection={onSelectCollection}
                                 onDragStart={onDragStart}
                                 onTaskClick={onTaskClick}
