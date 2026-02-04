@@ -22,6 +22,12 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete, o
     const [blockers, setBlockers] = useState([]);
     const [blockedTasks, setBlockedTasks] = useState([]);
     const [allProjectTasks, setAllProjectTasks] = useState([]);
+    const [blockerSearch, setBlockerSearch] = useState("");
+    const [blockedSearch, setBlockedSearch] = useState("");
+    const [assigneeSearch, setAssigneeSearch] = useState("");
+    const [showBlockerResults, setShowBlockerResults] = useState(false);
+    const [showBlockedResults, setShowBlockedResults] = useState(false);
+    const [showAssigneeResults, setShowAssigneeResults] = useState(false);
 
     const titleInputRef = useRef(null);
     const messagesEndRef = useRef(null);
@@ -314,22 +320,51 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete, o
                                     />
                                 ))}
 
-                                <div className={styles.addAssignee}>
-                                    <button className={styles.addAssigneeButton}>+</button>
-                                    <select
-                                        className={styles.addAssigneeSelect}
-                                        onChange={e => handleAssign(e.target.value)}
-                                        value=""
-                                    >
-                                        <option value="" disabled />
-                                        {members
-                                            .filter(m => !assignedIds.includes(m.userId))
-                                            .map(m => (
-                                                <option key={m.userId} value={m.userId}>
-                                                    {m.userName}
-                                                </option>
-                                            ))}
-                                    </select>
+
+
+                                <div className={styles.searchContainer}>
+                                    <input
+                                        type="text"
+                                        className={styles.searchInput}
+                                        placeholder="+ Add assignee..."
+                                        value={assigneeSearch}
+                                        onChange={e => {
+                                            setAssigneeSearch(e.target.value);
+                                            setShowAssigneeResults(true);
+                                        }}
+                                        onFocus={() => setShowAssigneeResults(true)}
+                                        onBlur={() => setTimeout(() => setShowAssigneeResults(false), 200)}
+                                    />
+                                    {showAssigneeResults && (
+                                        <div className={styles.searchResults}>
+                                            {members
+                                                .filter(m =>
+                                                    !assignedIds.includes(m.userId) &&
+                                                    m.userName.toLowerCase().includes(assigneeSearch.toLowerCase())
+                                                )
+                                                .map(m => (
+                                                    <div
+                                                        key={m.userId}
+                                                        className={styles.searchResultItem}
+                                                        onClick={() => {
+                                                            handleAssign(m.userId);
+                                                            setAssigneeSearch("");
+                                                            setShowAssigneeResults(false);
+                                                        }}
+                                                    >
+                                                        {m.userName}
+                                                    </div>
+                                                ))}
+                                            {members.filter(m =>
+                                                !assignedIds.includes(m.userId) &&
+                                                m.userName.toLowerCase().includes(assigneeSearch.toLowerCase())
+                                            ).length === 0 && (
+                                                    <div className={styles.searchResultItem} style={{ fontStyle: 'italic', opacity: 0.6 }}>
+                                                        No members found
+                                                    </div>
+                                                )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -361,22 +396,51 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete, o
                                         </button>
                                     </div>
                                 ))}
-                                <div className={styles.addAssignee} style={{ width: '100%' }}>
-                                    <button className={styles.addAssigneeButton} style={{ width: '100%', borderRadius: '6px' }}>+ Add Blocker</button>
-                                    <select
-                                        className={styles.addAssigneeSelect}
-                                        onChange={e => handleAddBlocker(e.target.value)}
-                                        value=""
-                                    >
-                                        <option value="" disabled />
-                                        {allProjectTasks
-                                            .filter(t => t.id !== task.id && !blockers.some(b => b.id === t.id))
-                                            .map(t => (
-                                                <option key={t.id} value={t.id}>
-                                                    {t.title}
-                                                </option>
-                                            ))}
-                                    </select>
+                                <div className={styles.searchContainer}>
+                                    <input
+                                        type="text"
+                                        className={styles.searchInput}
+                                        placeholder="+ Add blocker..."
+                                        value={blockerSearch}
+                                        onChange={e => {
+                                            setBlockerSearch(e.target.value);
+                                            setShowBlockerResults(true);
+                                        }}
+                                        onFocus={() => setShowBlockerResults(true)}
+                                        onBlur={() => setTimeout(() => setShowBlockerResults(false), 200)}
+                                    />
+                                    {showBlockerResults && (
+                                        <div className={styles.searchResults}>
+                                            {allProjectTasks
+                                                .filter(t =>
+                                                    t.id !== task.id &&
+                                                    !blockers.some(b => b.id === t.id) &&
+                                                    t.title.toLowerCase().includes(blockerSearch.toLowerCase())
+                                                )
+                                                .map(t => (
+                                                    <div
+                                                        key={t.id}
+                                                        className={styles.searchResultItem}
+                                                        onClick={() => {
+                                                            handleAddBlocker(t.id);
+                                                            setBlockerSearch("");
+                                                            setShowBlockerResults(false);
+                                                        }}
+                                                    >
+                                                        {t.title}
+                                                    </div>
+                                                ))}
+                                            {allProjectTasks.filter(t =>
+                                                t.id !== task.id &&
+                                                !blockers.some(b => b.id === t.id) &&
+                                                t.title.toLowerCase().includes(blockerSearch.toLowerCase())
+                                            ).length === 0 && (
+                                                    <div className={styles.searchResultItem} style={{ fontStyle: 'italic', opacity: 0.6 }}>
+                                                        No tasks found
+                                                    </div>
+                                                )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -404,22 +468,51 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete, o
                                         </button>
                                     </div>
                                 ))}
-                                <div className={styles.addAssignee} style={{ width: '100%' }}>
-                                    <button className={styles.addAssigneeButton} style={{ width: '100%', borderRadius: '6px' }}>+ Add Blocked Task</button>
-                                    <select
-                                        className={styles.addAssigneeSelect}
-                                        onChange={e => handleAddBlocked(e.target.value)}
-                                        value=""
-                                    >
-                                        <option value="" disabled />
-                                        {allProjectTasks
-                                            .filter(t => t.id !== task.id && !blockedTasks.some(b => b.id === t.id))
-                                            .map(t => (
-                                                <option key={t.id} value={t.id}>
-                                                    {t.title}
-                                                </option>
-                                            ))}
-                                    </select>
+                                <div className={styles.searchContainer}>
+                                    <input
+                                        type="text"
+                                        className={styles.searchInput}
+                                        placeholder="+ Add blocked task..."
+                                        value={blockedSearch}
+                                        onChange={e => {
+                                            setBlockedSearch(e.target.value);
+                                            setShowBlockedResults(true);
+                                        }}
+                                        onFocus={() => setShowBlockedResults(true)}
+                                        onBlur={() => setTimeout(() => setShowBlockedResults(false), 200)}
+                                    />
+                                    {showBlockedResults && (
+                                        <div className={styles.searchResults}>
+                                            {allProjectTasks
+                                                .filter(t =>
+                                                    t.id !== task.id &&
+                                                    !blockedTasks.some(b => b.id === t.id) &&
+                                                    t.title.toLowerCase().includes(blockedSearch.toLowerCase())
+                                                )
+                                                .map(t => (
+                                                    <div
+                                                        key={t.id}
+                                                        className={styles.searchResultItem}
+                                                        onClick={() => {
+                                                            handleAddBlocked(t.id);
+                                                            setBlockedSearch("");
+                                                            setShowBlockedResults(false);
+                                                        }}
+                                                    >
+                                                        {t.title}
+                                                    </div>
+                                                ))}
+                                            {allProjectTasks.filter(t =>
+                                                t.id !== task.id &&
+                                                !blockedTasks.some(b => b.id === t.id) &&
+                                                t.title.toLowerCase().includes(blockedSearch.toLowerCase())
+                                            ).length === 0 && (
+                                                    <div className={styles.searchResultItem} style={{ fontStyle: 'italic', opacity: 0.6 }}>
+                                                        No tasks found
+                                                    </div>
+                                                )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

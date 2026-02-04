@@ -329,6 +329,57 @@ textarea {
     cursor: pointer;
 }
 
+.searchContainer {
+    position: relative;
+    width: 100%;
+}
+
+.searchInput {
+    width: 100%;
+    padding: 0.5rem;
+    background: #2d2d2d;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.searchResults {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #1e1e1e;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+    margin-top: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.searchResultItem {
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    border-bottom: 1px solid #2d2d2d;
+}
+
+.searchResultItem:last-child {
+    border-bottom: none;
+}
+
+.searchResultItem:hover {
+    background: #2d2d2d;
+}
+
 .dueDateField {
     display: flex;
     flex-direction: column;
@@ -493,6 +544,14 @@ textarea {
 .rightColumn::-webkit-scrollbar-track,
 .chatColumn::-webkit-scrollbar-track,
 .messagesList::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 0;
+}
+
+.leftColumn::-webkit-scrollbar-corner,
+.rightColumn::-webkit-scrollbar-corner,
+.chatColumn::-webkit-scrollbar-corner,
+.messagesList::-webkit-scrollbar-corner {
     background: transparent;
 }
 
