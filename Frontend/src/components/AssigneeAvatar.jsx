@@ -18,8 +18,9 @@ function AssigneeAvatar({ assignee, onRemove }) {
                 setOpen(false);
             }
         };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+
+        document.addEventListener("click", handleClickOutside);
+        return () => document.removeEventListener("click", handleClickOutside);
     }, [open]);
 
     const togglePopup = () => {
@@ -48,6 +49,7 @@ function AssigneeAvatar({ assignee, onRemove }) {
             </button>
             <button
                 onClick={() => {
+                    console.log("w")
                     onRemove(assignee.userId);
                     setOpen(false);
                 }}

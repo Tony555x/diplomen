@@ -422,6 +422,79 @@ namespace Taskboard.Controllers
             return Ok(new { success = true, dueDate = task.DueDate });
         }
 
+        [HttpGet("{taskId}/messages")]
+        public async Task<IActionResult> GetTaskMessages(int projectId, int taskId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var hasAccess = await _context.ProjectMembers
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+            if (!hasAccess) return Forbid();
+
+            var messages = await _context.TaskMessages
+                .Where(tm => tm.TaskItemId == taskId)
+                .OrderBy(tm => tm.CreatedAt)
+                .Select(tm => new
+                {
+                    tm.Id,
+                    tm.Content,
+                    tm.CreatedAt,
+                    tm.UserId,
+                    UserName = tm.User!.UserName
+                })
+                .ToListAsync();
+
+            return Ok(messages);
+        }
+
+        [HttpPost("{taskId}/messages")]
+        public async Task<IActionResult> CreateTaskMessage(int projectId, int taskId, [FromBody] CreateMessageRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var hasAccess = await _context.ProjectMembers
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+            if (!hasAccess) return Forbid();
+
+            // Verify task exists and belongs to project
+            var taskExists = await _context.Tasks
+                .AnyAsync(t => t.Id == taskId && t.ProjectId == projectId);
+            if (!taskExists) return NotFound(new { success = false, message = "Task not found." });
+
+            if (string.IsNullOrWhiteSpace(request.Content))
+            {
+                return BadRequest(new { success = false, message = "Message content is required." });
+            }
+
+            var message = new TaskMessage
+            {
+                TaskItemId = taskId,
+                UserId = userId,
+                Content = request.Content.Trim(),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.TaskMessages.Add(message);
+            await _context.SaveChangesAsync();
+
+            // Reload with user info
+            var createdMessage = await _context.TaskMessages
+                .Where(tm => tm.Id == message.Id)
+                .Select(tm => new
+                {
+                    tm.Id,
+                    tm.Content,
+                    tm.CreatedAt,
+                    tm.UserId,
+                    UserName = tm.User!.UserName
+                })
+                .FirstOrDefaultAsync();
+
+            return Ok(new { success = true, message = createdMessage });
+        }
+
 
 
     }
@@ -456,5 +529,9 @@ namespace Taskboard.Controllers
     public class SetDueDateRequest
     {
         public DateTime? DueDate { get; set; }
+    }
+    public class CreateMessageRequest
+    {
+        public string Content { get; set; } = string.Empty;
     }
 }

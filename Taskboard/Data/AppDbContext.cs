@@ -24,6 +24,7 @@ public class AppDbContext : IdentityDbContext<User>
 
     public DbSet<UserTask> UserTasks { get; set; }
     public DbSet<Collection> Collections { get; set; }
+    public DbSet<TaskMessage> TaskMessages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -114,6 +115,21 @@ public class AppDbContext : IdentityDbContext<User>
             .HasOne(t => t.Collection)
             .WithMany(c => c.Tasks)
             .HasForeignKey(t => t.CollectionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // TaskMessage Configurations
+        // TaskMessage -> TaskItem: Cascade (when task is deleted, delete all its messages)
+        builder.Entity<TaskMessage>()
+            .HasOne(tm => tm.Task)
+            .WithMany()
+            .HasForeignKey(tm => tm.TaskItemId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // TaskMessage -> User: Restrict (prevent deleting user if they have messages)
+        builder.Entity<TaskMessage>()
+            .HasOne(tm => tm.User)
+            .WithMany()
+            .HasForeignKey(tm => tm.UserId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

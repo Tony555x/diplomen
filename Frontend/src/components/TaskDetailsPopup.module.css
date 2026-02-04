@@ -13,32 +13,30 @@
     background-color: #1e1e1e;
     border-radius: 12px;
     width: 90%;
-    max-width: 900px; /* was 500px */
+    max-width: 1200px;
+    /* increased from 900px */
     max-height: 85vh;
     display: flex;
     flex-direction: column;
     border: 1px solid #374151;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
 }
+
 .body {
-    padding: 1.5rem;
-    overflow-y: auto;
+    padding: 1rem 1.25rem;
+    overflow: hidden;
     display: grid;
-    grid-template-columns: 1fr 280px;
-    gap: 2rem;
-}
-.body {
-    padding: 1.5rem;
-    overflow-y: auto;
-    display: grid;
-    grid-template-columns: 1fr 280px;
-    gap: 2rem;
+    grid-template-columns: 1fr 280px 320px;
+    gap: 1.5rem;
+    max-height: calc(85vh - 150px);
 }
 
 .leftColumn {
     min-width: 0;
-    padding-right: 2rem;
+    padding-right: 1rem;
     border-right: 1px solid #374151;
+    overflow-y: auto;
+    max-height: 100%;
 }
 
 .rightColumn {
@@ -46,6 +44,10 @@
     flex-direction: column;
     gap: 1.5rem;
     padding-left: 0.5rem;
+    padding-right: 1rem;
+    border-right: 1px solid #374151;
+    overflow-y: auto;
+    max-height: 100%;
 }
 
 @keyframes slideIn {
@@ -63,7 +65,7 @@
 .header {
     display: flex;
     justify-content: space-between;
-    padding: 1.5rem;
+    padding: 1rem 1.25rem;
     border-bottom: 1px solid #374151;
     gap: 1rem;
 }
@@ -193,7 +195,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem;
+    padding: 1rem 1.25rem;
     border-top: 1px solid #374151;
 }
 
@@ -271,6 +273,7 @@ textarea {
     color: #f87171;
     cursor: pointer;
 }
+
 .sectionHeader {
     display: flex;
     justify-content: space-between;
@@ -291,16 +294,18 @@ textarea {
     gap: 0.5rem;
     flex-wrap: wrap;
 }
+
 .addAssignee {
-  position: relative;
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
+    position: relative;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
 }
+
 .addAssigneeButton {
     width: 32px;
     height: 32px;
-    padding:0;
+    padding: 0;
     border-radius: 50%;
     border: 1px dashed #4b5563;
     background: #1f2933;
@@ -350,6 +355,7 @@ textarea {
     opacity: 0.7;
     cursor: pointer;
 }
+
 .textarea {
     width: 100%;
     padding: 0.75rem;
@@ -366,4 +372,141 @@ textarea {
 .textarea:focus {
     outline: none;
     border-color: #3b82f6;
+}
+
+/* Chat Column Styles */
+.chatColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-left: 1rem;
+    overflow-y: auto;
+    max-height: 100%;
+}
+
+.chatColumn h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.messagesList {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 400px;
+    padding-right: 0.5rem;
+}
+
+.message {
+    background: #2d2d2d;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    padding: 0.75rem;
+}
+
+.messageHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.messageAuthor {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #3b82f6;
+}
+
+.messageTime {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.messageContent {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.85);
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+.messageInput {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    align-items: flex-end;
+}
+
+.messageInput textarea {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    background: #2d2d2d;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    resize: none;
+    box-sizing: border-box;
+    font-family: inherit;
+    min-height: 38px;
+    max-height: 38px;
+}
+
+.messageInput textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.messageInput button {
+    padding: 0.5rem 1rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    height: 38px;
+    flex-shrink: 0;
+}
+
+.messageInput button:hover:not(:disabled) {
+    background: #2563eb;
+}
+
+.messageInput button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Custom Scrollbar Styles */
+.leftColumn::-webkit-scrollbar,
+.rightColumn::-webkit-scrollbar,
+.chatColumn::-webkit-scrollbar,
+.messagesList::-webkit-scrollbar {
+    width: 6px;
+}
+
+.leftColumn::-webkit-scrollbar-track,
+.rightColumn::-webkit-scrollbar-track,
+.chatColumn::-webkit-scrollbar-track,
+.messagesList::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.leftColumn::-webkit-scrollbar-thumb,
+.rightColumn::-webkit-scrollbar-thumb,
+.chatColumn::-webkit-scrollbar-thumb,
+.messagesList::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.leftColumn::-webkit-scrollbar-thumb:hover,
+.rightColumn::-webkit-scrollbar-thumb:hover,
+.chatColumn::-webkit-scrollbar-thumb:hover,
+.messagesList::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
