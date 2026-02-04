@@ -20,30 +20,29 @@ function ProjectTasks() {
 
     const columns = ["To Do", "In Progress", "Done"];
 
+    const refreshTasks = async () => {
+        try {
+            //setLoading(true); // Don't show full loading state for refresh
+            const [tasksData, taskTypesData, collectionsData] =
+                await Promise.all([
+                    fetchWithAuth(`/api/projects/${projectId}/tasks`),
+                    fetchWithAuth(`/api/projects/${projectId}/task-types`),
+                    fetchWithAuth(`/api/projects/${projectId}/collections`)
+                ]);
+
+            setTasks(tasksData || []);
+            setTaskTypes(taskTypesData.taskTypes || []);
+            setCollections(collectionsData || []);
+        } catch (err) {
+            console.error(err);
+            setError("Failed to load tasks.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const loadData = async () => {
-            try {
-                setLoading(true);
-
-                const [tasksData, taskTypesData, collectionsData] =
-                    await Promise.all([
-                        fetchWithAuth(`/api/projects/${projectId}/tasks`),
-                        fetchWithAuth(`/api/projects/${projectId}/task-types`),
-                        fetchWithAuth(`/api/projects/${projectId}/collections`)
-                    ]);
-
-                setTasks(tasksData || []);
-                setTaskTypes(taskTypesData.taskTypes || []);
-                setCollections(collectionsData || []);
-            } catch (err) {
-                console.error(err);
-                setError("Failed to load tasks.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (projectId) loadData();
+        refreshTasks();
     }, [projectId]);
 
     const addTask = async (status, title, taskTypeId, selectedCollectionKey) => {
@@ -164,7 +163,7 @@ function ProjectTasks() {
     };
     const handleTaskUpdate = async (updatedTask) => {
         try {
-            await fetchWithAuth(
+            const result = await fetchWithAuth(
                 `/api/projects/${projectId}/tasks/${updatedTask.id}`,
                 {
                     method: "PATCH",
@@ -177,9 +176,22 @@ function ProjectTasks() {
                 }
             );
 
-            setTasks(prev =>
-                prev.map(t => (t.id === updatedTask.id ? updatedTask : t))
-            );
+            if (result && result.success && result.task) {
+                const fullTask = { ...updatedTask, ...result.task };
+
+                // Check if completion status changed to trigger full refresh (for dependencies)
+                const oldTask = tasks.find(t => t.id === fullTask.id);
+                const completionChanged = oldTask && oldTask.completed !== fullTask.completed;
+
+                setTasks(prev =>
+                    prev.map(t => (t.id === updatedTask.id ? fullTask : t))
+                );
+
+                if (completionChanged) {
+                    refreshTasks();
+                }
+            }
+
         } catch (err) {
             console.error(err);
         }
@@ -288,6 +300,7 @@ function ProjectTasks() {
                     onUpdate={handleTaskUpdate}
                     onDelete={handleTaskDelete}
                     onDrop={handleDrop}
+                    onRefresh={refreshTasks}
                 />
             )}
         </>

@@ -46,6 +46,8 @@ namespace Taskboard.Controllers
                     t.Completed,
                     t.TaskTypeId,
                     t.CollectionId,
+                    IsBlocked = _context.TaskBlockers
+                        .Any(tb => tb.BlockedTaskId == t.Id && !tb.BlockingTask.Completed),
                     FieldValues = t.FieldValues.Select(fv => new
                     {
                         fv.Id,
@@ -268,7 +270,9 @@ namespace Taskboard.Controllers
                     task.Title,
                     task.Status,
                     task.Completed,
-                    task.TaskTypeId
+                    task.TaskTypeId,
+                    IsBlocked = await _context.TaskBlockers
+                        .AnyAsync(tb => tb.BlockedTaskId == task.Id && !tb.BlockingTask.Completed)
                 }
             });
         }
@@ -495,6 +499,117 @@ namespace Taskboard.Controllers
             return Ok(new { success = true, message = createdMessage });
         }
 
+        [HttpGet("{taskId}/blockers")]
+        public async Task<IActionResult> GetTaskBlockers(int projectId, int taskId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var hasAccess = await _context.ProjectMembers
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+            if (!hasAccess) return Forbid();
+
+            var blockers = await _context.TaskBlockers
+                .Where(tb => tb.BlockedTaskId == taskId)
+                .Select(tb => new
+                {
+                    tb.BlockingTask!.Id,
+                    tb.BlockingTask.Title,
+                    tb.BlockingTask.Completed
+                })
+                .ToListAsync();
+
+            return Ok(blockers);
+        }
+
+        [HttpGet("{taskId}/blocking")]
+        public async Task<IActionResult> GetBlockedTasks(int projectId, int taskId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var hasAccess = await _context.ProjectMembers
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+            if (!hasAccess) return Forbid();
+
+            var blockedTasks = await _context.TaskBlockers
+                .Where(tb => tb.BlockingTaskId == taskId)
+                .Select(tb => new
+                {
+                    tb.BlockedTask!.Id,
+                    tb.BlockedTask.Title,
+                    tb.BlockedTask.Completed
+                })
+                .ToListAsync();
+
+            return Ok(blockedTasks);
+        }
+
+        [HttpPost("{taskId}/blockers")]
+        public async Task<IActionResult> AddBlocker(int projectId, int taskId, [FromBody] AddBlockerRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var hasAccess = await _context.ProjectMembers
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+            if (!hasAccess) return Forbid();
+
+            // Verify both tasks exist and belong to the same project
+            var tasksExist = await _context.Tasks
+                .Where(t => t.ProjectId == projectId && (t.Id == taskId || t.Id == request.BlockerTaskId))
+                .CountAsync();
+
+            if (tasksExist != 2)
+            {
+                return BadRequest(new { success = false, message = "One or both tasks not found." });
+            }
+
+            // Prevent self-blocking
+            if (taskId == request.BlockerTaskId)
+            {
+                return BadRequest(new { success = false, message = "A task cannot block itself." });
+            }
+
+            // Check if relationship already exists
+            var alreadyExists = await _context.TaskBlockers
+                .AnyAsync(tb => tb.BlockingTaskId == request.BlockerTaskId && tb.BlockedTaskId == taskId);
+
+            if (alreadyExists) return Ok(new { success = true });
+
+            var blocker = new TaskBlocker
+            {
+                BlockingTaskId = request.BlockerTaskId,
+                BlockedTaskId = taskId
+            };
+
+            _context.TaskBlockers.Add(blocker);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true });
+        }
+
+        [HttpDelete("{taskId}/blockers/{blockerTaskId}")]
+        public async Task<IActionResult> RemoveBlocker(int projectId, int taskId, int blockerTaskId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var hasAccess = await _context.ProjectMembers
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+            if (!hasAccess) return Forbid();
+
+            var blocker = await _context.TaskBlockers
+                .FirstOrDefaultAsync(tb => tb.BlockingTaskId == blockerTaskId && tb.BlockedTaskId == taskId);
+
+            if (blocker == null) return NotFound();
+
+            _context.TaskBlockers.Remove(blocker);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true });
+        }
+
 
 
     }
@@ -533,5 +648,9 @@ namespace Taskboard.Controllers
     public class CreateMessageRequest
     {
         public string Content { get; set; } = string.Empty;
+    }
+    public class AddBlockerRequest
+    {
+        public int BlockerTaskId { get; set; }
     }
 }

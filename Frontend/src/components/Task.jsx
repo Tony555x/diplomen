@@ -17,7 +17,7 @@ function Task({ task, columnKey, onDragStart, onClick }) {
       draggable
       onDragStart={handleDragStart}
       onClick={handleClick}
-      className={`${styles["task-item"]} ${task.completed ? styles.completed : ""}`}
+      className={`${styles["task-item"]} ${task.completed ? styles.completed : ""} ${!task.completed && task.isBlocked ? styles.blocked : ""}`}
     >
       <span className={styles["task-title"]}>{task.title}</span>
     </li>

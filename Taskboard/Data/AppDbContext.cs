@@ -25,6 +25,7 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<UserTask> UserTasks { get; set; }
     public DbSet<Collection> Collections { get; set; }
     public DbSet<TaskMessage> TaskMessages { get; set; }
+    public DbSet<TaskBlocker> TaskBlockers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -130,6 +131,26 @@ public class AppDbContext : IdentityDbContext<User>
             .HasOne(tm => tm.User)
             .WithMany()
             .HasForeignKey(tm => tm.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // TaskBlocker Configurations
+        // Composite primary key
+        builder.Entity<TaskBlocker>()
+            .HasKey(tb => new { tb.BlockingTaskId, tb.BlockedTaskId });
+
+        // TaskBlocker -> BlockingTask: Cascade (when task is deleted, remove all blocking relationships)
+        builder.Entity<TaskBlocker>()
+            .HasOne(tb => tb.BlockingTask)
+            .WithMany()
+            .HasForeignKey(tb => tb.BlockingTaskId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // TaskBlocker -> BlockedTask: Restrict (prevent cascade path conflicts)
+        // We'll manually handle cleanup in the controller
+        builder.Entity<TaskBlocker>()
+            .HasOne(tb => tb.BlockedTask)
+            .WithMany()
+            .HasForeignKey(tb => tb.BlockedTaskId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

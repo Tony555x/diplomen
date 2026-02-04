@@ -5,7 +5,7 @@ import { fetchWithAuth } from "../auth";
 import { useParams } from "react-router-dom";
 import AssigneeAvatar from "./AssigneeAvatar"
 
-function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete }) {
+function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete, onRefresh }) {
     const { projectId } = useParams();
 
     const [title, setTitle] = useState(task.title);
@@ -19,6 +19,9 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
     const [dueDate, setDueDate] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
+    const [blockers, setBlockers] = useState([]);
+    const [blockedTasks, setBlockedTasks] = useState([]);
+    const [allProjectTasks, setAllProjectTasks] = useState([]);
 
     const titleInputRef = useRef(null);
     const messagesEndRef = useRef(null);
@@ -29,6 +32,9 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
         loadMembers();
         loadDueDate();
         loadMessages();
+        loadBlockers();
+        loadBlockedTasks();
+        loadAllProjectTasks();
     }, []);
 
     useEffect(() => {
@@ -109,6 +115,69 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
         );
         setNewMessage("");
         loadMessages();
+    };
+
+    const loadBlockers = async () => {
+        const result = await fetchWithAuth(
+            `/api/projects/${projectId}/tasks/${task.id}/blockers`
+        );
+        setBlockers(result || []);
+    };
+
+    const loadBlockedTasks = async () => {
+        const result = await fetchWithAuth(
+            `/api/projects/${projectId}/tasks/${task.id}/blocking`
+        );
+        setBlockedTasks(result || []);
+    };
+
+    const loadAllProjectTasks = async () => {
+        const result = await fetchWithAuth(
+            `/api/projects/${projectId}/tasks`
+        );
+        setAllProjectTasks(result || []);
+    };
+
+    const handleAddBlocker = async (blockerTaskId) => {
+        await fetchWithAuth(
+            `/api/projects/${projectId}/tasks/${task.id}/blockers`,
+            {
+                method: "POST",
+                body: JSON.stringify({ blockerTaskId: parseInt(blockerTaskId) })
+            }
+        );
+        loadBlockers();
+        if (onRefresh) onRefresh();
+    };
+
+    const handleRemoveBlocker = async (blockerTaskId) => {
+        await fetchWithAuth(
+            `/api/projects/${projectId}/tasks/${task.id}/blockers/${blockerTaskId}`,
+            { method: "DELETE" }
+        );
+        loadBlockers();
+        if (onRefresh) onRefresh();
+    };
+
+    const handleAddBlocked = async (blockedTaskId) => {
+        await fetchWithAuth(
+            `/api/projects/${projectId}/tasks/${blockedTaskId}/blockers`,
+            {
+                method: "POST",
+                body: JSON.stringify({ blockerTaskId: task.id })
+            }
+        );
+        loadBlockedTasks();
+        if (onRefresh) onRefresh();
+    };
+
+    const handleRemoveBlocked = async (blockedTaskId) => {
+        await fetchWithAuth(
+            `/api/projects/${projectId}/tasks/${blockedTaskId}/blockers/${task.id}`,
+            { method: "DELETE" }
+        );
+        loadBlockedTasks();
+        if (onRefresh) onRefresh();
     };
 
     const formatTime = (dateString) => {
@@ -267,6 +336,92 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete })
                             {assignees.length === 0 && (
                                 <div className={styles.hint}>No one assigned</div>
                             )}
+                        </div>
+
+                        <div>
+                            <h3>Blocked By</h3>
+                            <div className={styles.assigneesList}>
+                                {blockers.map(b => (
+                                    <div key={b.id} className={styles.assigneeRow} style={{ width: '100%' }}>
+                                        <span style={{
+                                            textDecoration: b.completed ? "line-through" : "none",
+                                            opacity: b.completed ? 0.7 : 1,
+                                            flex: 1,
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                            whiteSpace: "nowrap"
+                                        }}>
+                                            {b.title}
+                                        </span>
+                                        <button
+                                            className={styles.removeBtn}
+                                            onClick={() => handleRemoveBlocker(b.id)}
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                ))}
+                                <div className={styles.addAssignee} style={{ width: '100%' }}>
+                                    <button className={styles.addAssigneeButton} style={{ width: '100%', borderRadius: '6px' }}>+ Add Blocker</button>
+                                    <select
+                                        className={styles.addAssigneeSelect}
+                                        onChange={e => handleAddBlocker(e.target.value)}
+                                        value=""
+                                    >
+                                        <option value="" disabled />
+                                        {allProjectTasks
+                                            .filter(t => t.id !== task.id && !blockers.some(b => b.id === t.id))
+                                            .map(t => (
+                                                <option key={t.id} value={t.id}>
+                                                    {t.title}
+                                                </option>
+                                            ))}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3>Blocks</h3>
+                            <div className={styles.assigneesList}>
+                                {blockedTasks.map(b => (
+                                    <div key={b.id} className={styles.assigneeRow} style={{ width: '100%' }}>
+                                        <span style={{
+                                            textDecoration: b.completed ? "line-through" : "none",
+                                            opacity: b.completed ? 0.7 : 1,
+                                            flex: 1,
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                            whiteSpace: "nowrap"
+                                        }}>
+                                            {b.title}
+                                        </span>
+                                        <button
+                                            className={styles.removeBtn}
+                                            onClick={() => handleRemoveBlocked(b.id)}
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                ))}
+                                <div className={styles.addAssignee} style={{ width: '100%' }}>
+                                    <button className={styles.addAssigneeButton} style={{ width: '100%', borderRadius: '6px' }}>+ Add Blocked Task</button>
+                                    <select
+                                        className={styles.addAssigneeSelect}
+                                        onChange={e => handleAddBlocked(e.target.value)}
+                                        value=""
+                                    >
+                                        <option value="" disabled />
+                                        {allProjectTasks
+                                            .filter(t => t.id !== task.id && !blockedTasks.some(b => b.id === t.id))
+                                            .map(t => (
+                                                <option key={t.id} value={t.id}>
+                                                    {t.title}
+                                                </option>
+                                            ))}
+                                    </select>
+                                </div>
+                            </div>
                         </div>
 
                         <div>
