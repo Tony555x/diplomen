@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Task from "./Task";
 import Collection from "./Collection";
 import styles from "./Column.module.css";
@@ -26,6 +26,9 @@ function Column({
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [isAddingCollection, setIsAddingCollection] = useState(false);
   const [newCollectionName, setNewCollectionName] = useState("");
+
+  const scrollContainerRef = useRef(null);
+  const scrollIntervalRef = useRef(null);
 
   useEffect(() => {
     if (taskTypes.length > 0 && !selectedType) {
@@ -55,17 +58,84 @@ function Column({
 
   const handleDragOver = (e) => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
     setIsDragOver(true);
+
+    // Auto-scroll logic
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const rect = container.getBoundingClientRect();
+      const mouseY = e.clientY;
+      const scrollZone = 50; // pixels from top/bottom to trigger scroll
+      const scrollSpeed = 5; // pixels per frame
+
+      // Clear any existing scroll interval
+      if (scrollIntervalRef.current) {
+        cancelAnimationFrame(scrollIntervalRef.current);
+        scrollIntervalRef.current = null;
+      }
+
+      // Check if mouse is in top scroll zone
+      if (mouseY < rect.top + scrollZone && container.scrollTop > 0) {
+        const scroll = () => {
+          if (container.scrollTop > 0) {
+            container.scrollTop -= scrollSpeed;
+            scrollIntervalRef.current = requestAnimationFrame(scroll);
+          }
+        };
+        scrollIntervalRef.current = requestAnimationFrame(scroll);
+      }
+      // Check if mouse is in bottom scroll zone
+      else if (mouseY > rect.bottom - scrollZone &&
+        container.scrollTop < container.scrollHeight - container.clientHeight) {
+        const scroll = () => {
+          if (container.scrollTop < container.scrollHeight - container.clientHeight) {
+            container.scrollTop += scrollSpeed;
+            scrollIntervalRef.current = requestAnimationFrame(scroll);
+          }
+        };
+        scrollIntervalRef.current = requestAnimationFrame(scroll);
+      }
+    }
   };
 
-  const handleDragLeave = () => setIsDragOver(false);
+  const handleDragLeave = (e) => {
+    // Only set isDragOver to false if we're actually leaving the column
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+
+    if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) {
+      setIsDragOver(false);
+      if (scrollIntervalRef.current) {
+        cancelAnimationFrame(scrollIntervalRef.current);
+        scrollIntervalRef.current = null;
+      }
+    }
+  };
 
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
+
+    // Clear scroll interval
+    if (scrollIntervalRef.current) {
+      cancelAnimationFrame(scrollIntervalRef.current);
+      scrollIntervalRef.current = null;
+    }
+
     onDrop(columnKey);
   };
+
+  // Cleanup scroll interval on unmount
+  useEffect(() => {
+    return () => {
+      if (scrollIntervalRef.current) {
+        cancelAnimationFrame(scrollIntervalRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div
@@ -76,7 +146,7 @@ function Column({
     >
       <h2>{label}</h2>
 
-      <ul className={styles.items}>
+      <ul className={styles.items} ref={scrollContainerRef}>
 
         {rootCollections.map(c => (
           <Collection
