@@ -17,11 +17,6 @@ namespace Taskboard.Data.Models
         [ForeignKey(nameof(ProjectId))]
         public Project? Project { get; set; }
 
-        // UNUSED: Status is deprecated. Collections are now column-agnostic and appear in all columns.
-        // Kept for backward compatibility with existing database schema.
-        [Required]
-        public string Status { get; set; } = "To Do";
-
         // For nested collections
         public int? ParentCollectionId { get; set; }
         [ForeignKey(nameof(ParentCollectionId))]
