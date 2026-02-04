@@ -333,7 +333,10 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete, o
                                             setShowAssigneeResults(true);
                                         }}
                                         onFocus={() => setShowAssigneeResults(true)}
-                                        onBlur={() => setTimeout(() => setShowAssigneeResults(false), 200)}
+                                        onBlur={() => setTimeout(() => {
+                                            setShowAssigneeResults(false);
+                                            setAssigneeSearch("");
+                                        }, 200)}
                                     />
                                     {showAssigneeResults && (
                                         <div className={styles.searchResults}>
@@ -407,7 +410,10 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete, o
                                             setShowBlockerResults(true);
                                         }}
                                         onFocus={() => setShowBlockerResults(true)}
-                                        onBlur={() => setTimeout(() => setShowBlockerResults(false), 200)}
+                                        onBlur={() => setTimeout(() => {
+                                            setShowBlockerResults(false);
+                                            setBlockerSearch("");
+                                        }, 200)}
                                     />
                                     {showBlockerResults && (
                                         <div className={styles.searchResults}>
@@ -479,7 +485,10 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete, o
                                             setShowBlockedResults(true);
                                         }}
                                         onFocus={() => setShowBlockedResults(true)}
-                                        onBlur={() => setTimeout(() => setShowBlockedResults(false), 200)}
+                                        onBlur={() => setTimeout(() => {
+                                            setShowBlockedResults(false);
+                                            setBlockedSearch("");
+                                        }, 200)}
                                     />
                                     {showBlockedResults && (
                                         <div className={styles.searchResults}>
