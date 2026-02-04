@@ -186,6 +186,55 @@ function ProjectTasks() {
             console.error(err);
         }
     };
+    const renameCollection = async (collectionId, name) => {
+        try {
+            const result = await fetchWithAuth(
+                `/api/projects/${projectId}/collections/${collectionId}`,
+                {
+                    method: "PATCH",
+                    body: { name }
+                }
+            );
+
+            if (result.success) {
+                setCollections(prev =>
+                    prev.map(c =>
+                        c.id === collectionId ? { ...c, name } : c
+                    )
+                );
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const deleteCollection = async (collection) => {
+        if (!window.confirm("Delete this folder? Tasks inside will be moved to the column.")) {
+            return;
+        }
+
+        try {
+            const result = await fetchWithAuth(
+                `/api/projects/${projectId}/collections/${collection.id}`,
+                { method: "DELETE" }
+            );
+
+            if (result.success) {
+                setCollections(prev => prev.filter(c => c.id !== collection.id));
+                setTasks(prev =>
+                    prev.map(t =>
+                        t.collectionId === collection.id
+                            ? { ...t, collectionId: null }
+                            : t
+                    )
+                );
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Unable to delete collection.");
+        }
+    };
+
 
     if (loading) return <div className="loading">Loading tasks...</div>;
     if (error) return <div className="error">{error}</div>;
@@ -209,7 +258,10 @@ function ProjectTasks() {
                             onDragStart={handleDragStart}
                             onDrop={handleDrop}
                             onTaskClick={setSelectedTask}
+                            onRenameCollection={renameCollection}
+                            onDeleteCollection={deleteCollection}
                         />
+
                     ))}
                 </div>
             </div>

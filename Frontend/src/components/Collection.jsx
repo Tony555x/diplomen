@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Task from "./Task";
 import styles from "./Collection.module.css";
 
@@ -11,10 +11,21 @@ function Collection({
     onSelectCollection,
     onDragStart,
     onTaskClick,
-    onDrop // add this prop
+    onDrop,
+    onRenameCollection,
+    onDeleteCollection
 }) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
+
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [menuPos, setMenuPos] = useState(null);
+
+    const [isRenaming, setIsRenaming] = useState(false);
+    const [nameValue, setNameValue] = useState(collection.name);
+
+    const inputRef = useRef(null);
+
     const isSelected = selectedCollectionId === collection.id;
 
     const childCollections = collections.filter(
@@ -22,94 +33,165 @@ function Collection({
     );
     const childTasks = tasks.filter(t => t.collectionId === collection.id);
 
-    const handleSelect = () => {
-        if (!isSelected && !isExpanded) {
-            onSelectCollection(collection.id);
-            setIsExpanded(true);
-            return;
+    useEffect(() => {
+        if (isRenaming && inputRef.current) {
+            inputRef.current.focus();
+            inputRef.current.select();
         }
-        if (!isSelected && isExpanded) {
-            onSelectCollection(collection.id);
-            return;
-        }
-        if (isSelected && isExpanded) {
-            onSelectCollection(null);
-            setIsExpanded(false);
-            return;
-        }
-        if (isSelected && !isExpanded) {
-            setIsExpanded(true);
-        }
-    };
+    }, [isRenaming]);
 
-    const handleDragOver = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragOver(true);
-    };
+    useEffect(() => {
+        const closeMenu = () => setMenuOpen(false);
+        window.addEventListener("mousedown", closeMenu);
+        window.addEventListener("scroll", closeMenu, true);
+        return () => {
+            window.removeEventListener("mousedown", closeMenu);
+            window.removeEventListener("scroll", closeMenu, true);
+        };
+    }, []);
 
-    const handleDragLeave = () => setIsDragOver(false);
+    const commitRename = () => {
+        const trimmed = nameValue.trim();
+        setIsRenaming(false);
 
-    const handleDrop = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragOver(false);
-        onDrop(collection.id);
+        if (trimmed && trimmed !== collection.name) {
+            onRenameCollection(collection.id, trimmed);
+        } else {
+            setNameValue(collection.name);
+        }
     };
 
     return (
-        <li
-            className={`${styles.collection} ${isDragOver ? styles.dragOver : ""}`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-        >
-            <div
-                className={`${styles.collectionHeader} ${isSelected ? styles.selected : ""}`}
-                onClick={handleSelect}
+        <>
+            <li
+                className={`${styles.collection} ${isDragOver ? styles.dragOver : ""}`}
+                onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsDragOver(true);
+                }}
+                onDragLeave={() => setIsDragOver(false)}
+                onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsDragOver(false);
+                    onDrop(collection.id);
+                }}
             >
-                <button
-                    className={styles.expandButton}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setIsExpanded(prev => !prev);
-                    }}
+                <div
+                    className={`${styles.collectionHeader} ${isSelected ? styles.selected : ""}`}
+                    onClick={() => onSelectCollection(collection.id)}
                 >
-                    {isExpanded ? "▼" : "▶"}
-                </button>
-                <span className={styles.collectionName}>{collection.name}</span>
-            </div>
+                    <button
+                        className={styles.expandButton}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsExpanded(prev => !prev);
+                        }}
+                    >
+                        {isExpanded ? "▼" : "▶"}
+                    </button>
 
-            {isExpanded && (
-                <ul className={styles.collectionContent}>
-                    {childCollections.map(child => (
-                        <Collection
-                            key={`collection-${child.id}`}
-                            collection={child}
-                            tasks={tasks}
-                            collections={collections}
-                            taskTypes={taskTypes}
-                            selectedCollectionId={selectedCollectionId}
-                            onSelectCollection={onSelectCollection}
-                            onDragStart={onDragStart}
-                            onTaskClick={onTaskClick}
-                            onDrop={onDrop} // pass it down
+                    {isRenaming ? (
+                        <input
+                            ref={inputRef}
+                            className={styles.renameInput}
+                            value={nameValue}
+                            onChange={e => setNameValue(e.target.value)}
+                            onBlur={commitRename}
+                            onKeyDown={e => {
+                                if (e.key === "Enter") commitRename();
+                                if (e.key === "Escape") {
+                                    setIsRenaming(false);
+                                    setNameValue(collection.name);
+                                }
+                            }}
+                            onClick={e => e.stopPropagation()}
                         />
-                    ))}
+                    ) : (
+                        <span className={styles.collectionName}>{collection.name}</span>
+                    )}
 
-                    {childTasks.map((task, index) => (
-                        <Task
-                            key={`task-${task.id}`}
-                            task={task}
-                            index={index}
-                            columnKey={collection.status}
-                            onDragStart={onDragStart}
-                            onClick={onTaskClick}
-                        />
-                    ))}
-                </ul>
+                    <button
+                        className={styles.menuButton}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            setMenuPos({
+                                x: rect.right + 6,
+                                y: rect.top + rect.height / 2
+                            });
+                            setMenuOpen(true);
+                        }}
+                    >
+                        …
+                    </button>
+                </div>
+
+                {isExpanded && (
+                    <ul className={styles.collectionContent}>
+                        {childCollections.map(child => (
+                            <Collection
+                                key={child.id}
+                                collection={child}
+                                tasks={tasks}
+                                collections={collections}
+                                taskTypes={taskTypes}
+                                selectedCollectionId={selectedCollectionId}
+                                onSelectCollection={onSelectCollection}
+                                onDragStart={onDragStart}
+                                onTaskClick={onTaskClick}
+                                onDrop={onDrop}
+                                onRenameCollection={onRenameCollection}
+                                onDeleteCollection={onDeleteCollection}
+                            />
+                        ))}
+
+                        {childTasks.map(task => (
+                            <Task
+                                key={task.id}
+                                task={task}
+                                onDragStart={onDragStart}
+                                onClick={onTaskClick}
+                            />
+                        ))}
+                    </ul>
+                )}
+            </li>
+
+            {menuOpen && menuPos && (
+                <div
+                    className={styles.menu}
+                    style={{
+                        position: "fixed",
+                        left: `${menuPos.x}px`,
+                        top: `${menuPos.y}px`,
+                        transform: "translateY(-50%)",
+                        zIndex: 10000
+                    }}
+                    onMouseDown={e => e.stopPropagation()}
+                    onClick={e => e.stopPropagation()}
+                >
+                    <button
+                        onClick={() => {
+                            setMenuOpen(false);
+                            setIsRenaming(true);
+                        }}
+                    >
+                        Rename
+                    </button>
+                    <button
+                        className={styles.danger}
+                        onClick={() => {
+                            setMenuOpen(false);
+                            onDeleteCollection(collection);
+                        }}
+                    >
+                        Delete
+                    </button>
+                </div>
             )}
-        </li>
+        </>
     );
 }
 

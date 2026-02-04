@@ -15,8 +15,11 @@ function Column({
   onSelectCollection,
   onDragStart,
   onDrop,
-  onTaskClick
+  onTaskClick,
+  onRenameCollection,
+  onDeleteCollection
 }) {
+
   const [newTask, setNewTask] = useState("");
   const [selectedType, setSelectedType] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
@@ -87,7 +90,10 @@ function Column({
             onDragStart={onDragStart}
             onDrop={onDrop}
             onTaskClick={onTaskClick}
+            onRenameCollection={onRenameCollection}
+            onDeleteCollection={onDeleteCollection}
           />
+
 
         ))}
 
