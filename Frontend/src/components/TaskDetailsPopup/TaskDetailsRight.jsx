@@ -3,6 +3,41 @@ import styles from "./TaskDetailsRight.module.css";
 import AssigneeAvatar from "../AssigneeAvatar";
 import { fetchWithAuth } from "../../auth";
 
+const ExpandableSection = ({ title, count, children, defaultOpen = false }) => {
+    const [isOpen, setIsOpen] = useState(defaultOpen);
+
+    return (
+        <div className={styles.expandableSection}>
+            <div
+                className={styles.expandableHeader}
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                <div className={styles.headerContent}>
+                    <h3>{title}</h3>
+                    {count !== undefined && count > 0 && (
+                        <span className={styles.countBadge}>{count}</span>
+                    )}
+                </div>
+                <svg
+                    className={`${styles.arrow} ${isOpen ? styles.arrowOpen : ""
+                        }`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <polyline points="9 18 15 12 9 6" />
+                </svg>
+            </div>
+            {isOpen && (
+                <div className={styles.expandableContent}>{children}</div>
+            )}
+        </div>
+    );
+};
+
 function TaskDetailsRight({
     projectId,
     task,
@@ -114,9 +149,7 @@ function TaskDetailsRight({
 
     return (
         <div className={styles.rightColumn}>
-            <div>
-                <h3>Assignees</h3>
-
+            <ExpandableSection title="Assignees" count={assignees.length}>
                 <div className={styles.assigneesList}>
                     {assignees.map(a => (
                         <AssigneeAvatar
@@ -196,10 +229,9 @@ function TaskDetailsRight({
                 {assignees.length === 0 && (
                     <div className={styles.hint}>No one assigned</div>
                 )}
-            </div>
+            </ExpandableSection>
 
-            <div>
-                <h3>Blocked By</h3>
+            <ExpandableSection title="Blocked By" count={blockers.length}>
                 <div className={styles.assigneesList}>
                     {blockers.map(b => (
                         <div
@@ -300,10 +332,9 @@ function TaskDetailsRight({
                         )}
                     </div>
                 </div>
-            </div>
+            </ExpandableSection>
 
-            <div>
-                <h3>Blocks</h3>
+            <ExpandableSection title="Blocks" count={blockedTasks.length}>
                 <div className={styles.assigneesList}>
                     {blockedTasks.map(b => (
                         <div
@@ -404,17 +435,16 @@ function TaskDetailsRight({
                         )}
                     </div>
                 </div>
-            </div>
+            </ExpandableSection>
 
-            <div>
-                <h3>Due Date</h3>
+            <ExpandableSection title="Due Date">
                 <input
                     type="date"
                     className={styles.dueDateInput}
                     value={dueDate ? dueDate.slice(0, 10) : ""}
                     onChange={e => onDueDateChange(e.target.value || null)}
                 />
-            </div>
+            </ExpandableSection>
         </div>
     );
 }
