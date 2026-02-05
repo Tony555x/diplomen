@@ -79,7 +79,7 @@ function Collection({
                     e.preventDefault();
                     e.stopPropagation();
                     setIsDragOver(false);
-                    onDrop(collection.id);
+                    onDrop({ collectionId: collection.id, columnKey });
                 }}
             >
                 <div

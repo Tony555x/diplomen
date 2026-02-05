@@ -120,30 +120,29 @@ function ProjectTasks() {
             return;
         }
 
-        // Determine new status and collectionId
         let updatedTask = { ...task };
+
         if (typeof target === "string") {
-            // Dropped on a column (not in a collection)
+            // Dropped on a column
             if (task.status === target && !task.collectionId) {
-                // Already in this column and not in a collection
                 setDraggedTaskId(null);
                 return;
             }
             updatedTask.status = target;
-            updatedTask.collectionId = null; // Remove from collection when dropped on column
-        } else {
+            updatedTask.collectionId = null;
+        } else if (typeof target === "object") {
             // Dropped on a collection
-            if (task.collectionId === target && task.status === updatedTask.status) {
-                // Already in this collection in this column
+            const { collectionId, columnKey } = target;
+
+            if (task.collectionId === collectionId && task.status === columnKey) {
                 setDraggedTaskId(null);
                 return;
             }
-            // When dropping into a collection, keep the task's current status
-            // (the collection instance in each column shows tasks with that column's status)
-            updatedTask.collectionId = target;
+
+            updatedTask.collectionId = collectionId;
+            updatedTask.status = columnKey; // ensure status matches the column where it was dropped
         }
 
-        // Optimistically update UI
         setTasks(prev => prev.map(t => (t.id === task.id ? updatedTask : t)));
         setDraggedTaskId(null);
 
@@ -157,7 +156,6 @@ function ProjectTasks() {
             });
         } catch (err) {
             console.error(err);
-            // Revert if request fails
             setTasks(prev => prev.map(t => (t.id === task.id ? task : t)));
         }
     };
