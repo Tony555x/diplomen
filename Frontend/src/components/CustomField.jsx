@@ -1,6 +1,5 @@
-// CustomField.jsx
 import React from "react";
-import styles from "./TaskDetailsPopup.module.css";
+import styles from "./CustomField.module.css";
 
 function CustomField({ field, value, onChange }) {
     const handleChange = e => {
@@ -23,7 +22,9 @@ function CustomField({ field, value, onChange }) {
                         />
                         <span>{field.name}</span>
                     </label>
-                    {field.description && <small className={styles.hint}>{field.description}</small>}
+                    {field.description && (
+                        <small className={styles.hint}>{field.description}</small>
+                    )}
                 </div>
             );
 
@@ -32,7 +33,9 @@ function CustomField({ field, value, onChange }) {
                 <div className={styles.formGroup} key={field.id}>
                     <label>{field.name}</label>
                     <input type="date" value={value} onChange={handleChange} />
-                    {field.description && <small className={styles.hint}>{field.description}</small>}
+                    {field.description && (
+                        <small className={styles.hint}>{field.description}</small>
+                    )}
                 </div>
             );
 
@@ -41,7 +44,9 @@ function CustomField({ field, value, onChange }) {
                 <div className={styles.formGroup} key={field.id}>
                     <label>{field.name}</label>
                     <input type="number" value={value} onChange={handleChange} />
-                    {field.description && <small className={styles.hint}>{field.description}</small>}
+                    {field.description && (
+                        <small className={styles.hint}>{field.description}</small>
+                    )}
                 </div>
             );
 
@@ -55,8 +60,9 @@ function CustomField({ field, value, onChange }) {
                         rows={4}
                         className={styles.textarea}
                     />
-
-                    {field.description && <small className={styles.hint}>{field.description}</small>}
+                    {field.description && (
+                        <small className={styles.hint}>{field.description}</small>
+                    )}
                 </div>
             );
     }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { fetchWithAuth } from "../auth";
 import Column from "../components/Column";
-import TaskDetailsPopup from "../components/TaskDetailsPopup";
+import TaskDetailsPopup from "../components/TaskDetailsPopup/TaskDetailsPopup";
 import styles from "./ProjectTasks.module.css";
 
 function ProjectTasks() {

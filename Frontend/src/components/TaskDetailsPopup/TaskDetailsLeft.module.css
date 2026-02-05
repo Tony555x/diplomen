@@ -1,0 +1,33 @@
+.column {
+    overflow-y: auto;
+    padding-right: 1rem;
+    border-right: 1px solid #374151;
+}
+
+.checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.column::-webkit-scrollbar {
+    width: 6px;
+}
+
+.column::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.column::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+.column::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.column::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}

@@ -1,0 +1,57 @@
+.formGroup {
+    margin-bottom: 1.25rem;
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.formGroup input,
+.formGroup select {
+    width: 100%;
+    padding: 0.75rem;
+    background: #2d2d2d;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.hint {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.checkboxGroup label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.checkboxGroup input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #3b82f6;
+}
+
+.textarea {
+    width: 100%;
+    padding: 0.75rem;
+    background: #2d2d2d;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    resize: vertical;
+    min-height: 96px;
+    box-sizing: border-box;
+}
+
+input,
+select,
+textarea {
+    box-sizing: border-box;
+}

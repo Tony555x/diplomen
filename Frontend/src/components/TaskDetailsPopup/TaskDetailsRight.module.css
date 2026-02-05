@@ -1,0 +1,145 @@
+/* TaskDetailsRight.module.css */
+
+.rightColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding-left: 0.5rem;
+    padding-right: 1rem;
+    border-right: 1px solid #374151;
+    overflow-y: auto;
+    max-height: 100%;
+}
+
+/* Assignee / Blocker / Blocked Lists */
+.assigneesList {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    position: relative;
+}
+
+.assigneeRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.removeBtn {
+    background: none;
+    border: none;
+    color: #f87171;
+    cursor: pointer;
+}
+
+/* Search input container */
+.searchContainer {
+    position: relative;
+    width: 100%;
+}
+
+.searchInput {
+    width: 100%;
+    padding: 0.5rem;
+    background: #2d2d2d;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+/* Dropdown search results */
+.searchResults {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #1e1e1e;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+    margin-top: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.searchResultItem {
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    border-bottom: 1px solid #2d2d2d;
+}
+
+.searchResultItem:last-child {
+    border-bottom: none;
+}
+
+.searchResultItem:hover {
+    background: #2d2d2d;
+}
+
+/* Hints */
+.hint {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Date input */
+.dueDateInput {
+    background: #2d2d2d;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    padding: 0.35rem 0.5rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.8rem;
+}
+
+.dueDateInput::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.7;
+    cursor: pointer;
+}
+
+/* Scrollbars */
+.rightColumn::-webkit-scrollbar,
+.assigneesList::-webkit-scrollbar,
+.searchResults::-webkit-scrollbar {
+    width: 6px;
+}
+
+.rightColumn::-webkit-scrollbar-track,
+.assigneesList::-webkit-scrollbar-track,
+.searchResults::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 0;
+}
+
+.rightColumn::-webkit-scrollbar-corner,
+.assigneesList::-webkit-scrollbar-corner,
+.searchResults::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+.rightColumn::-webkit-scrollbar-thumb,
+.assigneesList::-webkit-scrollbar-thumb,
+.searchResults::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.rightColumn::-webkit-scrollbar-thumb:hover,
+.assigneesList::-webkit-scrollbar-thumb:hover,
+.searchResults::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
