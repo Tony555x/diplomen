@@ -212,7 +212,7 @@ function Column({
               value={selectedType}
               onChange={e => setSelectedType(e.target.value)}
             >
-              <option value="">No type</option>
+              {taskTypes.length === 0 && <option value="">No type</option>}
               {taskTypes.map(tt => (
                 <option key={tt.id} value={tt.id}>
                   {tt.name}

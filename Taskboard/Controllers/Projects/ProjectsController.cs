@@ -107,6 +107,29 @@ public class ProjectsController : ControllerBase
 
         await _context.SaveChangesAsync();
 
+        // Create default "Task" type
+        var defaultTaskType = new TaskType
+        {
+            Name = "Task",
+            ProjectId = project.Id,
+            Description = "Default task type"
+        };
+        _context.TaskTypes.Add(defaultTaskType);
+        await _context.SaveChangesAsync();
+
+        // Create "Description" field for the default task type
+        var descriptionField = new TaskField
+        {
+            Name = "Description",
+            Type = FieldType.Text,
+            IsRequired = false,
+            Order = 0,
+            TaskTypeId = defaultTaskType.Id,
+            DefaultValue = ""
+        };
+        _context.TaskFields.Add(descriptionField);
+        await _context.SaveChangesAsync();
+
         return Ok(new
         {
             success = true,
