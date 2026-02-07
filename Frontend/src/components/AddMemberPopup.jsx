@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { fetchWithAuth } from "../auth";
-import "./AddMemberPopup.css";
+import styles from "./AddMemberPopup.module.css";
 
 function AddMemberPopup({ projectId, roles, onClose, onMemberAdded }) {
     const [email, setEmail] = useState("");
@@ -64,15 +64,15 @@ function AddMemberPopup({ projectId, roles, onClose, onMemberAdded }) {
     };
 
     return (
-        <div className="popup-overlay" onClick={handleBackdropClick}>
-            <div className="popup-container">
-                <div className="popup-header">
+        <div className={styles.overlay} onClick={handleBackdropClick}>
+            <div className={styles.popup}>
+                <div className={styles.header}>
                     <h2>Add Member</h2>
-                    <button className="close-btn" onClick={onClose}>×</button>
+                    <button className={styles.closeBtn} onClick={onClose}>×</button>
                 </div>
 
                 <form onSubmit={handleSubmit}>
-                    <div className="form-group">
+                    <div className={styles.field}>
                         <label htmlFor="member-email">Email Address</label>
                         <input
                             id="member-email"
@@ -88,7 +88,7 @@ function AddMemberPopup({ projectId, roles, onClose, onMemberAdded }) {
                         />
                     </div>
 
-                    <div className="form-group">
+                    <div className={styles.field} style={{ marginTop: "1rem" }}>
                         <label htmlFor="member-role">Role</label>
                         <select
                             id="member-role"
@@ -113,13 +113,13 @@ function AddMemberPopup({ projectId, roles, onClose, onMemberAdded }) {
                         </select>
                     </div>
 
-                    {error && <div className="error-message">{error}</div>}
+                    {error && <div className={styles.error} style={{ marginTop: "1rem" }}>{error}</div>}
 
-                    <div className="actions">
-                        <div className="rightActions">
+                    <div className={styles.actions} style={{ marginTop: "1.5rem" }}>
+                        <div className={styles.rightActions}>
                             <button
                                 type="button"
-                                className="cancelButton"
+                                className={styles.cancelButton}
                                 onClick={onClose}
                                 disabled={loading}
                             >
@@ -127,7 +127,7 @@ function AddMemberPopup({ projectId, roles, onClose, onMemberAdded }) {
                             </button>
                             <button
                                 type="submit"
-                                className="createButton"
+                                className={styles.createButton}
                                 disabled={loading || !email.trim()}
                             >
                                 {loading ? "Adding..." : "Add Member"}
