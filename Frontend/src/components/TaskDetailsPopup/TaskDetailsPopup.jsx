@@ -18,7 +18,7 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete, o
     const [assignees, setAssignees] = useState([]);
     const [members, setMembers] = useState([]);
 
-    const [dueDate, setDueDate] = useState(null);
+    const [dueDate, setDueDate] = useState(task.dueDate || null);
 
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
@@ -34,7 +34,6 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete, o
     useEffect(() => {
         loadAssignees();
         loadMembers();
-        loadDueDate();
         loadMessages();
     }, []);
 
@@ -57,12 +56,7 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete, o
         if (result?.success) setMembers(result.members);
     };
 
-    const loadDueDate = async () => {
-        const result = await fetchWithAuth(
-            `/api/projects/${projectId}/tasks/${task.id}/due-date`
-        );
-        setDueDate(result?.dueDate ?? null);
-    };
+    // loadDueDate removed as it is now passed in task prop
 
     const handleDueDateChange = async value => {
         setDueDate(value);

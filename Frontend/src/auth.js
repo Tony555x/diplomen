@@ -116,3 +116,30 @@ export async function fetchWithAuth(endpoint, options = {}) {
 
   return response.json();
 }
+
+/**
+ * Parse JWT token to get payload
+ * @param {string} token 
+ * @returns {object|null}
+ */
+export function parseJwt(token) {
+  try {
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Get current user info from token
+ * @returns {object|null} { id, name, ... }
+ */
+export function getCurrentUser() {
+  const token = getToken();
+  if (!token) return null;
+
+  const payload = parseJwt(token);
+  if (!payload) return null;
+
+  return payload;
+}

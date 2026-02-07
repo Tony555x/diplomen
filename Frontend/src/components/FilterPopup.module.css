@@ -1,0 +1,145 @@
+.popupContainer {
+    position: absolute;
+    top: -50px;
+    left: 100%;
+    /* Position to the right */
+    width: 300px;
+    background-color: #1e1e1e;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-left: 0.5rem;
+    /* Spacing from button/column */
+    max-height: 400px;
+    /* Limit height */
+    overflow-y: auto;
+    /* Scrollbar */
+}
+
+.popupHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #374151;
+    padding-bottom: 0.5rem;
+}
+
+.popupHeader h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.clearButton {
+    background: none;
+    border: none;
+    color: #f87171;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0;
+}
+
+.clearButton:hover {
+    text-decoration: underline;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sectionTitle {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.checkboxRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+}
+
+.checkboxRow input[type="checkbox"] {
+    accent-color: #3b82f6;
+    cursor: pointer;
+}
+
+/* User Search Styles (similar to TaskDetailsRight) */
+.userSearchContainer {
+    position: relative;
+    width: 100%;
+}
+
+.userInput {
+    width: 100%;
+    padding: 0.5rem;
+    background: #2d2d2d;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    color: white;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+
+.userDropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: #2d2d2d;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1001;
+    margin-top: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.userOption {
+    padding: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.userOption:hover {
+    background: #3d3d3d;
+}
+
+.selectedUser {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background: #374151;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.removeUserBtn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 4px;
+}
+
+.removeUserBtn:hover {
+    color: white;
+}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Task from "./Task";
 import Collection from "./Collection";
+import FilterPopup from "./FilterPopup";
 import styles from "./Column.module.css";
 
 function Column({
@@ -17,7 +18,11 @@ function Column({
   onDrop,
   onTaskClick,
   onRenameCollection,
-  onDeleteCollection
+  onDeleteCollection,
+  filterState,
+  setFilterState,
+  members,
+  currentUser
 }) {
 
   const [newTask, setNewTask] = useState("");
@@ -26,9 +31,11 @@ function Column({
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [isAddingCollection, setIsAddingCollection] = useState(false);
   const [newCollectionName, setNewCollectionName] = useState("");
+  const [showFilter, setShowFilter] = useState(false);
 
   const scrollContainerRef = useRef(null);
   const scrollIntervalRef = useRef(null);
+  const filterBtnRef = useRef(null);
 
   useEffect(() => {
     if (taskTypes.length > 0 && !selectedType) {
@@ -36,13 +43,67 @@ function Column({
     }
   }, [taskTypes, selectedType]);
 
+  // Filtering Helper
+  const isTaskVisible = (task) => {
+    // If no filters are active, show everything
+    const hasFilters = filterState.assignedToMe ||
+      filterState.assignedToUserId ||
+      filterState.completed ||
+      filterState.uncompleted ||
+      filterState.noDate ||
+      filterState.overdue ||
+      (filterState.typeIds && filterState.typeIds.length > 0);
+
+    if (!hasFilters) return true;
+
+    // Assignment Filters
+    if (filterState.assignedToMe) {
+      if (!currentUser) return false;
+      const isAssigned = task.assignees && task.assignees.some(a => a.userId === currentUser.nameid);
+      if (!isAssigned) return false;
+    }
+
+    if (filterState.assignedToUserId) {
+      const isAssigned = task.assignees && task.assignees.some(a => a.userId === filterState.assignedToUserId);
+      if (!isAssigned) return false;
+    }
+
+    // Status Filters
+    // If BOTH completed and uncompleted are checked or NEITHER, ignore (logic usually implies "show this type")
+    // If only one is checked, filter by it.
+    if (filterState.completed && !filterState.uncompleted) {
+      if (!task.completed) return false;
+    }
+    if (filterState.uncompleted && !filterState.completed) {
+      if (task.completed) return false;
+    }
+
+    // Date Filters
+    if (filterState.noDate) {
+      if (task.dueDate) return false;
+    }
+
+    if (filterState.overdue) {
+      if (!task.dueDate) return false; // cannot be overdue if no date
+      const isOverdue = new Date(task.dueDate) < new Date() && !task.completed;
+      if (!isOverdue) return false;
+    }
+
+    // Task Type Filters
+    if (filterState.typeIds && filterState.typeIds.length > 0) {
+      if (!filterState.typeIds.includes(task.taskTypeId)) return false;
+    }
+
+    return true;
+  };
+
   // Show all root collections in every column (collections are now column-agnostic)
   const rootCollections = collections.filter(
     c => !c.parentCollectionId
   );
 
   const rootTasks = tasks.filter(
-    t => t.status === columnKey && !t.collectionId
+    t => t.status === columnKey && !t.collectionId && isTaskVisible(t)
   );
 
   const handleAddTask = () => {
@@ -138,6 +199,16 @@ function Column({
     };
   }, []);
 
+  const isFilterActive = filterState && (
+    filterState.assignedToMe ||
+    filterState.assignedToUserId ||
+    filterState.completed ||
+    filterState.uncompleted ||
+    filterState.noDate ||
+    filterState.overdue ||
+    (filterState.typeIds && filterState.typeIds.length > 0)
+  );
+
   return (
     <div
       className={`${styles.column} ${isDragOver ? styles.dragOver : ""}`}
@@ -145,7 +216,27 @@ function Column({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <h2>{label}</h2>
+      <div className={styles.headerRow}>
+        <h2>{label}</h2>
+        <button
+          ref={filterBtnRef}
+          className={`${styles.filterBtn} ${isFilterActive ? styles.active : ""}`}
+          onClick={() => setShowFilter(!showFilter)}
+        >
+          <img src="/filter.png" alt="Filter" />
+        </button>
+
+        {showFilter && (
+          <FilterPopup
+            filterState={filterState}
+            onChange={setFilterState}
+            members={members}
+            taskTypes={taskTypes}
+            onClose={() => setShowFilter(false)}
+            ignoreRef={filterBtnRef}
+          />
+        )}
+      </div>
 
       <ul className={styles.items} ref={scrollContainerRef}>
 
@@ -164,6 +255,9 @@ function Column({
             onTaskClick={onTaskClick}
             onRenameCollection={onRenameCollection}
             onDeleteCollection={onDeleteCollection}
+            filterState={filterState}
+            currentUser={currentUser}
+            isTaskVisible={isTaskVisible}
           />
 
 

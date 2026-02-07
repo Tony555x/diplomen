@@ -46,6 +46,20 @@ namespace Taskboard.Controllers
                     t.Completed,
                     t.TaskTypeId,
                     t.CollectionId,
+                    Assignees = t.UserTasks.Select(ut => new 
+                    {
+                        ut.UserId,
+                        ut.User!.UserName
+                    }).ToList(),
+                    Blockers = _context.TaskBlockers
+                        .Where(tb => tb.BlockedTaskId == t.Id)
+                        .Select(tb => new 
+                        {
+                            tb.BlockingTask!.Id,
+                            tb.BlockingTask.Title,
+                            tb.BlockingTask.Completed
+                        }).ToList(),
+                    DueDate = t.DueDate,
                     IsBlocked = _context.TaskBlockers
                         .Any(tb => tb.BlockedTaskId == t.Id && !tb.BlockingTask.Completed),
                     FieldValues = t.FieldValues.Select(fv => new

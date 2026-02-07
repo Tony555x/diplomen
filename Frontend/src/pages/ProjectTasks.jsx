@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { fetchWithAuth } from "../auth";
+import { fetchWithAuth, getCurrentUser } from "../auth";
 import Column from "../components/Column";
 import TaskDetailsPopup from "../components/TaskDetailsPopup/TaskDetailsPopup";
 import styles from "./ProjectTasks.module.css";
 
 function ProjectTasks() {
     const { projectId } = useParams();
+
+    const [members, setMembers] = useState([]);
+    const [currentUser, setCurrentUser] = useState(null);
 
     const [tasks, setTasks] = useState([]);
     const [collections, setCollections] = useState([]);
@@ -18,21 +21,40 @@ function ProjectTasks() {
     const [selectedTask, setSelectedTask] = useState(null);
     const [selectedCollectionKey, setSelectedCollectionKey] = useState(null); // Format: "collectionId-columnKey"
 
+    // Filter State
+    const [filterState, setFilterState] = useState({
+        assignedToMe: false,
+        assignedToUserId: null,
+        assignedToUserName: null,
+        completed: false,
+        uncompleted: false,
+        noDate: false,
+        overdue: false,
+        typeIds: []
+    });
+
     const columns = ["To Do", "In Progress", "Done"];
 
     const refreshTasks = async () => {
         try {
             //setLoading(true); // Don't show full loading state for refresh
-            const [tasksData, taskTypesData, collectionsData] =
+            const [tasksData, taskTypesData, collectionsData, membersData] =
                 await Promise.all([
                     fetchWithAuth(`/api/projects/${projectId}/tasks`),
                     fetchWithAuth(`/api/projects/${projectId}/task-types`),
-                    fetchWithAuth(`/api/projects/${projectId}/collections`)
+                    fetchWithAuth(`/api/projects/${projectId}/collections`),
+                    fetchWithAuth(`/api/projects/${projectId}/members`)
                 ]);
 
             setTasks(tasksData || []);
             setTaskTypes(taskTypesData.taskTypes || []);
             setCollections(collectionsData || []);
+            setMembers(membersData.success ? membersData.members : []);
+
+            // Get current user from token
+            const user = getCurrentUser();
+            setCurrentUser(user);
+
         } catch (err) {
             console.error(err);
             setError("Failed to load tasks.");
@@ -284,6 +306,10 @@ function ProjectTasks() {
                             onTaskClick={setSelectedTask}
                             onRenameCollection={renameCollection}
                             onDeleteCollection={deleteCollection}
+                            filterState={filterState}
+                            setFilterState={setFilterState}
+                            members={members}
+                            currentUser={currentUser}
                         />
 
                     ))}
