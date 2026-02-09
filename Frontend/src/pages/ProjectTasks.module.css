@@ -296,3 +296,30 @@ body {
     border-color: #f87171;
     /* subtle red hover accent */
 }
+
+.addStatusArea {
+    min-width: 240px;
+    width: 240px;
+    display: flex;
+    justify-content: center;
+    padding-top: 1rem;
+}
+
+.addStatusButton {
+    background-color: #1e1e1e;
+    border: 1px dashed #374151;
+    color: rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    padding: 1rem;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    height: find-content;
+    align-self: flex-start;
+}
+
+.addStatusButton:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.05);
+}

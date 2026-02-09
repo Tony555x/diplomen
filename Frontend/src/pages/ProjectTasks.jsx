@@ -12,6 +12,7 @@ function ProjectTasks() {
     const [currentUser, setCurrentUser] = useState(null);
 
     const [tasks, setTasks] = useState([]);
+    const [statuses, setStatuses] = useState([]);
     const [collections, setCollections] = useState([]);
     const [taskTypes, setTaskTypes] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -33,23 +34,25 @@ function ProjectTasks() {
         typeIds: []
     });
 
-    const columns = ["To Do", "In Progress", "Done"];
+    // const columns = ["To Do", "In Progress", "Done"]; // Now dynamic from 'statuses' state
 
     const refreshTasks = async () => {
         try {
             //setLoading(true); // Don't show full loading state for refresh
-            const [tasksData, taskTypesData, collectionsData, membersData] =
+            const [tasksData, taskTypesData, collectionsData, membersData, statusesData] =
                 await Promise.all([
                     fetchWithAuth(`/api/projects/${projectId}/tasks`),
                     fetchWithAuth(`/api/projects/${projectId}/task-types`),
                     fetchWithAuth(`/api/projects/${projectId}/collections`),
-                    fetchWithAuth(`/api/projects/${projectId}/members`)
+                    fetchWithAuth(`/api/projects/${projectId}/members`),
+                    fetchWithAuth(`/api/projects/${projectId}/statuses`)
                 ]);
 
             setTasks(tasksData || []);
             setTaskTypes(taskTypesData.taskTypes || []);
             setCollections(collectionsData || []);
             setMembers(membersData.success ? membersData.members : []);
+            setStatuses(statusesData || []);
 
             // Get current user from token
             const user = getCurrentUser();
@@ -126,6 +129,47 @@ function ProjectTasks() {
             }
         } catch (err) {
             console.error(err);
+        }
+    };
+
+    const addStatus = async () => {
+        const name = window.prompt("Enter status name:");
+        if (!name || !name.trim()) return;
+
+        try {
+            const result = await fetchWithAuth(
+                `/api/projects/${projectId}/statuses`,
+                {
+                    method: "POST",
+                    body: { name: name.trim() }
+                }
+            );
+
+            if (result.success) {
+                setStatuses(prev => [...prev, result.status]);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const deleteStatus = async (statusId) => {
+        if (!window.confirm("Delete this status? This will only work if no tasks are currently in this status.")) return;
+
+        try {
+            const result = await fetchWithAuth(
+                `/api/projects/${projectId}/statuses/${statusId}`,
+                { method: "DELETE" }
+            );
+
+            if (result.success) {
+                setStatuses(prev => prev.filter(s => s.id !== statusId));
+            } else {
+                alert(result.message || "Failed to delete status.");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error deleting status.");
         }
     };
 
@@ -289,11 +333,11 @@ function ProjectTasks() {
         <>
             <div className={styles.projectTasks}>
                 <div className={styles.board}>
-                    {columns.map(column => (
+                    {statuses.map(status => (
                         <Column
-                            key={column}
-                            columnKey={column}
-                            label={column}
+                            key={status.id}
+                            columnKey={status.name}
+                            label={status.name}
                             tasks={tasks}
                             collections={collections}
                             taskTypes={taskTypes}
@@ -310,9 +354,15 @@ function ProjectTasks() {
                             setFilterState={setFilterState}
                             members={members}
                             currentUser={currentUser}
+                            onDeleteStatus={() => deleteStatus(status.id)}
                         />
 
                     ))}
+                    <div className={styles.addStatusArea}>
+                        <button className={styles.addStatusButton} onClick={addStatus}>
+                            + Add Status
+                        </button>
+                    </div>
                 </div>
             </div>
 

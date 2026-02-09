@@ -107,6 +107,19 @@ public class ProjectsController : ControllerBase
 
         await _context.SaveChangesAsync();
 
+        // Create default statuses
+        var defaultStatuses = new List<string> { "To Do", "In Progress", "Done" };
+        for (int i = 0; i < defaultStatuses.Count; i++)
+        {
+            _context.UserTaskStatuses.Add(new UserTaskStatus
+            {
+                Name = defaultStatuses[i],
+                ProjectId = project.Id,
+                Order = i
+            });
+        }
+        await _context.SaveChangesAsync();
+
         // Create default "Task" type
         var defaultTaskType = new TaskType
         {
@@ -141,6 +154,98 @@ public class ProjectsController : ControllerBase
                 project.AccessLevel
             }
         });
+    }
+
+    [HttpGet("{projectId}/statuses")]
+    public async Task<IActionResult> GetTaskStatuses(int projectId)
+    {
+        var statuses = await _context.UserTaskStatuses
+            .Where(ts => ts.ProjectId == projectId)
+            .OrderBy(ts => ts.Order)
+            .ToListAsync();
+
+        // If no statuses exist (legacy project), initialize defaults
+        if (statuses.Count == 0)
+        {
+            var defaults = new List<string> { "To Do", "In Progress", "Done" };
+            for (int i = 0; i < defaults.Count; i++)
+            {
+                var ts = new UserTaskStatus
+                {
+                    Name = defaults[i],
+                    ProjectId = projectId,
+                    Order = i
+                };
+                _context.UserTaskStatuses.Add(ts);
+                statuses.Add(ts);
+            }
+            await _context.SaveChangesAsync();
+        }
+
+        return Ok(statuses);
+    }
+
+    [HttpPost("{projectId}/statuses")]
+    public async Task<IActionResult> CreateTaskStatus(int projectId, [FromBody] CreateUserTaskStatusRequest request)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return Unauthorized();
+
+        var membership = await _context.ProjectMembers
+            .Include(pm => pm.ProjectRole)
+            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+
+        if (membership == null || membership.ProjectRole == null || !membership.ProjectRole.CanEditProjectSettings)
+            return Forbid();
+
+        if (string.IsNullOrWhiteSpace(request.Name))
+            return BadRequest(new { success = false, message = "Status name is required." });
+
+        var maxOrder = await _context.UserTaskStatuses
+            .Where(ts => ts.ProjectId == projectId)
+            .Select(ts => (int?)ts.Order)
+            .MaxAsync() ?? -1;
+
+        var status = new UserTaskStatus
+        {
+            Name = request.Name.Trim(),
+            ProjectId = projectId,
+            Order = maxOrder + 1
+        };
+
+        _context.UserTaskStatuses.Add(status);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { success = true, status });
+    }
+
+    [HttpDelete("{projectId}/statuses/{statusId}")]
+    public async Task<IActionResult> DeleteTaskStatus(int projectId, int statusId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return Unauthorized();
+
+        var membership = await _context.ProjectMembers
+            .Include(pm => pm.ProjectRole)
+            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+
+        if (membership == null || membership.ProjectRole == null || !membership.ProjectRole.CanEditProjectSettings)
+            return Forbid();
+
+        var status = await _context.UserTaskStatuses.FirstOrDefaultAsync(ts => ts.Id == statusId && ts.ProjectId == projectId);
+        if (status == null) return NotFound();
+
+        // Check if any tasks are using this status
+        var tasksUsingStatus = await _context.Tasks.AnyAsync(t => t.ProjectId == projectId && t.Status == status.Name);
+        if (tasksUsingStatus)
+        {
+            return BadRequest(new { success = false, message = "Cannot delete status while tasks are using it." });
+        }
+
+        _context.UserTaskStatuses.Remove(status);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { success = true });
     }
 
     [HttpPatch("{projectId}")]

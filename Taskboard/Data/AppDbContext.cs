@@ -22,6 +22,7 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<TaskFieldValue> TaskFieldValues { get; set; }
 
 
+    public DbSet<UserTaskStatus> UserTaskStatuses { get; set; }
     public DbSet<UserTask> UserTasks { get; set; }
     public DbSet<Collection> Collections { get; set; }
     public DbSet<TaskMessage> TaskMessages { get; set; }
@@ -65,6 +66,13 @@ public class AppDbContext : IdentityDbContext<User>
             .HasOne(tt => tt.Project)
             .WithMany(p => p.TaskTypes)
             .HasForeignKey(tt => tt.ProjectId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // UserTaskStatus -> Project: Cascade
+        builder.Entity<UserTaskStatus>()
+            .HasOne(ts => ts.Project)
+            .WithMany(p => p.UserTaskStatuses)
+            .HasForeignKey(ts => ts.ProjectId)
             .OnDelete(DeleteBehavior.Cascade);
 
         // TaskField -> TaskType: Cascade (when task type is deleted, delete all its fields)

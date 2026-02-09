@@ -95,3 +95,10 @@ public class UpsertTaskFieldRequest
 
     public int Order { get; set; }
 }
+
+public class CreateUserTaskStatusRequest
+{
+    [Required]
+    [MaxLength(100)]
+    public string Name { get; set; } = string.Empty;
+}

@@ -22,7 +22,8 @@ function Column({
   filterState,
   setFilterState,
   members,
-  currentUser
+  currentUser,
+  onDeleteStatus
 }) {
 
   const [newTask, setNewTask] = useState("");
@@ -224,6 +225,14 @@ function Column({
           onClick={() => setShowFilter(!showFilter)}
         >
           <img src="/filter.png" alt="Filter" />
+        </button>
+
+        <button
+          className={styles.deleteStatusBtn}
+          onClick={onDeleteStatus}
+          title="Delete Status"
+        >
+          ×
         </button>
 
         {showFilter && (
