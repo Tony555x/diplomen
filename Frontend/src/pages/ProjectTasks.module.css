@@ -298,24 +298,25 @@ body {
 }
 
 .addStatusArea {
-    min-width: 240px;
-    width: 240px;
+    min-width: 200px;
+    width: 200px;
     display: flex;
     justify-content: center;
-    padding-top: 1rem;
 }
 
 .addStatusButton {
-    background-color: #1e1e1e;
+    background-color: transparent;
     border: 1px dashed #374151;
-    color: rgba(255, 255, 255, 0.6);
-    border-radius: 12px;
-    padding: 1rem;
+    color: rgba(255, 255, 255, 0.4);
+    border-radius: 8px;
+    padding: 0.75rem;
     width: 100%;
     cursor: pointer;
     transition: all 0.2s ease;
-    height: find-content;
+    height: fit-content;
     align-self: flex-start;
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 
 .addStatusButton:hover {
