@@ -67,6 +67,36 @@
     font-size: 0.9rem;
 }
 
+.createCard {
+    border: 2px dashed #2c2c2c;
+    border-radius: 8px;
+    /* Ensure consistency */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: transparent;
+    opacity: 0.5;
+    transition: all 0.2s ease;
+}
+
+.createCard:hover {
+    border-color: #6b9eff;
+    opacity: 1;
+    background: rgba(30, 30, 30, 0.5);
+    transform: translateY(-2px);
+    /* Maintain the hover effect */
+}
+
+.createCard h3 {
+    color: rgba(255, 255, 255, 0.7);
+    /* Standard text color */
+    font-size: 1.1rem;
+    /* Slightly smaller text */
+    margin-bottom: 0.5rem;
+}
+
 .taskList {
     background: #1e1e1e;
     border-radius: 8px;

@@ -42,27 +42,24 @@ function HomePage() {
                 {/* Recent Workspaces */}
                 <section className={styles.homeSection}>
                     <h2>Recent Workspaces</h2>
-                    {data?.workspaces?.length > 0 ? (
-                        <div className={styles.cardGrid}>
-                            {data.workspaces.map((ws) => (
-                                <div
-                                    key={ws.id}
-                                    className={styles.card}
-                                    onClick={() => navigate(`/workspace/${ws.id}/projects`)}
-                                >
-                                    <h3>{ws.name}</h3>
-                                    <p>Workspace #{ws.id}</p>
-                                </div>
-                            ))}
+                    <div className={styles.cardGrid}>
+                        {data?.workspaces?.map((ws) => (
+                            <div
+                                key={ws.id}
+                                className={styles.card}
+                                onClick={() => navigate(`/workspace/${ws.id}/projects`)}
+                            >
+                                <h3>{ws.name}</h3>
+                                <p>Workspace #{ws.id}</p>
+                            </div>
+                        ))}
+                        <div
+                            className={`${styles.card} ${styles.createCard}`}
+                            onClick={() => navigate("/create-workspace")}
+                        >
+                            <h3>+ Create Workspace</h3>
                         </div>
-                    ) : (
-                        <p>
-                            No recent workspaces found.{" "}
-                            <Link to="/create-workspace" className={styles.link}>
-                                Create a workspace
-                            </Link>
-                        </p>
-                    )}
+                    </div>
                 </section>
 
                 {/* Recent Projects */}
