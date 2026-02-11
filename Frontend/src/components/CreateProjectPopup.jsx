@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { fetchWithAuth } from "../auth";
-import "./CreateProjectPopup.css";
+import styles from "./PopupStyles.module.css";
 
 function CreateProjectPopup({ workspaceId, onClose, onProjectCreated }) {
     const [name, setName] = useState("");
@@ -85,21 +85,21 @@ function CreateProjectPopup({ workspaceId, onClose, onProjectCreated }) {
     };
 
     const handleOverlayClick = (e) => {
-        if (e.target.className === "popup-overlay") {
+        if (e.target.classList.contains(styles.backdrop)) {
             onClose();
         }
     };
 
     return (
-        <div className="popup-overlay" onClick={handleOverlayClick}>
-            <div className="popup-container">
-                <div className="popup-header">
+        <div className={styles.backdrop} onClick={handleOverlayClick}>
+            <div className={styles.popup}>
+                <div className={styles.header}>
                     <h2>Create New Project</h2>
-                    <button className="close-btn" onClick={onClose}>×</button>
+                    <button className={styles.closeBtn} onClick={onClose}>×</button>
                 </div>
 
                 <form onSubmit={handleSubmit}>
-                    <div className="form-group">
+                    <div className={styles.field}>
                         <label>Project Name</label>
                         <input
                             type="text"
@@ -110,7 +110,7 @@ function CreateProjectPopup({ workspaceId, onClose, onProjectCreated }) {
                         />
                     </div>
 
-                    <div className="form-group">
+                    <div className={styles.field}>
                         <label>Access Level</label>
                         <select
                             value={accessLevel}
@@ -123,9 +123,9 @@ function CreateProjectPopup({ workspaceId, onClose, onProjectCreated }) {
                         </select>
                     </div>
 
-                    <div className="form-group">
+                    <div className={styles.field}>
                         <label>Add Members</label>
-                        <div className="member-input-group">
+                        <div style={{ display: "flex", gap: "0.5rem" }}>
                             <input
                                 type="email"
                                 value={memberEmail}
@@ -144,26 +144,26 @@ function CreateProjectPopup({ workspaceId, onClose, onProjectCreated }) {
                             />
                             <button
                                 type="button"
-                                className="add-btn"
+                                style={{ padding: "0.75rem 1rem", background: "#10b981", border: "none", borderRadius: "6px", color: "white", fontWeight: "500", cursor: "pointer" }}
                                 onClick={handleAddMember}
                                 disabled={loading}
                             >
                                 Add
                             </button>
                         </div>
-                        {emailError && <div className="email-error">{emailError}</div>}
+                        {emailError && <div className={styles.error} style={{ marginTop: "0.5rem" }}>{emailError}</div>}
                     </div>
 
                     {members.length > 0 && (
-                        <div className="members-list">
+                        <div style={{ marginTop: "1rem" }}>
                             <label>Members ({members.length})</label>
-                            <div className="members-container">
+                            <div style={{ maxHeight: "150px", overflowY: "auto", marginTop: "0.5rem" }}>
                                 {members.map((email) => (
-                                    <div key={email} className="member-item">
+                                    <div key={email} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.5rem", background: "#2d2d2d", borderRadius: "4px", marginBottom: "0.5rem" }}>
                                         <span>{email}</span>
                                         <button
                                             type="button"
-                                            className="remove-btn"
+                                            style={{ background: "none", border: "none", color: "rgba(255,255,255,0.6)", cursor: "pointer", fontSize: "1.2rem", padding: "0 4px" }}
                                             onClick={() => handleRemoveMember(email)}
                                             disabled={loading}
                                         >
@@ -175,24 +175,26 @@ function CreateProjectPopup({ workspaceId, onClose, onProjectCreated }) {
                         </div>
                     )}
 
-                    {error && <div className="error-message">{error}</div>}
+                    {error && <div className={styles.error}>{error}</div>}
 
-                    <div className="button-group">
-                        <button
-                            type="button"
-                            className="btn-secondary"
-                            onClick={onClose}
-                            disabled={loading}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            className="btn-primary"
-                            disabled={loading}
-                        >
-                            {loading ? "Creating..." : "Create Project"}
-                        </button>
+                    <div className={styles.actions}>
+                        <div className={styles.rightActions}>
+                            <button
+                                type="button"
+                                className={styles.cancelButton}
+                                onClick={onClose}
+                                disabled={loading}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                className={styles.createButton}
+                                disabled={loading}
+                            >
+                                {loading ? "Creating..." : "Create Project"}
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

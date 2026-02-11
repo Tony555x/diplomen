@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { fetchWithAuth } from "../auth";
-import "./EditMemberPopup.css";
+import styles from "./PopupStyles.module.css";
 
 function EditMemberPopup({ projectId, member, roles, currentUserRole, onClose, onMemberUpdated }) {
     const [selectedRole, setSelectedRole] = useState(member.roleId?.toString() || "");
@@ -85,31 +85,31 @@ function EditMemberPopup({ projectId, member, roles, currentUserRole, onClose, o
     const isOwner = member.role?.toLowerCase() === "owner";
 
     return (
-        <div className="popup-overlay" onClick={handleBackdropClick}>
-            <div className="popup-container">
-                <div className="popup-header">
+        <div className={styles.backdrop} onClick={handleBackdropClick}>
+            <div className={styles.popup}>
+                <div className={styles.header}>
                     <h2>Edit Member</h2>
-                    <button className="close-btn" onClick={onClose}>×</button>
+                    <button className={styles.closeBtn} onClick={onClose}>×</button>
                 </div>
 
-                <div className="member-details">
-                    <div className="member-detail-row">
-                        <span className="detail-label">Name:</span>
-                        <span className="detail-value">{member.userName}</span>
+                <div style={{ marginBottom: "1rem", padding: "0.75rem", background: "#2d2d2d", borderRadius: "6px" }}>
+                    <div style={{ marginBottom: "0.5rem" }}>
+                        <span style={{ color: "rgba(255,255,255,0.6)", marginRight: "0.5rem" }}>Name:</span>
+                        <span>{member.userName}</span>
                     </div>
-                    <div className="member-detail-row">
-                        <span className="detail-label">Email:</span>
-                        <span className="detail-value">{member.email}</span>
+                    <div>
+                        <span style={{ color: "rgba(255,255,255,0.6)", marginRight: "0.5rem" }}>Email:</span>
+                        <span>{member.email}</span>
                     </div>
                 </div>
 
                 {isOwner ? (
-                    <div className="owner-notice">
+                    <div style={{ padding: "0.75rem", background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.3)", borderRadius: "6px", color: "rgba(147,197,253,0.9)", fontSize: "0.9rem" }}>
                         This is the project owner. The owner's role cannot be changed or removed.
                     </div>
                 ) : (
                     <>
-                        <div className="form-group">
+                        <div className={styles.field}>
                             <label htmlFor="member-role">Role</label>
                             <select
                                 id="member-role"
@@ -134,21 +134,21 @@ function EditMemberPopup({ projectId, member, roles, currentUserRole, onClose, o
                             </select>
                         </div>
 
-                        {error && <div className="error-message">{error}</div>}
+                        {error && <div className={styles.error}>{error}</div>}
 
-                        <div className="actions">
+                        <div className={styles.actions}>
                             <button
                                 type="button"
-                                className="deleteButton"
+                                className={styles.deleteButton}
                                 onClick={handleDelete}
                                 disabled={loading}
                             >
                                 Remove Member
                             </button>
-                            <div className="rightActions">
+                            <div className={styles.rightActions}>
                                 <button
                                     type="button"
-                                    className="cancelButton"
+                                    className={styles.cancelButton}
                                     onClick={onClose}
                                     disabled={loading}
                                 >
@@ -156,7 +156,7 @@ function EditMemberPopup({ projectId, member, roles, currentUserRole, onClose, o
                                 </button>
                                 <button
                                     type="button"
-                                    className="createButton"
+                                    className={styles.createButton}
                                     onClick={handleUpdateRole}
                                     disabled={loading || !selectedRole}
                                 >

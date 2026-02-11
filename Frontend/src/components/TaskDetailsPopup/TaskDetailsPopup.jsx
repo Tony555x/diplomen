@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import styles from "./TaskDetailsPopup.module.css";
+import sharedStyles from "../PopupStyles.module.css";
 import { fetchWithAuth } from "../../auth";
 import { useParams } from "react-router-dom";
 
@@ -170,19 +171,19 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
                 <div className={styles.footer}>
                     {onDelete && (
                         <button
-                            className={styles.deleteButton}
+                            className={sharedStyles.deleteButton}
                             onClick={() => onDelete(task)}
                         >
                             Delete
                         </button>
                     )}
 
-                    <div className={styles.rightActions}>
-                        <button className={styles.cancelButton} onClick={onClose}>
+                    <div className={sharedStyles.rightActions}>
+                        <button className={sharedStyles.cancelButton} onClick={onClose}>
                             Cancel
                         </button>
                         <button
-                            className={styles.createButton}
+                            className={sharedStyles.createButton}
                             onClick={handleSave}
                             disabled={isSaving || !title.trim()}
                         >

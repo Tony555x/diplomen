@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { fetchWithAuth } from "../auth";
-import styles from "./CreateRolePopup.module.css";
+import styles from "./PopupStyles.module.css";
 
 function CreateRolePopup({ projectId, role = null, onClose, onRoleSaved }) {
     const [name, setName] = useState(role?.roleName ?? "");
@@ -72,7 +72,7 @@ function CreateRolePopup({ projectId, role = null, onClose, onRoleSaved }) {
 
 
     return (
-        <div className={styles.overlay}>
+        <div className={styles.backdrop}>
             <div className={styles.popup}>
                 <h2>{role ? "Edit role" : "Create role"}</h2>
 

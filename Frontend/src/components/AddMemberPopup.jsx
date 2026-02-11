@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { fetchWithAuth } from "../auth";
-import styles from "./AddMemberPopup.module.css";
+import styles from "./PopupStyles.module.css";
 
 function AddMemberPopup({ projectId, roles, onClose, onMemberAdded }) {
     const [email, setEmail] = useState("");
@@ -64,7 +64,7 @@ function AddMemberPopup({ projectId, roles, onClose, onMemberAdded }) {
     };
 
     return (
-        <div className={styles.overlay} onClick={handleBackdropClick}>
+        <div className={styles.backdrop} onClick={handleBackdropClick}>
             <div className={styles.popup}>
                 <div className={styles.header}>
                     <h2>Add Member</h2>
@@ -88,7 +88,7 @@ function AddMemberPopup({ projectId, roles, onClose, onMemberAdded }) {
                         />
                     </div>
 
-                    <div className={styles.field} style={{ marginTop: "1rem" }}>
+                    <div className={styles.field}>
                         <label htmlFor="member-role">Role</label>
                         <select
                             id="member-role"
@@ -113,9 +113,9 @@ function AddMemberPopup({ projectId, roles, onClose, onMemberAdded }) {
                         </select>
                     </div>
 
-                    {error && <div className={styles.error} style={{ marginTop: "1rem" }}>{error}</div>}
+                    {error && <div className={styles.error}>{error}</div>}
 
-                    <div className={styles.actions} style={{ marginTop: "1.5rem" }}>
+                    <div className={styles.actions}>
                         <div className={styles.rightActions}>
                             <button
                                 type="button"

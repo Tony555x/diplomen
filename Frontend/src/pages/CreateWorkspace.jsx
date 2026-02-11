@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchWithAuth } from "../auth";
 import Navbar from "../components/Navbar";
-import "./CreateWorkspace.css";
+import styles from "../components/PopupStyles.module.css";
 
 function CreateWorkspace() {
     const [name, setName] = useState("");
@@ -48,41 +48,45 @@ function CreateWorkspace() {
     return (
         <>
             <Navbar />
-            <div className="create-workspace-page">
-                <h2>Create New Workspace</h2>
+            <div className={styles.backdrop} style={{ position: "fixed" }}>
+                <div className={styles.popup} style={{ maxWidth: "500px" }}>
+                    <h2>Create New Workspace</h2>
 
-                <form onSubmit={handleSubmit}>
-                    <label>
-                        Workspace Name
-                        <input
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="Enter workspace name"
-                            disabled={loading}
-                        />
-                    </label>
+                    <form onSubmit={handleSubmit}>
+                        <div className={styles.field}>
+                            <label>Workspace Name</label>
+                            <input
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="Enter workspace name"
+                                disabled={loading}
+                            />
+                        </div>
 
-                    {error && <div className="error-message">{error}</div>}
+                        {error && <div className={styles.error}>{error}</div>}
 
-                    <div className="button-group">
-                        <button
-                            type="button"
-                            className="btn-secondary"
-                            onClick={handleCancel}
-                            disabled={loading}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            className="btn-primary"
-                            disabled={loading}
-                        >
-                            {loading ? "Creating..." : "Create Workspace"}
-                        </button>
-                    </div>
-                </form>
+                        <div className={styles.actions}>
+                            <div className={styles.rightActions}>
+                                <button
+                                    type="button"
+                                    className={styles.cancelButton}
+                                    onClick={handleCancel}
+                                    disabled={loading}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className={styles.createButton}
+                                    disabled={loading}
+                                >
+                                    {loading ? "Creating..." : "Create Workspace"}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </>
     );

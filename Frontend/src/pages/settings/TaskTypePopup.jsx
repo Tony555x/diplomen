@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { fetchWithAuth } from "../../auth";
+import sharedStyles from "../../components/PopupStyles.module.css";
 import styles from "./TaskTypePopup.module.css";
 
 const FIELD_TYPES = ["Text", "Number", "Date", "Checkbox"];
@@ -81,8 +82,8 @@ function TaskTypePopup({ projectId, taskType, onClose, onSaved }) {
     };
 
     return (
-        <div className={styles.backdrop}>
-            <div className={styles.popup}>
+        <div className={sharedStyles.backdrop}>
+            <div className={sharedStyles.popup}>
                 <h3>{isEdit ? "Edit task type" : "New task type"}</h3>
 
                 <input
@@ -129,28 +130,28 @@ function TaskTypePopup({ projectId, taskType, onClose, onSaved }) {
 
                 <button onClick={addField}>Add field</button>
 
-                {error && <div className={styles.error}>{error}</div>}
+                {error && <div className={sharedStyles.error}>{error}</div>}
 
-                <div className={styles.actions}>
+                <div className={sharedStyles.actions}>
                     {isEdit && (
                         <button
-                            className={styles.deleteButton}
+                            className={sharedStyles.deleteButton}
                             onClick={handleDelete}
                         >
                             Delete
                         </button>
                     )}
 
-                    <div className={styles.rightActions}>
+                    <div className={sharedStyles.rightActions}>
                         <button
-                            className={styles.cancelButton}
+                            className={sharedStyles.cancelButton}
                             onClick={onClose}
                         >
                             Cancel
                         </button>
 
                         <button
-                            className={styles.createButton}
+                            className={sharedStyles.createButton}
                             onClick={save}
                         >
                             Save

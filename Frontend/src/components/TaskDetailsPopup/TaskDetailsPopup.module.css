@@ -101,33 +101,3 @@
     padding: 1rem 1.25rem;
     border-top: 1px solid #374151;
 }
-
-.rightActions {
-    display: flex;
-    gap: 0.75rem;
-}
-
-.deleteButton {
-    padding: 0.75rem 1.5rem;
-    border-radius: 6px;
-    background: rgba(248, 113, 113, 0.1);
-    color: #f87171;
-    border: 1px solid #f87171;
-    cursor: pointer;
-}
-
-.createButton {
-    background: #3b82f6;
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border-radius: 6px;
-    border: none;
-}
-
-.cancelButton {
-    background: transparent;
-    color: rgba(255, 255, 255, 0.8);
-    border: 1px solid #374151;
-    padding: 0.75rem 1.5rem;
-    border-radius: 6px;
-}
