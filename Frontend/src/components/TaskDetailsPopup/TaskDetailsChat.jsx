@@ -1,3 +1,4 @@
+import { useState } from "react";
 import styles from "./TaskDetailsChat.module.css";
 import { fetchWithAuth } from "../../auth";
 
@@ -10,6 +11,7 @@ function TaskDetailsChat({
     reloadMessages,
     messagesEndRef
 }) {
+    const [activeTab, setActiveTab] = useState("messages");
     const formatTime = dateString => {
         const date = new Date(dateString);
         const diffMins = Math.floor((Date.now() - date) / 60000);
@@ -33,31 +35,54 @@ function TaskDetailsChat({
 
     return (
         <div className={styles.column}>
-            <h3>Messages</h3>
-
-            <div className={styles.messages}>
-                {messages.map(m => (
-                    <div key={m.id} className={styles.message}>
-                        <div className={styles.header}>
-                            <span className={styles.author}>{m.userName}</span>
-                            <span className={styles.time}>{formatTime(m.createdAt)}</span>
-                        </div>
-                        <div className={styles.content}>{m.content}</div>
-                    </div>
-                ))}
-                <div ref={messagesEndRef} />
-            </div>
-
-            <div className={styles.inputRow}>
-                <textarea
-                    value={newMessage}
-                    onChange={e => setNewMessage(e.target.value)}
-                    placeholder="Type a message..."
-                />
-                <button onClick={handleSend} disabled={!newMessage.trim()}>
-                    Send
+            <div className={styles.tabs}>
+                <button
+                    className={`${styles.tab} ${activeTab === "messages" ? styles.activeTab : ""}`}
+                    onClick={() => setActiveTab("messages")}
+                >
+                    Messages
+                </button>
+                <button
+                    className={`${styles.tab} ${activeTab === "history" ? styles.activeTab : ""}`}
+                    onClick={() => setActiveTab("history")}
+                >
+                    History
                 </button>
             </div>
+
+            {activeTab === "messages" ? (
+                <>
+                    <div className={styles.messages}>
+                        {messages.map(m => (
+                            <div key={m.id} className={styles.message}>
+                                <div className={styles.header}>
+                                    <span className={styles.author}>{m.userName}</span>
+                                    <span className={styles.time}>{formatTime(m.createdAt)}</span>
+                                </div>
+                                <div className={styles.content}>{m.content}</div>
+                            </div>
+                        ))}
+                        <div ref={messagesEndRef} />
+                    </div>
+
+                    <div className={styles.inputRow}>
+                        <textarea
+                            value={newMessage}
+                            onChange={e => setNewMessage(e.target.value)}
+                            placeholder="Type a message..."
+                        />
+                        <button onClick={handleSend} disabled={!newMessage.trim()}>
+                            Send
+                        </button>
+                    </div>
+                </>
+            ) : (
+                <div className={styles.messages}>
+                    <div style={{ padding: "1rem", textAlign: "center", color: "rgba(255,255,255,0.5)" }}>
+                        History feature coming soon...
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

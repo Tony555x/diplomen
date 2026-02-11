@@ -5,6 +5,41 @@
     padding-left: 0.65rem;
 }
 
+.tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.65rem;
+    border-bottom: 1px solid #374151;
+    padding-bottom: 0.5rem;
+}
+
+.tab {
+    background: transparent;
+    border: none;
+    padding: 0.5rem 1rem;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.tab:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.activeTab {
+    background: #3b82f6;
+    color: white;
+}
+
+.activeTab:hover {
+    background: #2563eb;
+    color: white;
+}
+
 .messages {
     flex: 1;
     display: flex;
