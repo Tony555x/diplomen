@@ -1,12 +1,12 @@
 .column {
     overflow-y: auto;
-    padding-right: 1rem;
+    padding-right: 0.65rem;
     border-right: 1px solid #374151;
 }
 
 /* Specific styling for completed checkbox */
 .completedCheckbox {
-    margin-top: 1rem;
+    margin-top: 0.65rem;
 }
 
 .column::-webkit-scrollbar {
