@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./CustomField.module.css";
+import StyledCheckbox from "./StyledCheckbox";
 
 function CustomField({ field, value, onChange }) {
     const handleChange = e => {
@@ -14,14 +15,11 @@ function CustomField({ field, value, onChange }) {
         case "Checkbox":
             return (
                 <div className={styles.checkboxGroup} key={field.id}>
-                    <label>
-                        <input
-                            type="checkbox"
-                            checked={value === "true"}
-                            onChange={handleChange}
-                        />
-                        <span>{field.name}</span>
-                    </label>
+                    <StyledCheckbox
+                        checked={value === "true"}
+                        onChange={handleChange}
+                        label={field.name}
+                    />
                     {field.description && (
                         <small className={styles.hint}>{field.description}</small>
                     )}

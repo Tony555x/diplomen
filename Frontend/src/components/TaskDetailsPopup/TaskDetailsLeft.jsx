@@ -1,5 +1,6 @@
 import styles from "./TaskDetailsLeft.module.css";
 import CustomField from "../CustomField";
+import StyledCheckbox from "../StyledCheckbox";
 
 function TaskDetailsLeft({ taskType, completed, setCompleted, fieldValues, setFieldValues }) {
     const handleFieldChange = (fieldId, value) => {
@@ -35,14 +36,12 @@ function TaskDetailsLeft({ taskType, completed, setCompleted, fieldValues, setFi
                 </>
             )}
 
-            <label className={styles.checkbox}>
-                <input
-                    type="checkbox"
-                    checked={completed}
-                    onChange={e => setCompleted(e.target.checked)}
-                />
-                <span>Mark as completed</span>
-            </label>
+            <StyledCheckbox
+                checked={completed}
+                onChange={e => setCompleted(e.target.checked)}
+                label="Mark as completed"
+                className={styles.completedCheckbox}
+            />
         </div>
     );
 }

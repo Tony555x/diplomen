@@ -7,7 +7,7 @@ import TaskDetailsLeft from "./TaskDetailsLeft";
 import TaskDetailsRight from "./TaskDetailsRight";
 import TaskDetailsChat from "./TaskDetailsChat";
 
-function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete, onRefresh }) {
+function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpdate, onDelete, onRefresh }) {
     const { projectId } = useParams();
 
     const [title, setTitle] = useState(task.title);
@@ -120,9 +120,11 @@ function TaskDetailsPopup({ task, taskTypes = [], onClose, onUpdate, onDelete, o
                                 value={status}
                                 onChange={e => setStatus(e.target.value)}
                             >
-                                <option value="To Do">To Do</option>
-                                <option value="In Progress">In Progress</option>
-                                <option value="Done">Done</option>
+                                {statuses.map(s => (
+                                    <option key={s.id} value={s.name}>
+                                        {s.name}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 

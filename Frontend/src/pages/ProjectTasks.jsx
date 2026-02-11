@@ -369,6 +369,7 @@ function ProjectTasks() {
             {selectedTask && (
                 <TaskDetailsPopup
                     task={selectedTask}
+                    statuses={statuses}
                     taskTypes={taskTypes}
                     onClose={() => setSelectedTask(null)}
                     onUpdate={handleTaskUpdate}

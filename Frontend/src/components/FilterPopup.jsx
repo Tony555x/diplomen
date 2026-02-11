@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import styles from "./FilterPopup.module.css";
+import StyledCheckbox from "./StyledCheckbox";
 
 const FilterPopup = ({
     filterState,
@@ -106,15 +107,12 @@ const FilterPopup = ({
 
             <div className={styles.section}>
                 <div className={styles.sectionTitle}>Assignments</div>
-                <label className={styles.checkboxRow}>
-                    <input
-                        type="checkbox"
-                        checked={!!filterState.assignedToMe}
-                        onChange={handleAssignedToMeChange}
-                        disabled={!!filterState.assignedToUserId} // Disable if specific user selected
-                    />
-                    Tasks assigned to me
-                </label>
+                <StyledCheckbox
+                    checked={!!filterState.assignedToMe}
+                    onChange={handleAssignedToMeChange}
+                    disabled={!!filterState.assignedToUserId}
+                    label="Tasks assigned to me"
+                />
 
                 <div className={styles.userSearchContainer}>
                     {!filterState.assignedToUserId ? (
@@ -160,56 +158,42 @@ const FilterPopup = ({
 
             <div className={styles.section}>
                 <div className={styles.sectionTitle}>Status</div>
-                <label className={styles.checkboxRow}>
-                    <input
-                        type="checkbox"
-                        checked={!!filterState.completed}
-                        onChange={() => handleCheckboxChange("completed")}
-                    />
-                    Completed tasks
-                </label>
-                <label className={styles.checkboxRow}>
-                    <input
-                        type="checkbox"
-                        checked={!!filterState.uncompleted}
-                        onChange={() => handleCheckboxChange("uncompleted")}
-                    />
-                    Uncompleted tasks
-                </label>
+                <StyledCheckbox
+                    checked={!!filterState.completed}
+                    onChange={() => handleCheckboxChange("completed")}
+                    label="Completed tasks"
+                />
+                <StyledCheckbox
+                    checked={!!filterState.uncompleted}
+                    onChange={() => handleCheckboxChange("uncompleted")}
+                    label="Uncompleted tasks"
+                />
             </div>
 
             <div className={styles.section}>
                 <div className={styles.sectionTitle}>Date</div>
-                <label className={styles.checkboxRow}>
-                    <input
-                        type="checkbox"
-                        checked={!!filterState.noDate}
-                        onChange={() => handleCheckboxChange("noDate")}
-                    />
-                    With no date
-                </label>
-                <label className={styles.checkboxRow}>
-                    <input
-                        type="checkbox"
-                        checked={!!filterState.overdue}
-                        onChange={() => handleCheckboxChange("overdue")}
-                    />
-                    Overdue
-                </label>
+                <StyledCheckbox
+                    checked={!!filterState.noDate}
+                    onChange={() => handleCheckboxChange("noDate")}
+                    label="With no date"
+                />
+                <StyledCheckbox
+                    checked={!!filterState.overdue}
+                    onChange={() => handleCheckboxChange("overdue")}
+                    label="Overdue"
+                />
             </div>
 
             {taskTypes.length > 0 && (
                 <div className={styles.section}>
                     <div className={styles.sectionTitle}>Task Types</div>
                     {taskTypes.map(type => (
-                        <label key={type.id} className={styles.checkboxRow}>
-                            <input
-                                type="checkbox"
-                                checked={(filterState.typeIds || []).includes(type.id)}
-                                onChange={() => handleTypeToggle(type.id)}
-                            />
-                            {type.name}
-                        </label>
+                        <StyledCheckbox
+                            key={type.id}
+                            checked={(filterState.typeIds || []).includes(type.id)}
+                            onChange={() => handleTypeToggle(type.id)}
+                            label={type.name}
+                        />
                     ))}
                 </div>
             )}
