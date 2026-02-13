@@ -164,7 +164,7 @@ function Column({
 
   const handleDragLeave = (e) => {
     // Only set isDragOver to false if we're actually leaving the column
-    const rect = e.currentTarget.getBoundingClientRect();
+    const rect = e.currentTarget();
     const x = e.clientX;
     const y = e.clientY;
 
@@ -289,7 +289,7 @@ function Column({
             className={styles.addButton}
             onClick={() => setIsAddingTask(true)}
           >
-            Add Task
+            Add Card
           </button>
           <button
             className={styles.addButton}

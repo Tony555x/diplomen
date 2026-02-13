@@ -222,8 +222,8 @@ namespace Taskboard.Controllers
                     {
                         TaskId = task.Id,
                         UserId = userId,
-                        ActionType = "Moved",
-                        Details = $"to {request.Status}"
+                        ActionType = "Moved this card to",
+                        Details = request.Status
                     });
                     task.Status = request.Status;
                 }
@@ -242,7 +242,7 @@ namespace Taskboard.Controllers
                     {
                         TaskId = task.Id,
                         UserId = userId,
-                        ActionType = request.Completed.Value ? "Completed" : "Uncompleted",
+                        ActionType = request.Completed.Value ? "Marked this card as completed" : "Marked this card as uncompleted",
                         Details = null
                     });
                     task.Completed = request.Completed.Value;
@@ -404,7 +404,7 @@ namespace Taskboard.Controllers
                 TaskId = taskId,
                 UserId = userId,
                 ActionType = "Assigned",
-                Details = assignedUser?.UserName ?? "Unknown User"
+                Details = $"{assignedUser?.UserName ?? "Unknown User"} to this card"
             });
             
             await _context.SaveChangesAsync();
@@ -436,8 +436,8 @@ namespace Taskboard.Controllers
             {
                 TaskId = taskId,
                 UserId = userId,
-                ActionType = "Unassigned",
-                Details = unassignedUser?.UserName ?? "Unknown User"
+                ActionType = "Removed",
+                Details = $"{unassignedUser?.UserName ?? "Unknown User"} from this card"
             });
             await _context.SaveChangesAsync();
 

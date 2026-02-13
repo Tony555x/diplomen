@@ -115,10 +115,10 @@ function TaskDetailsChat({
                                     <span className={styles.time}>{formatTime(h.createdAt)}</span>
                                 </div>
                                 <div className={styles.content}>
-                                    <span style={{ fontWeight: "bold", color: "var(--accent-color)" }}>
+                                    <span style={{ color: "var(--accent-color)" }}>
                                         {h.actionType}
                                     </span>
-                                    {h.details && <span style={{ marginLeft: "0.5rem" }}>{h.details}</span>}
+                                    {h.details && <span style={{ marginLeft: "4px" }}>{h.details}</span>}
                                 </div>
                             </div>
                         ))
