@@ -27,6 +27,7 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<Collection> Collections { get; set; }
     public DbSet<TaskMessage> TaskMessages { get; set; }
     public DbSet<TaskBlocker> TaskBlockers { get; set; }
+    public DbSet<TaskHistory> TaskHistories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -159,6 +160,21 @@ public class AppDbContext : IdentityDbContext<User>
             .HasOne(tb => tb.BlockedTask)
             .WithMany()
             .HasForeignKey(tb => tb.BlockedTaskId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // TaskHistory Configurations
+        // TaskHistory -> TaskItem: Cascade (when task is deleted, delete its history)
+        builder.Entity<TaskHistory>()
+            .HasOne(th => th.Task)
+            .WithMany()
+            .HasForeignKey(th => th.TaskId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // TaskHistory -> User: Restrict (prevent deleting user if they have history)
+        builder.Entity<TaskHistory>()
+            .HasOne(th => th.User)
+            .WithMany()
+            .HasForeignKey(th => th.UserId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

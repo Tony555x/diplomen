@@ -216,7 +216,17 @@ namespace Taskboard.Controllers
 
             if (!string.IsNullOrWhiteSpace(request.Status))
             {
-                task.Status = request.Status;
+                if (task.Status != request.Status)
+                {
+                    _context.TaskHistories.Add(new TaskHistory
+                    {
+                        TaskId = task.Id,
+                        UserId = userId,
+                        ActionType = "Moved",
+                        Details = $"to {request.Status}"
+                    });
+                    task.Status = request.Status;
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(request.Title))
@@ -226,7 +236,17 @@ namespace Taskboard.Controllers
 
             if (request.Completed.HasValue)
             {
-                task.Completed = request.Completed.Value;
+                if (task.Completed != request.Completed.Value)
+                {
+                    _context.TaskHistories.Add(new TaskHistory
+                    {
+                        TaskId = task.Id,
+                        UserId = userId,
+                        ActionType = request.Completed.Value ? "Completed" : "Uncompleted",
+                        Details = null
+                    });
+                    task.Completed = request.Completed.Value;
+                }
             }
 
             // Update field values if provided
@@ -376,6 +396,17 @@ namespace Taskboard.Controllers
             };
 
             _context.UserTasks.Add(assignment);
+            
+            // Log history
+            var assignedUser = await _context.Users.FindAsync(request.UserId);
+            _context.TaskHistories.Add(new TaskHistory
+            {
+                TaskId = taskId,
+                UserId = userId,
+                ActionType = "Assigned",
+                Details = assignedUser?.UserName ?? "Unknown User"
+            });
+            
             await _context.SaveChangesAsync();
 
             return Ok(new { success = true });
@@ -398,6 +429,16 @@ namespace Taskboard.Controllers
             if (assignment == null) return NotFound();
 
             _context.UserTasks.Remove(assignment);
+            
+            // Log history
+             var unassignedUser = await _context.Users.FindAsync(assignedUserId);
+             _context.TaskHistories.Add(new TaskHistory
+            {
+                TaskId = taskId,
+                UserId = userId,
+                ActionType = "Unassigned",
+                Details = unassignedUser?.UserName ?? "Unknown User"
+            });
             await _context.SaveChangesAsync();
 
             return Ok(new { success = true });
@@ -626,6 +667,32 @@ namespace Taskboard.Controllers
 
 
 
+        [HttpGet("{taskId}/history")]
+        public async Task<IActionResult> GetTaskHistory(int projectId, int taskId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var hasAccess = await _context.ProjectMembers
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+            if (!hasAccess) return Forbid();
+
+            var history = await _context.TaskHistories
+                .Where(th => th.TaskId == taskId)
+                .OrderByDescending(th => th.CreatedAt)
+                .Select(th => new
+                {
+                    th.Id,
+                    th.ActionType,
+                    th.Details,
+                    th.CreatedAt,
+                    th.UserId,
+                    UserName = th.User!.UserName
+                })
+                .ToListAsync();
+
+            return Ok(history);
+        }
     }
 
     public class CreateTaskRequest

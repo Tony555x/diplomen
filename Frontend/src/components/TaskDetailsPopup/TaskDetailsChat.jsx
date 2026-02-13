@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./TaskDetailsChat.module.css";
 import { fetchWithAuth } from "../../auth";
 
@@ -31,6 +31,27 @@ function TaskDetailsChat({
 
         setNewMessage("");
         reloadMessages();
+    };
+
+    const [history, setHistory] = useState([]);
+    const [loadingHistory, setLoadingHistory] = useState(false);
+
+    useEffect(() => {
+        if (activeTab === "history") {
+            loadHistory();
+        }
+    }, [activeTab, projectId, taskId]);
+
+    const loadHistory = async () => {
+        setLoadingHistory(true);
+        try {
+            const data = await fetchWithAuth(`/api/projects/${projectId}/tasks/${taskId}/history`);
+            setHistory(data);
+        } catch (error) {
+            console.error("Failed to load history:", error);
+        } finally {
+            setLoadingHistory(false);
+        }
     };
 
     return (
@@ -78,9 +99,30 @@ function TaskDetailsChat({
                 </>
             ) : (
                 <div className={styles.messages}>
-                    <div style={{ padding: "1rem", textAlign: "center", color: "rgba(255,255,255,0.5)" }}>
-                        History feature coming soon...
-                    </div>
+                    {loadingHistory ? (
+                        <div style={{ padding: "1rem", textAlign: "center", color: "rgba(255,255,255,0.5)" }}>
+                            Loading history...
+                        </div>
+                    ) : history.length === 0 ? (
+                        <div style={{ padding: "1rem", textAlign: "center", color: "rgba(255,255,255,0.5)" }}>
+                            No history yet.
+                        </div>
+                    ) : (
+                        history.map(h => (
+                            <div key={h.id} className={styles.message} style={{ opacity: 0.8 }}>
+                                <div className={styles.header}>
+                                    <span className={styles.author}>{h.userName}</span>
+                                    <span className={styles.time}>{formatTime(h.createdAt)}</span>
+                                </div>
+                                <div className={styles.content}>
+                                    <span style={{ fontWeight: "bold", color: "var(--accent-color)" }}>
+                                        {h.actionType}
+                                    </span>
+                                    {h.details && <span style={{ marginLeft: "0.5rem" }}>{h.details}</span>}
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
             )}
         </div>
