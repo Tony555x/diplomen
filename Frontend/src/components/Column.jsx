@@ -164,7 +164,7 @@ function Column({
 
   const handleDragLeave = (e) => {
     // Only set isDragOver to false if we're actually leaving the column
-    const rect = e.currentTarget();
+    const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX;
     const y = e.clientY;
 
