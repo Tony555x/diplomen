@@ -105,7 +105,8 @@ public class ProjectsController : ControllerBase
                 ProjectId = project.Id,
                 UserId = member.Id,
                 ProjectRoleId = memberRole.Id,
-                JoinedAt = DateTime.UtcNow
+                JoinedAt = DateTime.UtcNow,
+                Status = ProjectMemberStatus.Pending
             });
         }
 

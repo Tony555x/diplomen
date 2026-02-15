@@ -115,7 +115,8 @@ public class ProjectMembersController : ControllerBase
             ProjectId = projectId,
             UserId = userToAdd.Id,
             ProjectRoleId = role.Id,
-            JoinedAt = DateTime.UtcNow
+            JoinedAt = DateTime.UtcNow,
+            Status = ProjectMemberStatus.Pending
         };
 
         _context.ProjectMembers.Add(newMember);
@@ -138,16 +139,39 @@ public class ProjectMembersController : ControllerBase
         return Ok(new
         {
             success = true,
-            message = "Member added successfully.",
+            message = "Member invited successfully.",
             member = new
             {
                 UserId = userToAdd.Id,
                 userToAdd.Email,
                 userToAdd.UserName,
                 Role = addedMember!.ProjectRole!.RoleName,
-                addedMember.JoinedAt
+                addedMember.JoinedAt,
+                Status = addedMember.Status
             }
         });
+    }
+
+    [HttpPost("accept-invite/{projectId}")]
+    public async Task<IActionResult> AcceptInvite(int projectId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return Unauthorized();
+
+        var member = await _context.ProjectMembers
+            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+
+        if (member == null) return NotFound(new { success = false, message = "Invitation not found." });
+
+        if (member.Status == ProjectMemberStatus.Active)
+        {
+            return BadRequest(new { success = false, message = "You are already an active member of this project." });
+        }
+
+        member.Status = ProjectMemberStatus.Active;
+        await _context.SaveChangesAsync();
+
+        return Ok(new { success = true, message = "Invitation accepted." });
     }
 
     [HttpPatch("{userId}")]
