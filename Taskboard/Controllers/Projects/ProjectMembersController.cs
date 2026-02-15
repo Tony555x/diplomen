@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Taskboard.Contracts.Projects;
 using Taskboard.Data.Models;
+using Taskboard.Services;
 
 namespace Taskboard.Controllers.Projects;
 
@@ -13,10 +14,12 @@ namespace Taskboard.Controllers.Projects;
 public class ProjectMembersController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly INotificationService _notificationService;
 
-    public ProjectMembersController(AppDbContext context)
+    public ProjectMembersController(AppDbContext context, INotificationService notificationService)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     [HttpGet]
@@ -122,6 +125,15 @@ public class ProjectMembersController : ControllerBase
             .Where(pm => pm.ProjectId == projectId && pm.UserId == userToAdd.Id)
             .Include(pm => pm.ProjectRole)
             .FirstOrDefaultAsync();
+
+        // Send notification
+        var project = await _context.Projects.FindAsync(projectId);
+        var inviter = await _context.Users.FindAsync(userId);
+        
+        if (project != null && inviter != null)
+        {
+            await _notificationService.SendProjectInviteAsync(project, inviter, new List<User> { userToAdd });
+        }
 
         return Ok(new
         {

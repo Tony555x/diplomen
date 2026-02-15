@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Taskboard.Data.Models;
+using Taskboard.Services;
 
 namespace Taskboard.Controllers
 {
@@ -13,10 +14,12 @@ namespace Taskboard.Controllers
     public class TasksController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly INotificationService _notificationService;
 
-        public TasksController(AppDbContext context)
+        public TasksController(AppDbContext context, INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         [HttpGet]
@@ -407,7 +410,17 @@ namespace Taskboard.Controllers
                 Details = $"{assignedUser?.UserName ?? "Unknown User"} to this card"
             });
             
+            
             await _context.SaveChangesAsync();
+
+            // Send notification
+            var task = await _context.Tasks.FindAsync(taskId);
+            var assigner = await _context.Users.FindAsync(userId);
+            
+            if (task != null && assignedUser != null && assigner != null)
+            {
+                await _notificationService.SendTaskAssignmentAsync(task, assigner, assignedUser);
+            }
 
             return Ok(new { success = true });
         }

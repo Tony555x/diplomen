@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Taskboard.Data.Models;
+using Taskboard.Data.Models;
 using Taskboard.Contracts.Projects;
+using Taskboard.Services;
 
 namespace Taskboard.Controllers.Projects;
 
@@ -17,10 +19,12 @@ namespace Taskboard.Controllers.Projects;
 public class ProjectsController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly INotificationService _notificationService;
 
-    public ProjectsController(AppDbContext context)
+    public ProjectsController(AppDbContext context, INotificationService notificationService)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     [HttpPost]
@@ -142,6 +146,13 @@ public class ProjectsController : ControllerBase
         };
         _context.TaskFields.Add(descriptionField);
         await _context.SaveChangesAsync();
+
+        // Send notifications
+        var currentUser = await _context.Users.FindAsync(userId);
+        if (currentUser != null && validatedMembers.Any())
+        {
+            await _notificationService.SendProjectInviteAsync(project, currentUser, validatedMembers);
+        }
 
         return Ok(new
         {
