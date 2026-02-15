@@ -152,7 +152,7 @@ public class ProjectMembersController : ControllerBase
         });
     }
 
-    [HttpPost("accept-invite/{projectId}")]
+    [HttpPost("accept-invite")]
     public async Task<IActionResult> AcceptInvite(int projectId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
