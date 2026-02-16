@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./Navbar.css";
+import styles from "./Navbar.module.css";
 import { Link, useNavigate } from "react-router-dom";
 import { removeToken } from "../auth";
 
@@ -13,11 +13,11 @@ function Navbar({ userName }) {
     };
 
     return (
-        <div className="navbar">
-            <div className="nav-left">
+        <div className={styles.navbar}>
+            <div className={styles.navLeft}>
                 <Link
                     to="/home"
-                    className="nav-logo"
+                    className={styles.navLogo}
                     style={{ textDecoration: "none", color: "inherit" }}
                 >
                     MySite
@@ -25,35 +25,39 @@ function Navbar({ userName }) {
 
                 <Link
                     to="/home"
-                    className="nav-link"
+                    className={styles.navLink}
                     style={{ marginLeft: "1rem", textDecoration: "none", color: "#333" }}
                 >
                     Home
                 </Link>
 
-                <input className="nav-search" type="text" placeholder="Search..." />
+                <input
+                    className={styles.navSearch}
+                    type="text"
+                    placeholder="Search..."
+                />
             </div>
 
-            <div className="nav-right">
-                <button className="nav-btn">🔔</button>
-                <button className="nav-btn">⚙️</button>
+            <div className={styles.navRight}>
+                <button className={styles.navBtn}>🔔</button>
+                <button className={styles.navBtn}>⚙️</button>
 
-                <div className="user-menu-wrapper">
+                <div className={styles.userMenuWrapper}>
                     <button
-                        className="nav-btn"
+                        className={styles.navBtn}
                         onClick={() => setShowUserMenu(v => !v)}
                     >
                         👤
                     </button>
 
                     {showUserMenu && (
-                        <div className="user-menu">
-                            <div className="user-name">
+                        <div className={styles.userMenu}>
+                            <div className={styles.userName}>
                                 {userName || "User"}
                             </div>
 
                             <button
-                                className="logout-btn"
+                                className={styles.logoutBtn}
                                 onClick={handleLogout}
                             >
                                 Log out
