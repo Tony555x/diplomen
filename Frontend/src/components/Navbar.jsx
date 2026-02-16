@@ -1,33 +1,59 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styles from "./Navbar.module.css";
 import { Link, useNavigate } from "react-router-dom";
-import { removeToken } from "../auth";
+import { removeToken, fetchWithAuth } from "../auth";
 
 function Navbar({ userName }) {
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [notifications, setNotifications] = useState([]);
     const navigate = useNavigate();
+    const notifRef = useRef(null);
 
     const handleLogout = () => {
         removeToken();
         navigate("/");
     };
 
+    useEffect(() => {
+        if (!showNotifications) return;
+
+        const loadNotifications = async () => {
+            try {
+                const data = await fetchWithAuth("/api/notifications/latest");
+                setNotifications(data);
+            } catch {
+                setNotifications([]);
+            }
+        };
+
+        loadNotifications();
+    }, [showNotifications]);
+
+    useEffect(() => {
+        const handleClickOutside = e => {
+            if (notifRef.current && !notifRef.current.contains(e.target)) {
+                setShowNotifications(false);
+            }
+        };
+
+        if (showNotifications) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [showNotifications]);
+
     return (
         <div className={styles.navbar}>
             <div className={styles.navLeft}>
-                <Link
-                    to="/home"
-                    className={styles.navLogo}
-                    style={{ textDecoration: "none", color: "inherit" }}
-                >
+                <Link to="/home" className={styles.navLogo}>
                     MySite
                 </Link>
 
-                <Link
-                    to="/home"
-                    className={styles.navLink}
-                    style={{ marginLeft: "1rem", textDecoration: "none", color: "#333" }}
-                >
+                <Link to="/home" className={styles.navLink}>
                     Home
                 </Link>
 
@@ -39,7 +65,50 @@ function Navbar({ userName }) {
             </div>
 
             <div className={styles.navRight}>
-                <button className={styles.navBtn}>🔔</button>
+                <div className={styles.userMenuWrapper} ref={notifRef}>
+                    <button
+                        className={styles.navBtn}
+                        onClick={() => setShowNotifications(v => !v)}
+                    >
+                        🔔
+                    </button>
+
+                    {showNotifications && (
+                        <div className={styles.notificationPopup}>
+                            <div className={styles.notificationHeader}>
+                                Notifications
+                            </div>
+
+                            <div className={styles.notificationList}>
+                                {notifications.length === 0 && (
+                                    <div className={styles.notificationEmpty}>
+                                        No notifications
+                                    </div>
+                                )}
+
+                                {notifications.map(n => (
+                                    <div key={n.id} className={styles.notificationItem}>
+                                        <div className={styles.notificationTitle}>
+                                            {n.title}
+                                        </div>
+                                        <div className={styles.notificationMessage}>
+                                            {n.message}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <button
+                                className={styles.viewAllBtn}
+                                disabled
+                                onClick={() => navigate("/notifications")}
+                            >
+                                View all notifications
+                            </button>
+                        </div>
+                    )}
+                </div>
+
                 <button className={styles.navBtn}>⚙️</button>
 
                 <div className={styles.userMenuWrapper}>
@@ -55,7 +124,6 @@ function Navbar({ userName }) {
                             <div className={styles.userName}>
                                 {userName || "User"}
                             </div>
-
                             <button
                                 className={styles.logoutBtn}
                                 onClick={handleLogout}
