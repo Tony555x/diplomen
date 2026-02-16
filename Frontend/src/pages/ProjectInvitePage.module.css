@@ -1,0 +1,77 @@
+.wrapper {
+    height: calc(100vh - 55px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.card {
+    width: 100%;
+    max-width: 500px;
+    background: #1e1e1e;
+    border: 1px solid #374151;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.card h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.text {
+    margin-bottom: 1.5rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.acceptBtn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    border: none;
+    background: #3b82f6;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.acceptBtn:hover:not(:disabled) {
+    background: #2563eb;
+}
+
+.acceptBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cancelBtn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid #374151;
+    cursor: pointer;
+}
+
+.cancelBtn:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.error {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-radius: 6px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+    font-size: 0.9rem;
+}

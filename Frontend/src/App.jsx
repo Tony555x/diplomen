@@ -7,6 +7,7 @@ import HomePage from "./pages/HomePage";
 import CreateWorkspace from "./pages/CreateWorkspace";
 import WorkspacePage from "./pages/WorkspacePage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ProjectInvitePage from "./pages/ProjectInvitePage";
 
 function App() {
   return (
@@ -45,6 +46,13 @@ function App() {
               <WorkspacePage />
             </ProtectedRoute>
           }
+        />
+        <Route
+          path="/notifications/project-invite/:projectId"
+          element={
+            <ProtectedRoute>
+              <ProjectInvitePage />
+            </ProtectedRoute>}
         />
       </Routes>
     </BrowserRouter>

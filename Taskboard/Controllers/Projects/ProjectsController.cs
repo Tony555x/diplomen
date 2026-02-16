@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Taskboard.Data.Models;
-using Taskboard.Data.Models;
 using Taskboard.Contracts.Projects;
 using Taskboard.Services;
 

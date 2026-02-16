@@ -27,14 +27,6 @@ public class NotificationsController : ControllerBase
             .Where(n => n.UserId == userId)
             .OrderByDescending(n => n.CreatedAt)
             .Take(5)
-            .Select(n => new
-            {
-                n.Id,
-                n.Title,
-                n.Message,
-                n.IsRead,
-                n.CreatedAt
-            })
             .ToListAsync();
 
         return Ok(notifications);

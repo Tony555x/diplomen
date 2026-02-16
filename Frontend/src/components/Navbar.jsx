@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import styles from "./Navbar.module.css";
 import { Link, useNavigate } from "react-router-dom";
 import { removeToken, fetchWithAuth } from "../auth";
+import NotificationItem from "./NotificationItem";
 
 function Navbar({ userName }) {
     const [showUserMenu, setShowUserMenu] = useState(false);
@@ -87,16 +88,14 @@ function Navbar({ userName }) {
                                 )}
 
                                 {notifications.map(n => (
-                                    <div key={n.id} className={styles.notificationItem}>
-                                        <div className={styles.notificationTitle}>
-                                            {n.title}
-                                        </div>
-                                        <div className={styles.notificationMessage}>
-                                            {n.message}
-                                        </div>
-                                    </div>
+                                    <NotificationItem
+                                        key={n.id}
+                                        notification={n}
+                                        onClick={() => setShowNotifications(false)}
+                                    />
                                 ))}
                             </div>
+
 
                             <button
                                 className={styles.viewAllBtn}
