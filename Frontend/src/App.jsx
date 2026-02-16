@@ -15,14 +15,6 @@ function App() {
         <Route path="/" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route
-          path="/dashboard/:projectId"
-          element={
-            <ProtectedRoute>
-              <ProjectPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/project/:projectId/*"
           element={
             <ProtectedRoute>
