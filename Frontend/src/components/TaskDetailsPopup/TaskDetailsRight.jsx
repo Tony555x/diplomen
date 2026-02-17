@@ -183,6 +183,7 @@ function TaskDetailsRight({
                                     .filter(
                                         m =>
                                             !assignedIds.includes(m.userId) &&
+                                            m.status === "Active" &&
                                             m.userName
                                                 .toLowerCase()
                                                 .includes(
@@ -205,6 +206,7 @@ function TaskDetailsRight({
                                 {members.filter(
                                     m =>
                                         !assignedIds.includes(m.userId) &&
+                                        m.status === "Active" &&
                                         m.userName
                                             .toLowerCase()
                                             .includes(

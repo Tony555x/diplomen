@@ -39,7 +39,7 @@ namespace Taskboard.Controllers
 
             // Recent Projects (Top 5)
             var recentProjects = await _context.ProjectMembers
-                .Where(pm => pm.UserId == userId)
+                .Where(pm => pm.UserId == userId && pm.Status == ProjectMemberStatus.Active)
                 .Include(pm => pm.Project)
                 .OrderByDescending(pm => pm.Project.Id)
                 .Select(pm => new

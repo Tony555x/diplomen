@@ -30,7 +30,7 @@ public class ProjectMembersController : ControllerBase
 
         var currentUserMembership = await _context.ProjectMembers
             .Include(pm => pm.ProjectRole)
-            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
 
         if (currentUserMembership == null) return Forbid();
 
@@ -44,7 +44,8 @@ public class ProjectMembersController : ControllerBase
                 pm.User!.Email,
                 pm.User.UserName,
                 Role = pm.ProjectRole!.RoleName,
-                pm.JoinedAt
+                pm.JoinedAt,
+                Status = pm.Status.ToString()
             })
             .OrderBy(m => m.JoinedAt)
             .ToListAsync();
@@ -87,7 +88,7 @@ public class ProjectMembersController : ControllerBase
 
         var currentUserProjectMember = await _context.ProjectMembers
             .Include(pm => pm.ProjectRole)
-            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
 
         if (currentUserProjectMember?.ProjectRole?.CanAddEditMembers != true) return Forbid();
 
@@ -182,7 +183,7 @@ public class ProjectMembersController : ControllerBase
 
         var currentMember = await _context.ProjectMembers
             .Include(pm => pm.ProjectRole)
-            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == currentUserId);
+            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == currentUserId && pm.Status == ProjectMemberStatus.Active);
 
         if (currentMember?.ProjectRole?.CanAddEditMembers != true) return Forbid();
 
@@ -223,7 +224,7 @@ public class ProjectMembersController : ControllerBase
 
         var currentMember = await _context.ProjectMembers
             .Include(pm => pm.ProjectRole)
-            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == currentUserId);
+            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == currentUserId && pm.Status == ProjectMemberStatus.Active);
 
         if (currentMember?.ProjectRole?.CanAddEditMembers != true) return Forbid();
 

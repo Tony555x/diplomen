@@ -114,6 +114,11 @@ function ProjectMembers() {
                                         <span className={`role-badge role-${member.role.toLowerCase() === "owner" ? "owner" : "member"}`}>
                                             {member.role}
                                         </span>
+                                        {member.status === "Pending" && (
+                                            <span className="status-badge status-pending">
+                                                Pending Invite
+                                            </span>
+                                        )}
                                         <span className="joined-date">
                                             Joined {formatDate(member.joinedAt)}
                                         </span>

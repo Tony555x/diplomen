@@ -204,7 +204,7 @@ public class ProjectsController : ControllerBase
 
         var membership = await _context.ProjectMembers
             .Include(pm => pm.ProjectRole)
-            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
 
         if (membership == null || membership.ProjectRole == null || !membership.ProjectRole.CanEditProjectSettings)
             return Forbid();
@@ -238,7 +238,7 @@ public class ProjectsController : ControllerBase
 
         var membership = await _context.ProjectMembers
             .Include(pm => pm.ProjectRole)
-            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
 
         if (membership == null || membership.ProjectRole == null || !membership.ProjectRole.CanEditProjectSettings)
             return Forbid();
@@ -270,7 +270,7 @@ public class ProjectsController : ControllerBase
 
         var membership = await _context.ProjectMembers
             .Include(pm => pm.ProjectRole)
-            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
 
         if (membership == null || membership.ProjectRole == null || !membership.ProjectRole.CanEditProjectSettings)
             return Forbid();

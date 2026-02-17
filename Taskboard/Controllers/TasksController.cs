@@ -30,7 +30,7 @@ namespace Taskboard.Controllers
 
             // Verify user has access to this project
             var hasAccess = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
 
             if (!hasAccess)
             {
@@ -86,7 +86,7 @@ namespace Taskboard.Controllers
 
             // Verify user has access to this project
             var hasAccess = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
 
             if (!hasAccess)
             {
@@ -168,7 +168,7 @@ namespace Taskboard.Controllers
 
             // Verify user has access to this project
             var hasAccess = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
 
             if (!hasAccess)
             {
@@ -201,7 +201,7 @@ namespace Taskboard.Controllers
 
             // Verify user has access to this project
             var hasAccess = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
 
             if (!hasAccess)
             {
@@ -321,7 +321,7 @@ namespace Taskboard.Controllers
 
             // Verify user has access to this project
             var hasAccess = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
 
             if (!hasAccess)
             {
@@ -359,7 +359,7 @@ namespace Taskboard.Controllers
             if (userId == null) return Unauthorized();
 
             var hasAccess = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
 
             if (!hasAccess) return Forbid();
 
@@ -382,9 +382,19 @@ namespace Taskboard.Controllers
             if (userId == null) return Unauthorized();
 
             var hasAccess = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
 
             if (!hasAccess) return Forbid();
+
+            // Verify the user being assigned is an active member of the project
+            var userToAssign = await _context.ProjectMembers
+                .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == request.UserId);
+
+            if (userToAssign == null)
+                return BadRequest(new { success = false, message = "User is not a member of this project." });
+
+            if (userToAssign.Status != ProjectMemberStatus.Active)
+                return BadRequest(new { success = false, message = "Cannot assign users who have not accepted the project invite." });
 
             var alreadyAssigned = await _context.UserTasks
                 .AnyAsync(ut => ut.TaskItemId == taskId && ut.UserId == request.UserId);
@@ -432,7 +442,7 @@ namespace Taskboard.Controllers
             if (userId == null) return Unauthorized();
 
             var hasAccess = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
 
             if (!hasAccess) return Forbid();
 
@@ -463,7 +473,7 @@ namespace Taskboard.Controllers
             if (userId == null) return Unauthorized();
 
             var hasAccess = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
             if (!hasAccess) return Forbid();
 
             var task = await _context.Tasks
@@ -480,7 +490,7 @@ namespace Taskboard.Controllers
             if (userId == null) return Unauthorized();
 
             var hasAccess = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
             if (!hasAccess) return Forbid();
 
             var task = await _context.Tasks
@@ -501,7 +511,7 @@ namespace Taskboard.Controllers
             if (userId == null) return Unauthorized();
 
             var hasAccess = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
             if (!hasAccess) return Forbid();
 
             var messages = await _context.TaskMessages
@@ -527,7 +537,7 @@ namespace Taskboard.Controllers
             if (userId == null) return Unauthorized();
 
             var hasAccess = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
             if (!hasAccess) return Forbid();
 
             // Verify task exists and belongs to project
@@ -574,7 +584,7 @@ namespace Taskboard.Controllers
             if (userId == null) return Unauthorized();
 
             var hasAccess = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
             if (!hasAccess) return Forbid();
 
             var blockers = await _context.TaskBlockers
@@ -597,7 +607,7 @@ namespace Taskboard.Controllers
             if (userId == null) return Unauthorized();
 
             var hasAccess = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
             if (!hasAccess) return Forbid();
 
             var blockedTasks = await _context.TaskBlockers
@@ -620,7 +630,7 @@ namespace Taskboard.Controllers
             if (userId == null) return Unauthorized();
 
             var hasAccess = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
             if (!hasAccess) return Forbid();
 
             // Verify both tasks exist and belong to the same project
@@ -664,7 +674,7 @@ namespace Taskboard.Controllers
             if (userId == null) return Unauthorized();
 
             var hasAccess = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
             if (!hasAccess) return Forbid();
 
             var blocker = await _context.TaskBlockers
@@ -687,7 +697,7 @@ namespace Taskboard.Controllers
             if (userId == null) return Unauthorized();
 
             var hasAccess = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
             if (!hasAccess) return Forbid();
 
             var history = await _context.TaskHistories
