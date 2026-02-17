@@ -106,21 +106,23 @@ function ProjectMembers() {
                                     className={`member-card ${currentUserRole?.canAddEditMembers ? 'clickable' : ''}`}
                                     onClick={() => handleMemberClick(member)}
                                 >
-                                    <div className="member-info">
+                                    <div className="member-main">
                                         <div className="member-name">{member.userName}</div>
-                                        <div className="member-email">{member.email}</div>
-                                    </div>
-                                    <div className="member-meta">
-                                        <span className={`role-badge role-${member.role.toLowerCase() === "owner" ? "owner" : "member"}`}>
-                                            {member.role}
-                                        </span>
-                                        {member.status === "Pending" && (
-                                            <span className="status-badge status-pending">
-                                                Pending Invite
+                                        <div className="member-badges">
+                                            <span className={`role-badge role-${member.role.toLowerCase() === "owner" ? "owner" : "member"}`}>
+                                                {member.role}
                                             </span>
-                                        )}
+                                            {member.status === "Pending" && (
+                                                <span className="status-badge status-pending">
+                                                    Pending
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="member-secondary">
+                                        <span className="member-email">{member.email}</span>
                                         <span className="joined-date">
-                                            Joined {formatDate(member.joinedAt)}
+                                            {formatDate(member.joinedAt)}
                                         </span>
                                     </div>
                                 </div>

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { fetchWithAuth } from "../auth";
+import StyledCheckbox from "./StyledCheckbox";
 import styles from "./PopupStyles.module.css";
 
 function CreateRolePopup({ projectId, role = null, onClose, onRoleSaved }) {
@@ -86,27 +87,17 @@ function CreateRolePopup({ projectId, role = null, onClose, onRoleSaved }) {
                     />
                 </div>
 
-                <div className={styles.checkbox}>
-                    <label>
-                        <input
-                            type="checkbox"
-                            checked={canMembers}
-                            onChange={e => setCanMembers(e.target.checked)}
-                        />
-                        Can add / edit members
-                    </label>
-                </div>
+                <StyledCheckbox
+                    checked={canMembers}
+                    onChange={e => setCanMembers(e.target.checked)}
+                    label="Can add / edit members"
+                />
 
-                <div className={styles.checkbox}>
-                    <label>
-                        <input
-                            type="checkbox"
-                            checked={canSettings}
-                            onChange={e => setCanSettings(e.target.checked)}
-                        />
-                        Can edit project settings
-                    </label>
-                </div>
+                <StyledCheckbox
+                    checked={canSettings}
+                    onChange={e => setCanSettings(e.target.checked)}
+                    label="Can edit project settings"
+                />
 
                 <div className={styles.actions}>
                     {role && !role.isOwner && (

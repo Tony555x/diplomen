@@ -3,7 +3,7 @@ import styles from "./StyledCheckbox.module.css";
 
 function StyledCheckbox({ checked, onChange, label, disabled = false, className = "" }) {
     return (
-        <label className={`${styles.checkbox} ${className}`}>
+        <div className={`${styles.checkbox} ${className}`}>
             <input
                 type="checkbox"
                 checked={checked}
@@ -11,7 +11,7 @@ function StyledCheckbox({ checked, onChange, label, disabled = false, className 
                 disabled={disabled}
             />
             {label && <span>{label}</span>}
-        </label>
+        </div>
     );
 }
 
