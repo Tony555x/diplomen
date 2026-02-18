@@ -93,7 +93,8 @@ function TaskDetailsRight({
             `/api/projects/${projectId}/tasks/${task.id}/assignees`,
             { method: "POST", body: JSON.stringify({ userId }) }
         );
-        loadAssignees();
+        await loadAssignees();
+        onRefresh?.();
     };
 
     const handleRemove = async userId => {
@@ -101,7 +102,8 @@ function TaskDetailsRight({
             `/api/projects/${projectId}/tasks/${task.id}/assignees/${userId}`,
             { method: "DELETE" }
         );
-        loadAssignees();
+        await loadAssignees();
+        onRefresh?.();
     };
 
     const handleAddBlocker = async blockerTaskId => {

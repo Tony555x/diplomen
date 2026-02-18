@@ -48,7 +48,7 @@ function ProjectTasks() {
                     fetchWithAuth(`/api/projects/${projectId}/members`),
                     fetchWithAuth(`/api/projects/${projectId}/statuses`)
                 ]);
-
+            console.log(tasksData);
             setTasks(tasksData || []);
             setTaskTypes(taskTypesData.taskTypes || []);
             setCollections(collectionsData || []);
@@ -243,10 +243,17 @@ function ProjectTasks() {
             );
 
             if (result && result.success && result.task) {
-                const fullTask = { ...updatedTask, ...result.task };
+                const oldTask = tasks.find(t => t.id === updatedTask.id);
+                const fullTask = {
+                    ...updatedTask,
+                    ...result.task,
+                    // PATCH response doesn't return assignees/dueDate — preserve from existing state
+                    assignees: oldTask?.assignees ?? updatedTask.assignees,
+                    dueDate: oldTask?.dueDate ?? updatedTask.dueDate,
+                    blockers: oldTask?.blockers ?? updatedTask.blockers,
+                    isBlocked: oldTask?.isBlocked ?? updatedTask.isBlocked,
+                };
 
-                // Check if completion status changed to trigger full refresh (for dependencies)
-                const oldTask = tasks.find(t => t.id === fullTask.id);
                 const completionChanged = oldTask && oldTask.completed !== fullTask.completed;
 
                 setTasks(prev =>

@@ -68,6 +68,7 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
                 body: JSON.stringify({ dueDate: value })
             }
         );
+        onRefresh?.();
     };
 
     const loadMessages = async () => {

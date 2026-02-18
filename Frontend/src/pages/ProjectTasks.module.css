@@ -96,19 +96,81 @@ body {
     background-color: #2c2c2c;
     color: rgba(255, 255, 255, 0.87);
     padding: 0.5rem 0.8rem;
-    /* minimal padding */
     margin-top: 0.4rem;
     border-radius: 6px;
     display: flex;
-    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.4rem;
     font-size: 0.9rem;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     border: 1px solid #374151;
     cursor: grab;
     transition: all 0.2s ease;
     min-height: 0;
-    /* allow shrinking in flex container */
 }
+
+/* Footer row: avatars left, due date right */
+.task-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
+    min-height: 20px;
+}
+
+.task-avatars {
+    display: flex;
+    align-items: center;
+    gap: -4px;
+    /* negative gap for overlap effect */
+    flex-wrap: nowrap;
+}
+
+.task-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #fff;
+    border: 1.5px solid #2c2c2c;
+    margin-right: -4px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    flex-shrink: 0;
+}
+
+.task-avatar-overflow {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.7);
+    background: #374151;
+    border: 1.5px solid #2c2c2c;
+    margin-left: 2px;
+    flex-shrink: 0;
+}
+
+.task-due {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.5);
+    white-space: nowrap;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.task-due-overdue {
+    color: #f87171;
+    font-weight: 600;
+}
+
 
 .task-title {
     flex: 1 1 auto;
