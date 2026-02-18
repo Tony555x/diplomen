@@ -358,12 +358,27 @@ public class ProjectsController : ControllerBase
         var project = await _context.Projects.FirstOrDefaultAsync(p => p.Id == projectId);
         if (project == null) return NotFound(new { success = false, message = "Project not found." });
 
+        // Remove members first (they reference ProjectRoles via FK)
+        var members = await _context.ProjectMembers
+            .Where(pm => pm.ProjectId == projectId)
+            .ToListAsync();
+        _context.ProjectMembers.RemoveRange(members);
+        await _context.SaveChangesAsync();
+
+        // Remove roles next
+        var roles = await _context.ProjectRoles
+            .Where(r => r.ProjectId == projectId)
+            .ToListAsync();
+        _context.ProjectRoles.RemoveRange(roles);
+        await _context.SaveChangesAsync();
+
         _context.Projects.Remove(project);
         await _context.SaveChangesAsync();
 
         return Ok(new { success = true, message = "Project deleted." });
     }
 }
+
 
 
 
