@@ -2,7 +2,7 @@ import styles from "./TaskDetailsLeft.module.css";
 import CustomField from "../CustomField";
 import StyledCheckbox from "../StyledCheckbox";
 
-function TaskDetailsLeft({ taskType, completed, setCompleted, fieldValues, setFieldValues }) {
+function TaskDetailsLeft({ taskType, completed, setCompleted, fieldValues, setFieldValues, canCreateTasks = false }) {
     const handleFieldChange = (fieldId, value) => {
         setFieldValues(prev => {
             const next = [...prev];
@@ -30,6 +30,7 @@ function TaskDetailsLeft({ taskType, completed, setCompleted, fieldValues, setFi
                                 field={field}
                                 value={value}
                                 onChange={handleFieldChange}
+                                readOnly={!canCreateTasks}
                             />
                         );
                     })}

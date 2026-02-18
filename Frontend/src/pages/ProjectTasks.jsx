@@ -10,6 +10,7 @@ function ProjectTasks() {
 
     const [members, setMembers] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
+    const [currentUserRole, setCurrentUserRole] = useState(null);
 
     const [tasks, setTasks] = useState([]);
     const [statuses, setStatuses] = useState([]);
@@ -52,6 +53,7 @@ function ProjectTasks() {
             setTaskTypes(taskTypesData.taskTypes || []);
             setCollections(collectionsData || []);
             setMembers(membersData.success ? membersData.members : []);
+            setCurrentUserRole(membersData.success ? membersData.currentUserRole : null);
             setStatuses(statusesData || []);
 
             // Get current user from token
@@ -329,6 +331,9 @@ function ProjectTasks() {
     if (loading) return <div className="loading">Loading tasks...</div>;
     if (error) return <div className="error">{error}</div>;
 
+    const canCreateTasks = currentUserRole?.canCreateEditDeleteTasks === true;
+    const canManageStatuses = currentUserRole?.canCreateDeleteTaskStatuses === true;
+
     return (
         <>
             <div className={styles.projectTasks}>
@@ -355,13 +360,17 @@ function ProjectTasks() {
                             members={members}
                             currentUser={currentUser}
                             onDeleteStatus={() => deleteStatus(status.id)}
+                            canCreateTasks={canCreateTasks}
+                            canManageStatuses={canManageStatuses}
                         />
 
                     ))}
                     <div className={styles.addStatusArea}>
-                        <button className={styles.addStatusButton} onClick={addStatus}>
-                            + Add Status
-                        </button>
+                        {canManageStatuses && (
+                            <button className={styles.addStatusButton} onClick={addStatus}>
+                                + Add Status
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -373,9 +382,10 @@ function ProjectTasks() {
                     taskTypes={taskTypes}
                     onClose={() => setSelectedTask(null)}
                     onUpdate={handleTaskUpdate}
-                    onDelete={handleTaskDelete}
+                    onDelete={canCreateTasks ? handleTaskDelete : null}
                     onDrop={handleDrop}
                     onRefresh={refreshTasks}
+                    canCreateTasks={canCreateTasks}
                 />
             )}
         </>

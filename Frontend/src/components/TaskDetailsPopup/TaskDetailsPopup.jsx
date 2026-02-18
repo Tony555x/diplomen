@@ -8,7 +8,7 @@ import TaskDetailsLeft from "./TaskDetailsLeft";
 import TaskDetailsRight from "./TaskDetailsRight";
 import TaskDetailsChat from "./TaskDetailsChat";
 
-function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpdate, onDelete, onRefresh }) {
+function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpdate, onDelete, onRefresh, canCreateTasks = false }) {
     const { projectId } = useParams();
 
     const [title, setTitle] = useState(task.title);
@@ -81,7 +81,10 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
     const handleSave = async () => {
         setIsSaving(true);
         try {
-            await onUpdate({ ...task, title, status, completed, fieldValues });
+            const updatedTask = canCreateTasks
+                ? { ...task, title, status, completed, fieldValues }
+                : { ...task, status, completed };
+            await onUpdate(updatedTask);
             onClose();
         } finally {
             setIsSaving(false);
@@ -98,7 +101,7 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
                 <div className={styles.header}>
                     <div className={styles.headerMain}>
                         <div className={styles.titleRow}>
-                            {isEditingTitle ? (
+                            {isEditingTitle && canCreateTasks ? (
                                 <input
                                     ref={titleInputRef}
                                     className={styles.titleInput}
@@ -110,7 +113,8 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
                             ) : (
                                 <h2
                                     className={styles.title}
-                                    onClick={() => setIsEditingTitle(true)}
+                                    onClick={() => canCreateTasks && setIsEditingTitle(true)}
+                                    style={canCreateTasks ? {} : { cursor: "default" }}
                                 >
                                     {title || "Untitled task"}
                                 </h2>
@@ -144,6 +148,7 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
                         setCompleted={setCompleted}
                         fieldValues={fieldValues}
                         setFieldValues={setFieldValues}
+                        canCreateTasks={canCreateTasks}
                     />
 
                     <TaskDetailsRight
@@ -155,6 +160,7 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
                         dueDate={dueDate}
                         onDueDateChange={handleDueDateChange}
                         onRefresh={onRefresh}
+                        canCreateTasks={canCreateTasks}
                     />
 
                     <TaskDetailsChat
@@ -177,6 +183,7 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
                             Delete
                         </button>
                     )}
+                    {!onDelete && <div />}
 
                     <div className={sharedStyles.rightActions}>
                         <button className={sharedStyles.cancelButton} onClick={onClose}>
@@ -185,7 +192,7 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
                         <button
                             className={sharedStyles.createButton}
                             onClick={handleSave}
-                            disabled={isSaving || !title.trim()}
+                            disabled={isSaving || (canCreateTasks && !title.trim())}
                         >
                             {isSaving ? "Saving…" : "Save"}
                         </button>

@@ -3,10 +3,12 @@ import { fetchWithAuth } from "../../auth";
 import TaskTypePopup from "./TaskTypePopup";
 import styles from "./TaskTypesSettings.module.css";
 
-function TaskTypesSettings({ projectId }) {
+function TaskTypesSettings({ projectId, currentUserRole }) {
     const [taskTypes, setTaskTypes] = useState([]);
     const [selectedType, setSelectedType] = useState(null);
     const [loading, setLoading] = useState(true);
+
+    const canEdit = currentUserRole?.canEditProjectSettings === true;
 
     const load = async () => {
         const res = await fetchWithAuth(`/api/projects/${projectId}/task-types`);
@@ -26,9 +28,11 @@ function TaskTypesSettings({ projectId }) {
         <div className={styles.wrapper}>
             <div className={styles.header}>
                 <h2>Task Types</h2>
-                <button onClick={() => setSelectedType({})}>
-                    New task type
-                </button>
+                {canEdit && (
+                    <button onClick={() => setSelectedType({})}>
+                        New task type
+                    </button>
+                )}
             </div>
 
             <div className={styles.list}>
@@ -36,7 +40,8 @@ function TaskTypesSettings({ projectId }) {
                     <div
                         key={tt.id}
                         className={styles.item}
-                        onClick={() => setSelectedType(tt)}
+                        onClick={canEdit ? () => setSelectedType(tt) : undefined}
+                        style={!canEdit ? { pointerEvents: "none" } : {}}
                     >
                         <strong>{tt.name}</strong>
                         <span>{tt.fields.length} fields</span>
@@ -57,3 +62,4 @@ function TaskTypesSettings({ projectId }) {
 }
 
 export default TaskTypesSettings;
+

@@ -46,7 +46,8 @@ function TaskDetailsRight({
     loadAssignees,
     dueDate,
     onDueDateChange,
-    onRefresh
+    onRefresh,
+    canCreateTasks
 }) {
     const [blockers, setBlockers] = useState([]);
     const [blockedTasks, setBlockedTasks] = useState([]);
@@ -155,32 +156,56 @@ function TaskDetailsRight({
                         <AssigneeAvatar
                             key={a.userId}
                             assignee={a}
-                            onRemove={handleRemove}
+                            onRemove={canCreateTasks ? handleRemove : null}
                         />
                     ))}
 
-                    <div className={styles.searchContainer}>
-                        <input
-                            type="text"
-                            className={styles.searchInput}
-                            placeholder="+ Add assignee..."
-                            value={assigneeSearch}
-                            onChange={e => {
-                                setAssigneeSearch(e.target.value);
-                                setShowAssigneeResults(true);
-                            }}
-                            onFocus={() => setShowAssigneeResults(true)}
-                            onBlur={() =>
-                                setTimeout(() => {
-                                    setShowAssigneeResults(false);
-                                    setAssigneeSearch("");
-                                }, 200)
-                            }
-                        />
-                        {showAssigneeResults && (
-                            <div className={styles.searchResults}>
-                                {members
-                                    .filter(
+                    {canCreateTasks && (
+                        <div className={styles.searchContainer}>
+                            <input
+                                type="text"
+                                className={styles.searchInput}
+                                placeholder="+ Add assignee..."
+                                value={assigneeSearch}
+                                onChange={e => {
+                                    setAssigneeSearch(e.target.value);
+                                    setShowAssigneeResults(true);
+                                }}
+                                onFocus={() => setShowAssigneeResults(true)}
+                                onBlur={() =>
+                                    setTimeout(() => {
+                                        setShowAssigneeResults(false);
+                                        setAssigneeSearch("");
+                                    }, 200)
+                                }
+                            />
+                            {showAssigneeResults && (
+                                <div className={styles.searchResults}>
+                                    {members
+                                        .filter(
+                                            m =>
+                                                !assignedIds.includes(m.userId) &&
+                                                m.status === "Active" &&
+                                                m.userName
+                                                    .toLowerCase()
+                                                    .includes(
+                                                        assigneeSearch.toLowerCase()
+                                                    )
+                                        )
+                                        .map(m => (
+                                            <div
+                                                key={m.userId}
+                                                className={styles.searchResultItem}
+                                                onClick={() => {
+                                                    handleAssign(m.userId);
+                                                    setAssigneeSearch("");
+                                                    setShowAssigneeResults(false);
+                                                }}
+                                            >
+                                                {m.userName}
+                                            </div>
+                                        ))}
+                                    {members.filter(
                                         m =>
                                             !assignedIds.includes(m.userId) &&
                                             m.status === "Active" &&
@@ -189,43 +214,21 @@ function TaskDetailsRight({
                                                 .includes(
                                                     assigneeSearch.toLowerCase()
                                                 )
-                                    )
-                                    .map(m => (
-                                        <div
-                                            key={m.userId}
-                                            className={styles.searchResultItem}
-                                            onClick={() => {
-                                                handleAssign(m.userId);
-                                                setAssigneeSearch("");
-                                                setShowAssigneeResults(false);
-                                            }}
-                                        >
-                                            {m.userName}
-                                        </div>
-                                    ))}
-                                {members.filter(
-                                    m =>
-                                        !assignedIds.includes(m.userId) &&
-                                        m.status === "Active" &&
-                                        m.userName
-                                            .toLowerCase()
-                                            .includes(
-                                                assigneeSearch.toLowerCase()
-                                            )
-                                ).length === 0 && (
-                                        <div
-                                            className={styles.searchResultItem}
-                                            style={{
-                                                fontStyle: "italic",
-                                                opacity: 0.6
-                                            }}
-                                        >
-                                            No members found
-                                        </div>
-                                    )}
-                            </div>
-                        )}
-                    </div>
+                                    ).length === 0 && (
+                                            <div
+                                                className={styles.searchResultItem}
+                                                style={{
+                                                    fontStyle: "italic",
+                                                    opacity: 0.6
+                                                }}
+                                            >
+                                                No members found
+                                            </div>
+                                        )}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {assignees.length === 0 && (
@@ -255,84 +258,88 @@ function TaskDetailsRight({
                             >
                                 {b.title}
                             </span>
-                            <button
-                                className={styles.removeBtn}
-                                onClick={() => handleRemoveBlocker(b.id)}
-                            >
-                                ×
-                            </button>
+                            {canCreateTasks && (
+                                <button
+                                    className={styles.removeBtn}
+                                    onClick={() => handleRemoveBlocker(b.id)}
+                                >
+                                    ×
+                                </button>
+                            )}
                         </div>
                     ))}
 
-                    <div className={styles.searchContainer}>
-                        <input
-                            type="text"
-                            className={styles.searchInput}
-                            placeholder="+ Add blocker..."
-                            value={blockerSearch}
-                            onChange={e => {
-                                setBlockerSearch(e.target.value);
-                                setShowBlockerResults(true);
-                            }}
-                            onFocus={() => setShowBlockerResults(true)}
-                            onBlur={() =>
-                                setTimeout(() => {
-                                    setShowBlockerResults(false);
-                                    setBlockerSearch("");
-                                }, 200)
-                            }
-                        />
-                        {showBlockerResults && (
-                            <div className={styles.searchResults}>
-                                {allProjectTasks
-                                    .filter(
+                    {canCreateTasks && (
+                        <div className={styles.searchContainer}>
+                            <input
+                                type="text"
+                                className={styles.searchInput}
+                                placeholder="+ Add blocker..."
+                                value={blockerSearch}
+                                onChange={e => {
+                                    setBlockerSearch(e.target.value);
+                                    setShowBlockerResults(true);
+                                }}
+                                onFocus={() => setShowBlockerResults(true)}
+                                onBlur={() =>
+                                    setTimeout(() => {
+                                        setShowBlockerResults(false);
+                                        setBlockerSearch("");
+                                    }, 200)
+                                }
+                            />
+                            {showBlockerResults && (
+                                <div className={styles.searchResults}>
+                                    {allProjectTasks
+                                        .filter(
+                                            t =>
+                                                t.id !== task.id &&
+                                                !blockers.some(
+                                                    b => b.id === t.id
+                                                ) &&
+                                                t.title
+                                                    .toLowerCase()
+                                                    .includes(
+                                                        blockerSearch.toLowerCase()
+                                                    )
+                                        )
+                                        .map(t => (
+                                            <div
+                                                key={t.id}
+                                                className={styles.searchResultItem}
+                                                onClick={() => {
+                                                    handleAddBlocker(t.id);
+                                                    setBlockerSearch("");
+                                                    setShowBlockerResults(false);
+                                                }}
+                                            >
+                                                {t.title}
+                                            </div>
+                                        ))}
+                                    {allProjectTasks.filter(
                                         t =>
                                             t.id !== task.id &&
-                                            !blockers.some(
-                                                b => b.id === t.id
-                                            ) &&
+                                            !blockers.some(b => b.id === t.id) &&
                                             t.title
                                                 .toLowerCase()
                                                 .includes(
                                                     blockerSearch.toLowerCase()
                                                 )
-                                    )
-                                    .map(t => (
-                                        <div
-                                            key={t.id}
-                                            className={styles.searchResultItem}
-                                            onClick={() => {
-                                                handleAddBlocker(t.id);
-                                                setBlockerSearch("");
-                                                setShowBlockerResults(false);
-                                            }}
-                                        >
-                                            {t.title}
-                                        </div>
-                                    ))}
-                                {allProjectTasks.filter(
-                                    t =>
-                                        t.id !== task.id &&
-                                        !blockers.some(b => b.id === t.id) &&
-                                        t.title
-                                            .toLowerCase()
-                                            .includes(
-                                                blockerSearch.toLowerCase()
-                                            )
-                                ).length === 0 && (
-                                        <div
-                                            className={styles.searchResultItem}
-                                            style={{
-                                                fontStyle: "italic",
-                                                opacity: 0.6
-                                            }}
-                                        >
-                                            No tasks found
-                                        </div>
-                                    )}
-                            </div>
-                        )}
-                    </div>
+                                    ).length === 0 && (
+                                            <div
+                                                className={styles.searchResultItem}
+                                                style={{
+                                                    fontStyle: "italic",
+                                                    opacity: 0.6
+                                                }}
+                                            >
+                                                No tasks found
+                                            </div>
+                                        )}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </ExpandableSection>
 
@@ -358,84 +365,88 @@ function TaskDetailsRight({
                             >
                                 {b.title}
                             </span>
-                            <button
-                                className={styles.removeBtn}
-                                onClick={() => handleRemoveBlocked(b.id)}
-                            >
-                                ×
-                            </button>
+                            {canCreateTasks && (
+                                <button
+                                    className={styles.removeBtn}
+                                    onClick={() => handleRemoveBlocked(b.id)}
+                                >
+                                    ×
+                                </button>
+                            )}
                         </div>
                     ))}
 
-                    <div className={styles.searchContainer}>
-                        <input
-                            type="text"
-                            className={styles.searchInput}
-                            placeholder="+ Add blocked task..."
-                            value={blockedSearch}
-                            onChange={e => {
-                                setBlockedSearch(e.target.value);
-                                setShowBlockedResults(true);
-                            }}
-                            onFocus={() => setShowBlockedResults(true)}
-                            onBlur={() =>
-                                setTimeout(() => {
-                                    setShowBlockedResults(false);
-                                    setBlockedSearch("");
-                                }, 200)
-                            }
-                        />
-                        {showBlockedResults && (
-                            <div className={styles.searchResults}>
-                                {allProjectTasks
-                                    .filter(
+                    {canCreateTasks && (
+                        <div className={styles.searchContainer}>
+                            <input
+                                type="text"
+                                className={styles.searchInput}
+                                placeholder="+ Add blocked task..."
+                                value={blockedSearch}
+                                onChange={e => {
+                                    setBlockedSearch(e.target.value);
+                                    setShowBlockedResults(true);
+                                }}
+                                onFocus={() => setShowBlockedResults(true)}
+                                onBlur={() =>
+                                    setTimeout(() => {
+                                        setShowBlockedResults(false);
+                                        setBlockedSearch("");
+                                    }, 200)
+                                }
+                            />
+                            {showBlockedResults && (
+                                <div className={styles.searchResults}>
+                                    {allProjectTasks
+                                        .filter(
+                                            t =>
+                                                t.id !== task.id &&
+                                                !blockedTasks.some(
+                                                    b => b.id === t.id
+                                                ) &&
+                                                t.title
+                                                    .toLowerCase()
+                                                    .includes(
+                                                        blockedSearch.toLowerCase()
+                                                    )
+                                        )
+                                        .map(t => (
+                                            <div
+                                                key={t.id}
+                                                className={styles.searchResultItem}
+                                                onClick={() => {
+                                                    handleAddBlocked(t.id);
+                                                    setBlockedSearch("");
+                                                    setShowBlockedResults(false);
+                                                }}
+                                            >
+                                                {t.title}
+                                            </div>
+                                        ))}
+                                    {allProjectTasks.filter(
                                         t =>
                                             t.id !== task.id &&
-                                            !blockedTasks.some(
-                                                b => b.id === t.id
-                                            ) &&
+                                            !blockedTasks.some(b => b.id === t.id) &&
                                             t.title
                                                 .toLowerCase()
                                                 .includes(
                                                     blockedSearch.toLowerCase()
                                                 )
-                                    )
-                                    .map(t => (
-                                        <div
-                                            key={t.id}
-                                            className={styles.searchResultItem}
-                                            onClick={() => {
-                                                handleAddBlocked(t.id);
-                                                setBlockedSearch("");
-                                                setShowBlockedResults(false);
-                                            }}
-                                        >
-                                            {t.title}
-                                        </div>
-                                    ))}
-                                {allProjectTasks.filter(
-                                    t =>
-                                        t.id !== task.id &&
-                                        !blockedTasks.some(b => b.id === t.id) &&
-                                        t.title
-                                            .toLowerCase()
-                                            .includes(
-                                                blockedSearch.toLowerCase()
-                                            )
-                                ).length === 0 && (
-                                        <div
-                                            className={styles.searchResultItem}
-                                            style={{
-                                                fontStyle: "italic",
-                                                opacity: 0.6
-                                            }}
-                                        >
-                                            No tasks found
-                                        </div>
-                                    )}
-                            </div>
-                        )}
-                    </div>
+                                    ).length === 0 && (
+                                            <div
+                                                className={styles.searchResultItem}
+                                                style={{
+                                                    fontStyle: "italic",
+                                                    opacity: 0.6
+                                                }}
+                                            >
+                                                No tasks found
+                                            </div>
+                                        )}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </ExpandableSection>
 
@@ -445,6 +456,8 @@ function TaskDetailsRight({
                     className={styles.dueDateInput}
                     value={dueDate ? dueDate.slice(0, 10) : ""}
                     onChange={e => onDueDateChange(e.target.value || null)}
+                    readOnly={!canCreateTasks}
+                    style={!canCreateTasks ? { pointerEvents: "none" } : {}}
                 />
             </ExpandableSection>
         </div>

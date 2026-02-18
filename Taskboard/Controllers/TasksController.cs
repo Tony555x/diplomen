@@ -84,14 +84,13 @@ namespace Taskboard.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
-            // Verify user has access to this project
-            var hasAccess = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
+            // Verify user has permission to create tasks
+            var membership = await _context.ProjectMembers
+                .Include(pm => pm.ProjectRole)
+                .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
 
-            if (!hasAccess)
-            {
-                return Forbid();
-            }
+            if (membership == null) return Forbid();
+            if (membership.ProjectRole?.CanCreateEditDeleteTasks != true) return Forbid();
 
             if (string.IsNullOrWhiteSpace(request.Title))
             {
@@ -199,14 +198,14 @@ namespace Taskboard.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
-            // Verify user has access to this project
-            var hasAccess = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
+            // Load membership with role to check permissions
+            var membership = await _context.ProjectMembers
+                .Include(pm => pm.ProjectRole)
+                .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
 
-            if (!hasAccess)
-            {
-                return Forbid();
-            }
+            if (membership == null) return Forbid();
+
+            var canEditTasks = membership.ProjectRole?.CanCreateEditDeleteTasks == true;
 
             var task = await _context.Tasks
                 .Include(t => t.FieldValues)
@@ -234,6 +233,7 @@ namespace Taskboard.Controllers
 
             if (!string.IsNullOrWhiteSpace(request.Title))
             {
+                if (!canEditTasks) return Forbid();
                 task.Title = request.Title;
             }
 
@@ -255,6 +255,7 @@ namespace Taskboard.Controllers
             // Update field values if provided
             if (request.FieldValues != null && request.FieldValues.Count > 0)
             {
+                if (!canEditTasks) return Forbid();
                 foreach (var fieldReq in request.FieldValues)
                 {
                     var fieldValue = task.FieldValues.FirstOrDefault(fv => fv.Id == fieldReq.Id);
@@ -319,14 +320,13 @@ namespace Taskboard.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
-            // Verify user has access to this project
-            var hasAccess = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
+            // Verify user has permission to delete tasks
+            var membership = await _context.ProjectMembers
+                .Include(pm => pm.ProjectRole)
+                .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
 
-            if (!hasAccess)
-            {
-                return Forbid();
-            }
+            if (membership == null) return Forbid();
+            if (membership.ProjectRole?.CanCreateEditDeleteTasks != true) return Forbid();
 
             var task = await _context.Tasks
                 .Include(t => t.FieldValues)

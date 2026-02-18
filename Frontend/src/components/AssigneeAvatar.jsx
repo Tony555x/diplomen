@@ -47,15 +47,17 @@ function AssigneeAvatar({ assignee, onRemove }) {
             <button disabled className={styles.popupBtn}>
                 View Profile
             </button>
-            <button
-                onClick={() => {
-                    onRemove(assignee.userId);
-                    setOpen(false);
-                }}
-                className={styles.popupBtn}
-            >
-                Remove from card
-            </button>
+            {onRemove && (
+                <button
+                    onClick={() => {
+                        onRemove(assignee.userId);
+                        setOpen(false);
+                    }}
+                    className={styles.popupBtn}
+                >
+                    Remove from card
+                </button>
+            )}
         </div>,
         document.body
     ) : null;

@@ -2,8 +2,9 @@ import React from "react";
 import styles from "./CustomField.module.css";
 import StyledCheckbox from "./StyledCheckbox";
 
-function CustomField({ field, value, onChange }) {
+function CustomField({ field, value, onChange, readOnly = false }) {
     const handleChange = e => {
+        if (readOnly) return;
         const val =
             field.type === "Checkbox"
                 ? e.target.checked.toString()
@@ -19,6 +20,7 @@ function CustomField({ field, value, onChange }) {
                         checked={value === "true"}
                         onChange={handleChange}
                         label={field.name}
+                        disabled={readOnly}
                     />
                     {field.description && (
                         <small className={styles.hint}>{field.description}</small>
@@ -30,7 +32,7 @@ function CustomField({ field, value, onChange }) {
             return (
                 <div className={styles.formGroup} key={field.id}>
                     <label>{field.name}</label>
-                    <input type="date" value={value} onChange={handleChange} />
+                    <input type="date" value={value} onChange={handleChange} readOnly={readOnly} />
                     {field.description && (
                         <small className={styles.hint}>{field.description}</small>
                     )}
@@ -41,7 +43,7 @@ function CustomField({ field, value, onChange }) {
             return (
                 <div className={styles.formGroup} key={field.id}>
                     <label>{field.name}</label>
-                    <input type="number" value={value} onChange={handleChange} />
+                    <input type="number" value={value} onChange={handleChange} readOnly={readOnly} />
                     {field.description && (
                         <small className={styles.hint}>{field.description}</small>
                     )}
@@ -57,6 +59,7 @@ function CustomField({ field, value, onChange }) {
                         onChange={handleChange}
                         rows={4}
                         className={styles.textarea}
+                        readOnly={readOnly}
                     />
                     {field.description && (
                         <small className={styles.hint}>{field.description}</small>

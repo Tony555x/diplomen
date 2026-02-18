@@ -69,6 +69,8 @@ public class ProjectsController : ControllerBase
             RoleName = "Owner",
             CanAddEditMembers = true,
             CanEditProjectSettings = true,
+            CanCreateEditDeleteTasks = true,
+            CanCreateDeleteTaskStatuses = true,
             IsOwner = true
         };
 
@@ -78,6 +80,8 @@ public class ProjectsController : ControllerBase
             RoleName = "Member",
             CanAddEditMembers = false,
             CanEditProjectSettings = false,
+            CanCreateEditDeleteTasks = true,
+            CanCreateDeleteTaskStatuses = false,
             IsOwner = false
         };
 
@@ -206,7 +210,7 @@ public class ProjectsController : ControllerBase
             .Include(pm => pm.ProjectRole)
             .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
 
-        if (membership == null || membership.ProjectRole == null || !membership.ProjectRole.CanEditProjectSettings)
+        if (membership == null || membership.ProjectRole == null || !membership.ProjectRole.CanCreateDeleteTaskStatuses)
             return Forbid();
 
         if (string.IsNullOrWhiteSpace(request.Name))
@@ -240,7 +244,7 @@ public class ProjectsController : ControllerBase
             .Include(pm => pm.ProjectRole)
             .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
 
-        if (membership == null || membership.ProjectRole == null || !membership.ProjectRole.CanEditProjectSettings)
+        if (membership == null || membership.ProjectRole == null || !membership.ProjectRole.CanCreateDeleteTaskStatuses)
             return Forbid();
 
         var status = await _context.UserTaskStatuses.FirstOrDefaultAsync(ts => ts.Id == statusId && ts.ProjectId == projectId);
@@ -319,7 +323,48 @@ public class ProjectsController : ControllerBase
 
         return Ok(new { success = true, user });
     }
+
+    [HttpPost("{projectId}/leave")]
+    public async Task<IActionResult> LeaveProject(int projectId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return Unauthorized();
+
+        var membership = await _context.ProjectMembers
+            .Include(pm => pm.ProjectRole)
+            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
+
+        if (membership == null) return NotFound(new { success = false, message = "You are not a member of this project." });
+        if (membership.ProjectRole?.IsOwner == true) return BadRequest(new { success = false, message = "The project owner cannot leave. Transfer ownership or delete the project." });
+
+        _context.ProjectMembers.Remove(membership);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { success = true, message = "You have left the project." });
+    }
+
+    [HttpDelete("{projectId}")]
+    public async Task<IActionResult> DeleteProject(int projectId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return Unauthorized();
+
+        var membership = await _context.ProjectMembers
+            .Include(pm => pm.ProjectRole)
+            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
+
+        if (membership?.ProjectRole?.IsOwner != true) return Forbid();
+
+        var project = await _context.Projects.FirstOrDefaultAsync(p => p.Id == projectId);
+        if (project == null) return NotFound(new { success = false, message = "Project not found." });
+
+        _context.Projects.Remove(project);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { success = true, message = "Project deleted." });
+    }
 }
+
 
 
 

@@ -23,7 +23,9 @@ function Column({
   setFilterState,
   members,
   currentUser,
-  onDeleteStatus
+  onDeleteStatus,
+  canCreateTasks,
+  canManageStatuses
 }) {
 
   const [newTask, setNewTask] = useState("");
@@ -227,13 +229,15 @@ function Column({
           <img src="/filter.png" alt="Filter" />
         </button>
 
-        <button
-          className={styles.deleteStatusBtn}
-          onClick={onDeleteStatus}
-          title="Delete Status"
-        >
-          ×
-        </button>
+        {canManageStatuses && (
+          <button
+            className={styles.deleteStatusBtn}
+            onClick={onDeleteStatus}
+            title="Delete Status"
+          >
+            ×
+          </button>
+        )}
 
         {showFilter && (
           <FilterPopup
@@ -285,18 +289,22 @@ function Column({
 
       {!isAddingTask && !isAddingCollection ? (
         <div className={styles.addRow}>
-          <button
-            className={styles.addButton}
-            onClick={() => setIsAddingTask(true)}
-          >
-            Add Card
-          </button>
-          <button
-            className={styles.addButton}
-            onClick={() => setIsAddingCollection(true)}
-          >
-            Add Collection
-          </button>
+          {canCreateTasks && (
+            <button
+              className={styles.addButton}
+              onClick={() => setIsAddingTask(true)}
+            >
+              Add Card
+            </button>
+          )}
+          {canCreateTasks && (
+            <button
+              className={styles.addButton}
+              onClick={() => setIsAddingCollection(true)}
+            >
+              Add Collection
+            </button>
+          )}
         </div>
       ) : isAddingTask ? (
         <div className={styles.addForm}>

@@ -58,6 +58,8 @@ public class ProjectMembersController : ControllerBase
                 pr.RoleName,
                 pr.CanAddEditMembers,
                 pr.CanEditProjectSettings,
+                pr.CanCreateEditDeleteTasks,
+                pr.CanCreateDeleteTaskStatuses,
                 pr.IsOwner,
                 MemberCount = pr.Members.Count
             })
@@ -75,6 +77,8 @@ public class ProjectMembersController : ControllerBase
                 RoleName = currentUserMembership.ProjectRole!.RoleName,
                 CanAddEditMembers = currentUserMembership.ProjectRole.CanAddEditMembers,
                 CanEditProjectSettings = currentUserMembership.ProjectRole.CanEditProjectSettings,
+                CanCreateEditDeleteTasks = currentUserMembership.ProjectRole.CanCreateEditDeleteTasks,
+                CanCreateDeleteTaskStatuses = currentUserMembership.ProjectRole.CanCreateDeleteTaskStatuses,
                 IsOwner = currentUserMembership.ProjectRole.IsOwner
             }
         });
