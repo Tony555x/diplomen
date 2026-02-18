@@ -369,7 +369,8 @@ namespace Taskboard.Controllers
                 .Select(ut => new
                 {
                     ut.UserId,
-                    ut.User!.UserName
+                    ut.User!.UserName,
+                    ut.User!.AvatarColor
                 })
                 .ToListAsync();
 
