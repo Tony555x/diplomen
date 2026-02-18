@@ -7,6 +7,8 @@ function CreateRolePopup({ projectId, role = null, onClose, onRoleSaved }) {
     const [name, setName] = useState(role?.roleName ?? "");
     const [canMembers, setCanMembers] = useState(role?.canAddEditMembers ?? false);
     const [canSettings, setCanSettings] = useState(role?.canEditProjectSettings ?? false);
+    const [canTasks, setCanTasks] = useState(role?.canCreateEditDeleteTasks ?? false);
+    const [canStatuses, setCanStatuses] = useState(role?.canCreateDeleteTaskStatuses ?? false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState(null);
 
@@ -28,7 +30,9 @@ function CreateRolePopup({ projectId, role = null, onClose, onRoleSaved }) {
                         roleId: role?.id ?? null,
                         roleName: name,
                         canAddEditMembers: canMembers,
-                        canEditProjectSettings: canSettings
+                        canEditProjectSettings: canSettings,
+                        canCreateEditDeleteTasks: canTasks,
+                        canCreateDeleteTaskStatuses: canStatuses
                     }
                 }
             );
@@ -97,6 +101,18 @@ function CreateRolePopup({ projectId, role = null, onClose, onRoleSaved }) {
                     checked={canSettings}
                     onChange={e => setCanSettings(e.target.checked)}
                     label="Can edit project settings"
+                />
+
+                <StyledCheckbox
+                    checked={canTasks}
+                    onChange={e => setCanTasks(e.target.checked)}
+                    label="Can create / edit / delete tasks"
+                />
+
+                <StyledCheckbox
+                    checked={canStatuses}
+                    onChange={e => setCanStatuses(e.target.checked)}
+                    label="Can create / delete task statuses (columns)"
                 />
 
                 <div className={styles.actions}>

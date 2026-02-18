@@ -60,6 +60,10 @@ public class CreateProjectRoleRequest
     public bool CanAddEditMembers { get; set; }
 
     public bool CanEditProjectSettings { get; set; }
+
+    public bool CanCreateEditDeleteTasks { get; set; }
+
+    public bool CanCreateDeleteTaskStatuses { get; set; }
 }
 
 public class UpsertTaskTypeRequest

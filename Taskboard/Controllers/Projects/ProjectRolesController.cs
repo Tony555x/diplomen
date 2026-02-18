@@ -53,6 +53,8 @@ public class ProjectRolesController : ControllerBase
         role.RoleName = request.RoleName.Trim();
         role.CanAddEditMembers = request.CanAddEditMembers;
         role.CanEditProjectSettings = request.CanEditProjectSettings;
+        role.CanCreateEditDeleteTasks = request.CanCreateEditDeleteTasks;
+        role.CanCreateDeleteTaskStatuses = request.CanCreateDeleteTaskStatuses;
 
         await _context.SaveChangesAsync();
 
@@ -65,6 +67,8 @@ public class ProjectRolesController : ControllerBase
                 role.RoleName,
                 role.CanAddEditMembers,
                 role.CanEditProjectSettings,
+                role.CanCreateEditDeleteTasks,
+                role.CanCreateDeleteTaskStatuses,
                 role.IsOwner
             }
         });

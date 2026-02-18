@@ -26,6 +26,12 @@ namespace Taskboard.Data.Models
         public bool CanEditProjectSettings { get; set; } = false;
         
         [Required]
+        public bool CanCreateEditDeleteTasks { get; set; } = false;
+        
+        [Required]
+        public bool CanCreateDeleteTaskStatuses { get; set; } = false;
+        
+        [Required]
         public bool IsOwner { get; set; } = false;
         
         public List<ProjectMember> Members { get; set; } = new();
