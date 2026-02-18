@@ -52,7 +52,8 @@ namespace Taskboard.Controllers
                     Assignees = t.UserTasks.Select(ut => new 
                     {
                         ut.UserId,
-                        ut.User!.UserName
+                        ut.User!.UserName,
+                        ut.User.AvatarColor
                     }).ToList(),
                     Blockers = _context.TaskBlockers
                         .Where(tb => tb.BlockedTaskId == t.Id)

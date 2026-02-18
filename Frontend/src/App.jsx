@@ -8,6 +8,7 @@ import CreateWorkspace from "./pages/CreateWorkspace";
 import WorkspacePage from "./pages/WorkspacePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProjectInvitePage from "./pages/ProjectInvitePage";
+import UserSettingsPage from "./pages/UserSettingsPage";
 
 function App() {
   return (
@@ -53,6 +54,14 @@ function App() {
             <ProtectedRoute>
               <ProjectInvitePage />
             </ProtectedRoute>}
+        />
+        <Route
+          path="/user/settings"
+          element={
+            <ProtectedRoute>
+              <UserSettingsPage />
+            </ProtectedRoute>
+          }
         />
       </Routes>
     </BrowserRouter>

@@ -8,5 +8,6 @@ namespace Taskboard.Data.Models
         public List<TaskItem> Tasks { get; set; } = new();
         public List<WorkspaceMember> WorkspaceMemberships { get; set; } = new();
         public List<ProjectMember> ProjectMemberships { get; set; } = new();
+        public string? AvatarColor { get; set; }
     }
 }

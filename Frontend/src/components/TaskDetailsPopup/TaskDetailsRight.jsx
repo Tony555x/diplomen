@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import styles from "./TaskDetailsRight.module.css";
-import AssigneeAvatar from "../AssigneeAvatar";
+import UserAvatar from "../UserAvatar";
 import { fetchWithAuth } from "../../auth";
 
 const ExpandableSection = ({ title, count, children, defaultOpen = false }) => {
@@ -153,9 +153,9 @@ function TaskDetailsRight({
             <ExpandableSection title="Assignees" count={assignees.length}>
                 <div className={styles.assigneesList}>
                     {assignees.map(a => (
-                        <AssigneeAvatar
+                        <UserAvatar
                             key={a.userId}
-                            assignee={a}
+                            user={a}
                             onRemove={canCreateTasks ? handleRemove : null}
                         />
                     ))}

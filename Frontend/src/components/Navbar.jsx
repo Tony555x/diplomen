@@ -108,7 +108,9 @@ function Navbar({ userName }) {
                     )}
                 </div>
 
-                <button className={styles.navBtn}>⚙️</button>
+                <Link to="/user/settings" className={styles.navBtn} title="User Settings">
+                    ⚙️
+                </Link>
 
                 <div className={styles.userMenuWrapper}>
                     <button

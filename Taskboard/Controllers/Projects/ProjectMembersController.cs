@@ -43,6 +43,7 @@ public class ProjectMembersController : ControllerBase
                 pm.UserId,
                 pm.User!.Email,
                 pm.User.UserName,
+                pm.User.AvatarColor,
                 Role = pm.ProjectRole!.RoleName,
                 pm.JoinedAt,
                 Status = pm.Status.ToString()
