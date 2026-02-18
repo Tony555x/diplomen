@@ -234,8 +234,8 @@ namespace Taskboard.Controllers
 
             if (!string.IsNullOrWhiteSpace(request.Title))
             {
-                if (!canEditTasks) return Forbid();
-                task.Title = request.Title;
+                if (canEditTasks)
+                    task.Title = request.Title;
             }
 
             if (request.Completed.HasValue)
@@ -256,24 +256,26 @@ namespace Taskboard.Controllers
             // Update field values if provided
             if (request.FieldValues != null && request.FieldValues.Count > 0)
             {
-                if (!canEditTasks) return Forbid();
-                foreach (var fieldReq in request.FieldValues)
+                if (canEditTasks)
                 {
-                    var fieldValue = task.FieldValues.FirstOrDefault(fv => fv.Id == fieldReq.Id);
+                    foreach (var fieldReq in request.FieldValues)
+                    {
+                        var fieldValue = task.FieldValues.FirstOrDefault(fv => fv.Id == fieldReq.Id);
 
-                    if (fieldValue != null)
-                    {
-                        fieldValue.Value = fieldReq.Value;
-                    }
-                    else
-                    {
-                        var newFieldValue = new TaskFieldValue
+                        if (fieldValue != null)
                         {
-                            TaskId = task.Id,
-                            TaskFieldId = fieldReq.TaskFieldId,
-                            Value = fieldReq.Value
-                        };
-                        _context.TaskFieldValues.Add(newFieldValue);
+                            fieldValue.Value = fieldReq.Value;
+                        }
+                        else
+                        {
+                            var newFieldValue = new TaskFieldValue
+                            {
+                                TaskId = task.Id,
+                                TaskFieldId = fieldReq.TaskFieldId,
+                                Value = fieldReq.Value
+                            };
+                            _context.TaskFieldValues.Add(newFieldValue);
+                        }
                     }
                 }
             }
