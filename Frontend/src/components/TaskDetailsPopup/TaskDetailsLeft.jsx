@@ -17,7 +17,7 @@ function TaskDetailsLeft({ taskType, completed, setCompleted, fieldValues, setFi
         <div className={styles.column}>
             {taskType?.fields?.length > 0 && (
                 <>
-                    <h3>{taskType.name} Details</h3>
+                    <h3 className={styles.header}>{taskType.name} Details</h3>
                     {taskType.fields.map(field => {
                         const value =
                             fieldValues.find(fv => fv.taskFieldId === field.id)?.value ??

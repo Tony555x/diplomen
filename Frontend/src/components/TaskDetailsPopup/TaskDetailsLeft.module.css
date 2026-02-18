@@ -4,6 +4,10 @@
     border-right: 1px solid #374151;
 }
 
+.header {
+    margin: 0.5rem 0;
+}
+
 /* Specific styling for completed checkbox */
 .completedCheckbox {
     margin-top: 0.65rem;
