@@ -4,6 +4,7 @@ import { fetchWithAuth } from "../auth";
 import AddMemberPopup from "../components/AddMemberPopup";
 import CreateRolePopup from "../components/CreateRolePopup";
 import EditMemberPopup from "../components/EditMemberPopup";
+import UserAvatar from "../components/UserAvatar";
 import "./ProjectMembers.css";
 
 function ProjectMembers() {
@@ -107,6 +108,12 @@ function ProjectMembers() {
                                     onClick={() => handleMemberClick(member)}
                                 >
                                     <div className="member-main">
+                                        <div onClick={e => e.stopPropagation()}>
+                                            <UserAvatar
+                                                user={{ userId: member.userId, userName: member.userName, avatarColor: member.avatarColor }}
+                                                size="sm"
+                                            />
+                                        </div>
                                         <div className="member-name">{member.userName}</div>
                                         <div className="member-badges">
                                             <span className={`role-badge role-${member.role.toLowerCase() === "owner" ? "owner" : "member"}`}>

@@ -202,6 +202,12 @@ function TaskDetailsRight({
                                                     setShowAssigneeResults(false);
                                                 }}
                                             >
+                                                <span
+                                                    className={styles.memberAvatarMini}
+                                                    style={{ background: m.avatarColor || "#3b82f6" }}
+                                                >
+                                                    {m.userName?.charAt(0).toUpperCase()}
+                                                </span>
                                                 {m.userName}
                                             </div>
                                         ))}

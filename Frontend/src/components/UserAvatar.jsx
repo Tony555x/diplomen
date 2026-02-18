@@ -44,7 +44,7 @@ function UserAvatar({ user, onRemove, size = "md" }) {
             className={styles.portalPopup}
             style={{ top: popupPosition.top, left: popupPosition.left, transform: "translateX(-50%)" }}
         >
-            <div className={styles.popupAvatar} style={{ background: bg }}>{initial}</div>
+            <div className={styles.popupAvatar} style={{ backgroundColor: bg }}>{initial}</div>
             <div className={styles.username}>{user.userName}</div>
             {onRemove && (
                 <button
@@ -63,7 +63,7 @@ function UserAvatar({ user, onRemove, size = "md" }) {
             <button
                 ref={avatarRef}
                 className={`${styles.avatar} ${styles[size]}`}
-                style={{ background: bg }}
+                style={{ backgroundColor: bg }}
                 onClick={togglePopup}
                 title={user.userName}
             >
