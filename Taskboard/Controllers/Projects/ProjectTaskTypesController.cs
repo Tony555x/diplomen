@@ -36,6 +36,7 @@ public class ProjectTaskTypesController : ControllerBase
                 tt.Id,
                 tt.Name,
                 tt.Description,
+                tt.Icon,
                 Fields = tt.Fields.OrderBy(f => f.Order).Select(f => new
                 {
                     f.Id,
@@ -86,6 +87,7 @@ public class ProjectTaskTypesController : ControllerBase
 
         taskType.Name = request.Name.Trim();
         taskType.Description = request.Description;
+        taskType.Icon = request.Icon;
 
         await _context.SaveChangesAsync();
 

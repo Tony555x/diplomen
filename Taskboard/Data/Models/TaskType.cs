@@ -13,7 +13,9 @@ namespace Taskboard.Data.Models
         public string Name { get; set; } = String.Empty;
         
         public string? Description { get; set; }
-        
+
+        public string? Icon { get; set; }
+
         [Required]
         public int ProjectId { get; set; }
         

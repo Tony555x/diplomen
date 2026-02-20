@@ -133,7 +133,8 @@ public class ProjectsController : ControllerBase
         {
             Name = "Task",
             ProjectId = project.Id,
-            Description = "Default task type"
+            Description = "Default task type",
+            Icon = "task.png"
         };
         _context.TaskTypes.Add(defaultTaskType);
         await _context.SaveChangesAsync();

@@ -43,6 +43,13 @@ function TaskTypesSettings({ projectId, currentUserRole }) {
                         onClick={canEdit ? () => setSelectedType(tt) : undefined}
                         style={!canEdit ? { pointerEvents: "none" } : {}}
                     >
+                        {tt.icon && (
+                            <img
+                                src={`/cardicons/${tt.icon}`}
+                                alt=""
+                                className={styles.itemIcon}
+                            />
+                        )}
                         <strong>{tt.name}</strong>
                         <span>{tt.fields.length} fields</span>
                     </div>

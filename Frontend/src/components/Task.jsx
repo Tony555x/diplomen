@@ -3,7 +3,9 @@ import styles from "../pages/ProjectTasks.module.css";
 
 const MAX_AVATARS = 3;
 
-function Task({ task, columnKey, onDragStart, onClick }) {
+function Task({ task, taskTypes = [], columnKey, onDragStart, onClick }) {
+  const taskType = taskTypes.find(tt => tt.id === task.taskTypeId);
+  const iconFile = taskType?.icon;
   const handleDragStart = (e) => {
     e.dataTransfer.effectAllowed = "move";
     onDragStart(task);
@@ -40,7 +42,16 @@ function Task({ task, columnKey, onDragStart, onClick }) {
       onClick={handleClick}
       className={`${styles["task-item"]} ${task.completed ? styles.completed : ""} ${!task.completed && task.isBlocked ? styles.blocked : ""}`}
     >
-      <span className={styles["task-title"]}>{task.title}</span>
+      <span className={styles["task-title"]}>
+        {iconFile && (
+          <img
+            src={`/cardicons/${iconFile}`}
+            alt=""
+            className={styles["task-type-icon"]}
+          />
+        )}
+        {task.title}
+      </span>
 
       {hasFooter && (
         <div className={styles["task-footer"]}>

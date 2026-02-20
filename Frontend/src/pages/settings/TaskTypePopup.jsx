@@ -5,11 +5,18 @@ import styles from "./TaskTypePopup.module.css";
 
 const FIELD_TYPES = ["Text", "Number", "Date", "Checkbox"];
 
+const ICONS = [
+    "task.png", "bug.png", "bolt.png", "clone.png",
+    "gear.png", "search.png", "story.png", "text.png",
+    "up.png", "warn.png"
+];
+
 function TaskTypePopup({ projectId, taskType, onClose, onSaved }) {
     const isEdit = !!taskType.id;
 
     const [name, setName] = useState(taskType.name || "");
     const [description, setDescription] = useState(taskType.description || "");
+    const [icon, setIcon] = useState(taskType.icon || "task.png");
     const [fields, setFields] = useState(taskType.fields || []);
     const [error, setError] = useState("");
 
@@ -68,6 +75,7 @@ function TaskTypePopup({ projectId, taskType, onClose, onSaved }) {
                         id: taskType.id,
                         name,
                         description,
+                        icon,
                         fields
                     }
                 }
@@ -97,6 +105,23 @@ function TaskTypePopup({ projectId, taskType, onClose, onSaved }) {
                     value={description}
                     onChange={e => setDescription(e.target.value)}
                 />
+
+                <hr style={{ borderColor: "#888" }} />
+                <h3>Icon</h3>
+                <div className={styles.iconPicker}>
+                    {ICONS.map(filename => (
+                        <button
+                            key={filename}
+                            type="button"
+                            title={filename.replace(".png", "")}
+                            className={`${styles.iconOption} ${icon === filename ? styles.iconSelected : ""}`}
+                            onClick={() => setIcon(filename)}
+                        >
+                            <img src={`/cardicons/${filename}`} alt={filename} />
+                        </button>
+                    ))}
+                </div>
+
                 <hr style={{ borderColor: "#888" }} />
                 <h3>Fields</h3>
 

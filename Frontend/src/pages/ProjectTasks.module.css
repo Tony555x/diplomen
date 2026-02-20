@@ -185,6 +185,20 @@ body {
     /* tighter vertical spacing */
     margin: 0;
     /* remove extra margins */
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+}
+
+.task-type-icon {
+    width: 14px;
+    height: 14px;
+    object-fit: contain;
+    flex-shrink: 0;
+    opacity: 0.75;
+    vertical-align: middle;
+    position: relative;
+    top: 1px;
 }
 
 

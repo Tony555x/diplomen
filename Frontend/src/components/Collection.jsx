@@ -192,6 +192,7 @@ function Collection({
                             <Task
                                 key={task.id}
                                 task={task}
+                                taskTypes={taskTypes}
                                 onDragStart={onDragStart}
                                 onClick={onTaskClick}
                             />

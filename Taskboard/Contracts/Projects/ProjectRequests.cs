@@ -76,6 +76,8 @@ public class UpsertTaskTypeRequest
 
     public string? Description { get; set; }
 
+    public string? Icon { get; set; }
+
     [Required]
     public List<UpsertTaskFieldRequest> Fields { get; set; } = new();
 }

@@ -280,6 +280,7 @@ function Column({
           <Task
             key={t.id}
             task={t}
+            taskTypes={taskTypes}
             columnKey={columnKey}
             onDragStart={onDragStart}
             onClick={onTaskClick}
