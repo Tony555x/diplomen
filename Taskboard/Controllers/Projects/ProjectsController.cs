@@ -378,6 +378,23 @@ public class ProjectsController : ControllerBase
 
         return Ok(new { success = true, message = "Project deleted." });
     }
+
+    [HttpPost("{projectId}/visit")]
+    public async Task<IActionResult> VisitProject(int projectId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return Unauthorized();
+
+        var membership = await _context.ProjectMembers
+            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
+
+        if (membership == null) return Forbid();
+
+        membership.LastVisitedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        return Ok(new { success = true });
+    }
 }
 
 

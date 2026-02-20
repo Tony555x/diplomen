@@ -27,5 +27,7 @@ namespace Taskboard.Data.Models
 
         [Required]
         public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime? LastVisitedAt { get; set; }
     }
 }

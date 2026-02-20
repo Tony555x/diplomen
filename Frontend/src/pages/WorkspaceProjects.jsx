@@ -30,6 +30,8 @@ function WorkspaceProjects() {
 
     useEffect(() => {
         loadProjects();
+        // Fire-and-forget: update last visited timestamp
+        fetchWithAuth(`/api/workspaces/${workspaceId}/visit`, { method: "POST" }).catch(() => { });
     }, [workspaceId]);
 
     const handleProjectCreated = () => {

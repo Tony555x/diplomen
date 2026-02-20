@@ -148,3 +148,24 @@
 .error {
     color: #f87171;
 }
+
+.showAllBtn {
+    display: block;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.7rem 1rem;
+    background: transparent;
+    border: 1px dashed #374151;
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background-color 0.2s;
+    text-align: center;
+}
+
+.showAllBtn:hover {
+    border-color: #3b82f6;
+    color: #6b9eff;
+    background-color: rgba(59, 130, 246, 0.05);
+}

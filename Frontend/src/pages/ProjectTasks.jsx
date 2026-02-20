@@ -70,6 +70,8 @@ function ProjectTasks() {
 
     useEffect(() => {
         refreshTasks();
+        // Fire-and-forget: update last visited timestamp
+        fetchWithAuth(`/api/projects/${projectId}/visit`, { method: "POST" }).catch(() => { });
     }, [projectId]);
 
     const addTask = async (status, title, taskTypeId, selectedCollectionKey) => {

@@ -120,6 +120,23 @@ namespace Taskboard.Controllers
                 }
             });
         }
+
+        [HttpPost("{id}/visit")]
+        public async Task<IActionResult> VisitWorkspace(int id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var membership = await _context.WorkspaceMembers
+                .FirstOrDefaultAsync(wm => wm.WorkspaceId == id && wm.UserId == userId);
+
+            if (membership == null) return Forbid();
+
+            membership.LastVisitedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true });
+        }
     }
 
     public class CreateWorkspaceRequest

@@ -22,5 +22,7 @@ namespace Taskboard.Data.Models
         public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
 
         public ProjectMemberStatus Status { get; set; } = ProjectMemberStatus.Active;
+
+        public DateTime? LastVisitedAt { get; set; }
     }
 }

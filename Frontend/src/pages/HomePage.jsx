@@ -5,10 +5,14 @@ import Navbar from "../components/Navbar";
 import ProjectCard from "../components/ProjectCard";
 import styles from "./HomePage.module.css";
 
+const RECENT_LIMIT = 4;
+
 function HomePage() {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showAllWorkspaces, setShowAllWorkspaces] = useState(false);
+    const [showAllProjects, setShowAllProjects] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -30,6 +34,12 @@ function HomePage() {
     if (loading) return <div className={styles.loading}>Loading...</div>;
     if (error) return <div className={styles.error}>{error}</div>;
 
+    const allWorkspaces = data?.workspaces ?? [];
+    const allProjects = data?.projects ?? [];
+
+    const visibleWorkspaces = showAllWorkspaces ? allWorkspaces : allWorkspaces.slice(0, RECENT_LIMIT);
+    const visibleProjects = showAllProjects ? allProjects : allProjects.slice(0, RECENT_LIMIT);
+
     return (
         <>
             <Navbar />
@@ -43,7 +53,7 @@ function HomePage() {
                 <section className={styles.homeSection}>
                     <h2>Recent Workspaces</h2>
                     <div className={styles.cardGrid}>
-                        {data?.workspaces?.map((ws) => (
+                        {visibleWorkspaces.map((ws) => (
                             <div
                                 key={ws.id}
                                 className={styles.card}
@@ -60,17 +70,39 @@ function HomePage() {
                             <h3>+ Create Workspace</h3>
                         </div>
                     </div>
+                    {allWorkspaces.length > RECENT_LIMIT && (
+                        <button
+                            className={styles.showAllBtn}
+                            onClick={() => setShowAllWorkspaces(prev => !prev)}
+                        >
+                            {showAllWorkspaces
+                                ? "Show less"
+                                : `Show all workspaces (${allWorkspaces.length})`}
+                        </button>
+                    )}
                 </section>
 
                 {/* Recent Projects */}
                 <section className={styles.homeSection}>
                     <h2>Recent Projects</h2>
-                    {data?.projects?.length > 0 ? (
-                        <div className={styles.cardGrid}>
-                            {data.projects.map((proj) => (
-                                <ProjectCard key={proj.id} project={proj} />
-                            ))}
-                        </div>
+                    {allProjects.length > 0 ? (
+                        <>
+                            <div className={styles.cardGrid}>
+                                {visibleProjects.map((proj) => (
+                                    <ProjectCard key={proj.id} project={proj} />
+                                ))}
+                            </div>
+                            {allProjects.length > RECENT_LIMIT && (
+                                <button
+                                    className={styles.showAllBtn}
+                                    onClick={() => setShowAllProjects(prev => !prev)}
+                                >
+                                    {showAllProjects
+                                        ? "Show less"
+                                        : `Show all projects (${allProjects.length})`}
+                                </button>
+                            )}
+                        </>
                     ) : (
                         <p>No recent projects found.</p>
                     )}

@@ -24,34 +24,33 @@ namespace Taskboard.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
-            // Recent Workspaces (Top 5)
+            // All Workspaces ordered by last visited (or joined if never visited)
             var recentWorkspaces = await _context.WorkspaceMembers
                 .Where(wm => wm.UserId == userId)
                 .Include(wm => wm.Workspace)
-                .OrderByDescending(wm => wm.Workspace.Id)
+                .OrderByDescending(wm => wm.LastVisitedAt ?? wm.JoinedAt)
                 .Select(wm => new
                 {
                     wm.Workspace.Id,
-                    wm.Workspace.Name
+                    wm.Workspace.Name,
+                    LastVisitedAt = wm.LastVisitedAt
                 })
-                .Take(5)
                 .ToListAsync();
 
-            // Recent Projects (Top 5)
+            // All Projects ordered by last visited (or joined if never visited)
             var recentProjects = await _context.ProjectMembers
                 .Where(pm => pm.UserId == userId && pm.Status == ProjectMemberStatus.Active)
                 .Include(pm => pm.Project)
-                .OrderByDescending(pm => pm.Project.Id)
+                .OrderByDescending(pm => pm.LastVisitedAt ?? pm.JoinedAt)
                 .Select(pm => new
                 {
                     pm.Project.Id,
-                    pm.Project.Name
+                    pm.Project.Name,
+                    LastVisitedAt = pm.LastVisitedAt
                 })
-                .Take(5)
                 .ToListAsync();
 
             // Assigned Tasks (Top 10, not completed)
-            // UserTask links User and TaskItem
             var assignedTasks = await _context.Tasks
                 .Where(t => !t.Completed && t.UserTasks.Any(ut => ut.UserId == userId))
                 .Include(t => t.Project)
