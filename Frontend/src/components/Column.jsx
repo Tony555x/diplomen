@@ -39,6 +39,23 @@ function Column({
   const scrollContainerRef = useRef(null);
   const scrollIntervalRef = useRef(null);
   const filterBtnRef = useRef(null);
+  const typeDropdownRef = useRef(null);
+
+  const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (typeDropdownRef.current && !typeDropdownRef.current.contains(e.target)) {
+        setIsTypeDropdownOpen(false);
+      }
+    };
+    if (isTypeDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isTypeDropdownOpen]);
 
   useEffect(() => {
     if (taskTypes.length > 0 && !selectedType) {
@@ -319,18 +336,55 @@ function Column({
             />
           </div>
           <div className={styles.buttonRow}>
-            <select
-              className={styles.addSelect}
-              value={selectedType}
-              onChange={e => setSelectedType(e.target.value)}
-            >
-              {taskTypes.length === 0 && <option value="">No type</option>}
-              {taskTypes.map(tt => (
-                <option key={tt.id} value={tt.id}>
-                  {tt.name}
-                </option>
-              ))}
-            </select>
+            <div className={styles.customSelect} ref={typeDropdownRef}>
+              <div
+                className={styles.addSelect}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', padding: '0.4rem 0.5rem', height: '100%', boxSizing: 'border-box' }}
+                onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
+              >
+                {selectedType ? (
+                  <>
+                    {taskTypes.find(tt => tt.id == selectedType)?.icon && (
+                      <img
+                        src={`/cardicons/${taskTypes.find(tt => tt.id == selectedType).icon}`}
+                        alt=""
+                        style={{ width: '14px', height: '14px', objectFit: 'contain' }}
+                      />
+                    )}
+                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {taskTypes.find(tt => tt.id == selectedType)?.name}
+                    </span>
+                  </>
+                ) : (
+                  <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>No type</span>
+                )}
+                <span style={{ marginLeft: 'auto', fontSize: '0.7rem', opacity: 0.5, flexShrink: 0 }}>▼</span>
+              </div>
+
+              {isTypeDropdownOpen && (
+                <div className={styles.dropdownMenu}>
+                  {taskTypes.map(tt => (
+                    <div
+                      key={tt.id}
+                      className={styles.dropdownOption}
+                      onClick={() => {
+                        setSelectedType(tt.id);
+                        setIsTypeDropdownOpen(false);
+                      }}
+                    >
+                      {tt.icon ? (
+                        <img src={`/cardicons/${tt.icon}`} alt="" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />
+                      ) : (
+                        <div style={{ width: '14px' }}></div>
+                      )}
+                      {tt.name}
+                    </div>
+                  ))}
+                  {taskTypes.length === 0 && <div className={styles.dropdownOption}>No type</div>}
+                </div>
+              )}
+            </div>
+
             <button className={styles.addButton} onClick={handleAddTask}>
               Add
             </button>
