@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchWithAuth } from "../auth";
 import styles from "./ProjectDashboard.module.css";
+import CreateWidgetPopup from "../components/CreateWidgetPopup/CreateWidgetPopup";
 
 function ProjectDashboard() {
     const { projectId } = useParams();
@@ -10,21 +11,54 @@ function ProjectDashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const loadWidgets = async () => {
-            try {
-                const data = await fetchWithAuth(`/api/projects/${projectId}/dashboard/widgets`);
-                setWidgets(data);
-            } catch (err) {
-                console.error("Failed to load widgets", err);
-                setError("Failed to load dashboard widgets.");
-            } finally {
-                setLoading(false);
-            }
-        };
+    // Popup State
+    const [showWidgetPopup, setShowWidgetPopup] = useState(false);
+    const [editingWidgetId, setEditingWidgetId] = useState(null);
 
+    const loadWidgets = async () => {
+        setLoading(true);
+        try {
+            const data = await fetchWithAuth(`/api/projects/${projectId}/dashboard/widgets`);
+            setWidgets(data);
+        } catch (err) {
+            console.error("Failed to load widgets", err);
+            setError("Failed to load dashboard widgets.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         loadWidgets();
     }, [projectId]);
+
+    const handleDeleteWidget = async (widgetId) => {
+        if (!window.confirm("Are you sure you want to delete this widget?")) return;
+
+        try {
+            await fetchWithAuth(`/api/projects/${projectId}/dashboard/widgets/${widgetId}`, {
+                method: "DELETE"
+            });
+            setWidgets(widgets.filter(w => w.id !== widgetId));
+        } catch (err) {
+            console.error("Failed to delete widget", err);
+            alert("Failed to delete widget: " + err.message);
+        }
+    };
+
+    const handleCreateWidgetClick = () => {
+        setEditingWidgetId(null);
+        setShowWidgetPopup(true);
+    };
+
+    const handleEditWidgetClick = (widgetId) => {
+        setEditingWidgetId(widgetId);
+        setShowWidgetPopup(true);
+    };
+
+    const handleWidgetSaved = () => {
+        loadWidgets();
+    };
 
     const renderWidgetData = (widget) => {
         if (widget.error) {
@@ -55,7 +89,7 @@ function ProjectDashboard() {
                 <ul className={styles['widget-list']}>
                     {widget.data.map(item => (
                         <li key={`${item.projectId}-${item.userId}`}>
-                            <strong>{item.user?.userName || item.userId}</strong> - Role: {item.projectRole?.name || "Unknown"}
+                            <strong>{item.user?.userName || item.userId}</strong> - Role: {item.projectRole?.roleName || "Unknown"}
                         </li>
                     ))}
                 </ul>
@@ -71,7 +105,7 @@ function ProjectDashboard() {
                 <h2>Project Dashboard</h2>
                 <button
                     className={styles['create-widget-btn']}
-                    onClick={() => navigate(`/project/${projectId}/dashboard/create-widget`)}
+                    onClick={handleCreateWidgetClick}
                 >
                     + Create Widget
                 </button>
@@ -90,13 +124,23 @@ function ProjectDashboard() {
                     {widgets.map(w => (
                         <div key={w.id} className={styles['widget-card']}>
                             <div className={styles['widget-card-header']}>
-                                <h3>Widget #{w.id}</h3>
-                                <span className={styles['widget-type-badge']}>
-                                    {w.type === 0 ? "List Result" : w.type === 1 ? "Stat Result" : "Counter"}
-                                </span>
-                            </div>
-                            <div className={styles['widget-source']}>
-                                <code>{w.source}</code>
+                                <h3>{w.name || `Widget #${w.id}`}</h3>
+                                <div className={styles['widget-actions']}>
+                                    <button
+                                        className={styles['edit-widget']}
+                                        onClick={() => handleEditWidgetClick(w.id)}
+                                        title="Edit Widget"
+                                    >
+                                        <img src="/buttonicons/write.png" alt="Edit" width="20" height="20" />
+                                    </button>
+                                    <button
+                                        className={styles['delete-widget']}
+                                        onClick={() => handleDeleteWidget(w.id)}
+                                        title="Delete Widget"
+                                    >
+                                        <img src="/buttonicons/delete.png" alt="Delete" width="20" height="20" />
+                                    </button>
+                                </div>
                             </div>
                             <div className={styles['widget-results']}>
                                 {renderWidgetData(w)}
@@ -104,6 +148,15 @@ function ProjectDashboard() {
                         </div>
                     ))}
                 </div>
+            )}
+
+            {showWidgetPopup && (
+                <CreateWidgetPopup
+                    projectId={projectId}
+                    widgetId={editingWidgetId}
+                    onClose={() => setShowWidgetPopup(false)}
+                    onWidgetSaved={handleWidgetSaved}
+                />
             )}
         </div>
     );

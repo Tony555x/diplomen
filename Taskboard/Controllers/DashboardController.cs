@@ -74,6 +74,7 @@ namespace Taskboard.Controllers
 
                         results.Add(new {
                             widget.Id,
+                            widget.Name,
                             widget.Source,
                             widget.Type,
                             ListType = listType,
@@ -85,6 +86,7 @@ namespace Taskboard.Controllers
                     {
                         results.Add(new {
                             widget.Id,
+                            widget.Name,
                             widget.Source,
                             widget.Type,
                             ListType = "Error",
@@ -100,6 +102,7 @@ namespace Taskboard.Controllers
 
         public class CreateWidgetDto
         {
+            public string Name { get; set; }
             public WidgetType Type { get; set; }
             public string Source { get; set; }
         }
@@ -114,6 +117,7 @@ namespace Taskboard.Controllers
             {
                 UserId = userId,
                 ProjectId = projectId,
+                Name = dto.Name,
                 Type = dto.Type,
                 Source = dto.Source,
                 Result=""
@@ -123,6 +127,42 @@ namespace Taskboard.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(widget);
+        }
+
+        [HttpPut("widgets/{widgetId}")]
+        public async Task<IActionResult> UpdateWidget(int projectId, int widgetId, [FromBody] CreateWidgetDto dto)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var widget = await _context.DashboardWidgets
+                .FirstOrDefaultAsync(w => w.Id == widgetId && w.UserId == userId && w.ProjectId == projectId);
+
+            if (widget == null) return NotFound();
+
+            widget.Name = dto.Name;
+            widget.Type = dto.Type;
+            widget.Source = dto.Source;
+
+            await _context.SaveChangesAsync();
+            return Ok(widget);
+        }
+
+        [HttpDelete("widgets/{widgetId}")]
+        public async Task<IActionResult> DeleteWidget(int projectId, int widgetId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var widget = await _context.DashboardWidgets
+                .FirstOrDefaultAsync(w => w.Id == widgetId && w.UserId == userId && w.ProjectId == projectId);
+
+            if (widget == null) return NotFound();
+
+            _context.DashboardWidgets.Remove(widget);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

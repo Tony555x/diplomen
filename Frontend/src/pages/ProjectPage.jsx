@@ -4,7 +4,6 @@ import { fetchWithAuth } from "../auth";
 import Navbar from "../components/Navbar";
 import ProjectNavbar from "../components/ProjectNavbar";
 import ProjectDashboard from "./ProjectDashboard";
-import CreateWidget from "./CreateWidget/CreateWidget";
 import ProjectTasks from "./ProjectTasks";
 import ProjectMembers from "./ProjectMembers";
 import "./ProjectPage.css";
@@ -43,7 +42,6 @@ function ProjectPage() {
                 <Routes>
                     <Route path="/" element={<Navigate to={`/project/${projectId}/dashboard`} replace />} />
                     <Route path="/dashboard" element={<ProjectDashboard />} />
-                    <Route path="/dashboard/create-widget" element={<CreateWidget />} />
                     <Route path="/tasks" element={<ProjectTasks />} />
                     <Route path="/members" element={<ProjectMembers />} />
                     <Route path="/settings/*" element={<ProjectSettings />} />
