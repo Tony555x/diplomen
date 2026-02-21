@@ -58,6 +58,7 @@ builder.Services.AddControllers()
     });
 
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IWidgetService, WidgetService>();
 
 var app = builder.Build();
 
