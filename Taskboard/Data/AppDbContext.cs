@@ -29,6 +29,7 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<TaskBlocker> TaskBlockers { get; set; }
     public DbSet<TaskHistory> TaskHistories { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<DashboardWidget> DashboardWidgets { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
