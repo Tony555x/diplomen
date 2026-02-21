@@ -1,0 +1,154 @@
+.project-dashboard {
+    padding: 20px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.dashboard-header h2 {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.create-widget-btn {
+    background-color: #3b82f6;
+    /* Blue matching typical dark themes */
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.create-widget-btn:hover {
+    background-color: #2563eb;
+}
+
+.widgets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.widget-card {
+    background-color: #1e1e1e;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+}
+
+.widget-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #374151;
+    padding-bottom: 12px;
+}
+
+.widget-card-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.widget-type-badge {
+    background-color: #374151;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.widget-source {
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #2d2d2d;
+    border: 1px solid #4b5563;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: #60a5fa;
+    /* light blue for code */
+    word-break: break-all;
+    font-family: monospace;
+}
+
+.widget-results {
+    flex-grow: 1;
+    overflow-y: auto;
+    max-height: 250px;
+    padding-right: 5px;
+}
+
+/* Custom scrollbar for results */
+.widget-results::-webkit-scrollbar {
+    width: 6px;
+}
+
+.widget-results::-webkit-scrollbar-track {
+    background: #1e1e1e;
+}
+
+.widget-results::-webkit-scrollbar-thumb {
+    background: #4b5563;
+    border-radius: 3px;
+}
+
+.widget-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.widget-list li {
+    padding: 10px 0;
+    border-bottom: 1px dashed #374151;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.widget-list li:last-child {
+    border-bottom: none;
+}
+
+.widget-list li strong {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.no-data {
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 20px 0;
+}
+
+.widget-error {
+    background-color: rgba(220, 38, 38, 0.1);
+    /* light red bg */
+    color: #fca5a5;
+    /* light red text */
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+.widget-error p {
+    margin: 0 0 6px 0;
+}
+
+.widget-error p:last-child {
+    margin-bottom: 0;
+}

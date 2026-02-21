@@ -35,6 +35,18 @@ public class AppDbContext : IdentityDbContext<User>
     {
         base.OnModelCreating(builder);
 
+        builder.Entity<DashboardWidget>()
+            .HasOne(dw => dw.User)
+            .WithMany()
+            .HasForeignKey(dw => dw.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<DashboardWidget>()
+            .HasOne(dw => dw.Project)
+            .WithMany()
+            .HasForeignKey(dw => dw.ProjectId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.Entity<WorkspaceMember>()
             .HasKey(x => new { x.WorkspaceId, x.UserId });
 
