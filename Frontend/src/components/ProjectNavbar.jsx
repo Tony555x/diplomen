@@ -7,6 +7,7 @@ function ProjectNavbar({ projectId, projectName }) {
     const location = useLocation();
 
     const tabs = [
+        { name: "Dashboard", path: `/project/${projectId}/dashboard` },
         { name: "Tasks", path: `/project/${projectId}/tasks` },
         { name: "Members", path: `/project/${projectId}/members` },
         { name: "Settings", path: `/project/${projectId}/settings` }

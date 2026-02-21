@@ -3,6 +3,7 @@ import { useParams, Routes, Route, Navigate } from "react-router-dom";
 import { fetchWithAuth } from "../auth";
 import Navbar from "../components/Navbar";
 import ProjectNavbar from "../components/ProjectNavbar";
+import ProjectDashboard from "./ProjectDashboard";
 import ProjectTasks from "./ProjectTasks";
 import ProjectMembers from "./ProjectMembers";
 import "./ProjectPage.css";
@@ -39,7 +40,8 @@ function ProjectPage() {
             <ProjectNavbar projectId={projectId} projectName={project?.name} />
             <div className="project-content">
                 <Routes>
-                    <Route path="/" element={<Navigate to={`/project/${projectId}/tasks`} replace />} />
+                    <Route path="/" element={<Navigate to={`/project/${projectId}/dashboard`} replace />} />
+                    <Route path="/dashboard" element={<ProjectDashboard />} />
                     <Route path="/tasks" element={<ProjectTasks />} />
                     <Route path="/members" element={<ProjectMembers />} />
                     <Route path="/settings/*" element={<ProjectSettings />} />
