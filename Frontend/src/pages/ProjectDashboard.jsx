@@ -78,8 +78,25 @@ function ProjectDashboard() {
             return (
                 <ul className={styles['widget-list']}>
                     {widget.data.map(item => (
-                        <li key={item.id}>
-                            <strong>{item.title}</strong> - Status: {item.status} {item.completed ? "(Completed)" : ""}
+                        <li key={item.id} className={`${styles['widget-task-item']} ${item.completed ? styles['completed-task'] : ''}`}>
+                            <div className={styles['task-item-header']}>
+                                {item.taskType?.icon && (
+                                    <img
+                                        src={`/cardicons/${item.taskType.icon}`}
+                                        alt={item.taskType.name}
+                                        className={styles['task-type-icon']}
+                                    />
+                                )}
+                                <span className={styles['task-title']}>{item.title}</span>
+                            </div>
+                            <div className={styles['task-item-details']}>
+                                <span className={styles['task-status']}>{item.status}</span>
+                                {item.assignees && item.assignees.length > 0 && (
+                                    <span className={styles['task-assignees']} title={item.assignees.join(', ')}>
+                                        👤 {item.assignees.length}
+                                    </span>
+                                )}
+                            </div>
                         </li>
                     ))}
                 </ul>
@@ -88,8 +105,13 @@ function ProjectDashboard() {
             return (
                 <ul className={styles['widget-list']}>
                     {widget.data.map(item => (
-                        <li key={`${item.projectId}-${item.userId}`}>
-                            <strong>{item.user?.userName || item.userId}</strong> - Role: {item.projectRole?.roleName || "Unknown"}
+                        <li key={`${item.projectId}-${item.userId}`} className={styles['widget-member-item']}>
+                            <div className={styles['member-item-header']}>
+                                <span className={styles['member-name']}>{item.user?.userName || item.userId}</span>
+                            </div>
+                            <div className={styles['member-item-details']}>
+                                <span className={styles['member-role']}>{item.projectRole?.roleName || "Unknown"}</span>
+                            </div>
                         </li>
                     ))}
                 </ul>

@@ -56,7 +56,7 @@ namespace Taskboard.Controllers
                                 t.Status,
                                 t.Completed,
                                 t.DueDate,
-                                TaskType = t.TaskType != null ? new { t.TaskType.Name } : null,
+                                TaskType = t.TaskType != null ? new { t.TaskType.Name, t.TaskType.Icon } : null,
                                 Assignees = t.UserTasks?.Select(ut => ut.User?.UserName).ToList()
                             }).ToList();
                         }
