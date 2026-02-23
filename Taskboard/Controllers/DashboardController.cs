@@ -48,7 +48,7 @@ namespace Taskboard.Controllers
                         var (list, listType) = await _widgetService.ProcessListResultAsync(widget);
                         
                         object processedData = list;
-                        if (listType == "Task" || listType == "TypedTask")
+                        if (listType == "Tasks" || listType == "TypedTasks")
                         {
                             processedData = list.Cast<TaskItem>().Select(t => new {
                                 t.Id,
@@ -60,7 +60,7 @@ namespace Taskboard.Controllers
                                 Assignees = t.UserTasks?.Select(ut => ut.User?.UserName).ToList()
                             }).ToList();
                         }
-                        else if (listType == "Member")
+                        else if (listType == "Members")
                         {
                             processedData = list.Cast<ProjectMember>().Select(m => new {
                                 m.ProjectId,

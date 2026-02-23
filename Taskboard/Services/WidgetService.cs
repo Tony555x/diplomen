@@ -70,9 +70,9 @@ namespace Taskboard.Services
                 string target = tokens[i].ToUpperInvariant();
                 i++;
                 
-                if (target == "TASK")
+                if (target == "TASKS")
                 {
-                    listType = "Task";
+                    listType = "Tasks";
                     var param = Expression.Parameter(typeof(TaskItem), "t");
                     Expression body = null;
                     
@@ -84,19 +84,25 @@ namespace Taskboard.Services
                     {
                         string detail = tokens[i].ToUpperInvariant();
                         i++;
-                        if (i >= tokens.Count) break;
+                        if (i >= tokens.Count) throw new Exception("Error: Expected operator.");
+                        
+                        string op = tokens[i].ToUpperInvariant();
+                        i++;
+                        if (i >= tokens.Count) throw new Exception("Error: Expected value.");
+                        
                         string val = tokens[i];
                         i++;
 
                         Expression condition = null;
                         if (detail == "TYPE")
                         {
-                            listType = "TypedTask";
+                            listType = "TypedTasks";
                             var navTaskType = Expression.Property(param, "TaskType");
                             var navNotNull = Expression.NotEqual(navTaskType, Expression.Constant(null, typeof(TaskType)));
                             var propName = Expression.Property(navTaskType, "Name");
-                            var nameEq = Expression.Equal(propName, Expression.Constant(val));
-                            condition = Expression.AndAlso(navNotNull, nameEq);
+                            condition = BuildComparison(propName, val, op);
+                            if (condition != null)
+                                condition = Expression.AndAlso(navNotNull, condition);
                         }
                         else if (detail == "COMPLETED")
                         {
@@ -109,7 +115,7 @@ namespace Taskboard.Services
                         else if (detail == "STATUS")
                         {
                             var propStatus = Expression.Property(param, "Status");
-                            condition = Expression.Equal(propStatus, Expression.Constant(val));
+                            condition = BuildStringComparison(propStatus, val, op);
                         }
 
                         if (condition != null)
@@ -134,9 +140,9 @@ namespace Taskboard.Services
                     var taskResults = await query.ToListAsync();
                     results.AddRange(taskResults);
                 }
-                else if (target == "MEMBER")
+                else if (target == "MEMBERS")
                 {
-                    listType = "Member";
+                    listType = "Members";
                     var param = Expression.Parameter(typeof(ProjectMember), "m");
                     Expression body = null;
                     
@@ -148,7 +154,12 @@ namespace Taskboard.Services
                     {
                         string detail = tokens[i].ToUpperInvariant();
                         i++;
-                        if (i >= tokens.Count) break;
+                        if (i >= tokens.Count) throw new Exception("Error: Expected operator.");
+                        
+                        string op = tokens[i].ToUpperInvariant();
+                        i++;
+                        if (i >= tokens.Count) throw new Exception("Error: Expected value.");
+
                         string val = tokens[i];
                         i++;
 
@@ -157,9 +168,10 @@ namespace Taskboard.Services
                         {
                             var navRole = Expression.Property(param, "ProjectRole");
                             var navNotNull = Expression.NotEqual(navRole, Expression.Constant(null, typeof(ProjectRole)));
-                            var propName = Expression.Property(navRole, "Name");
-                            var nameEq = Expression.Equal(propName, Expression.Constant(val));
-                            condition = Expression.AndAlso(navNotNull, nameEq);
+                            var propName = Expression.Property(navRole, "RoleName");
+                            condition = BuildStringComparison(propName, val, op);
+                            if (condition != null)
+                                condition = Expression.AndAlso(navNotNull, condition);
                         }
 
                         if (condition != null)
@@ -184,15 +196,83 @@ namespace Taskboard.Services
                 }
                 else
                 {
-                    throw new ArgumentException($"Invalid SELECT target: '{target}'. Expected 'TASK' or 'MEMBER'.");
+                    throw new ArgumentException($"Invalid SELECT target: '{target}'. Expected 'TASKS' or 'MEMBERS'.");
                 }
             }
             else
             {
-                throw new ArgumentException("Invalid query format. Expected 'SELECT [TASK | MEMBER] ...'");
+                throw new ArgumentException("Invalid query format. Expected 'SELECT [TASKS | MEMBERS] ...'");
             }
 
             return (results, listType);
+        }
+
+        private Expression BuildComparison(MemberExpression property, string value, string op)
+        {
+            if (op == "=" || op == "!=")
+            {
+                return BuildStringComparison(property, value, op);
+            }
+
+            // For <, >, <=, >= we need to handle numerical or date comparisons if possible.
+            // But since our properties are mostly strings or enums right now, if they want to
+            // do > or < on a string, it's not directly supported by EF core in a simple Expression.LessThan.
+            // Let's at least throw or handle if the underlying type is not string.
+            
+            var underlyingType = Nullable.GetUnderlyingType(property.Type) ?? property.Type;
+            
+            if (underlyingType == typeof(int) || underlyingType == typeof(long) || underlyingType == typeof(double) || underlyingType == typeof(decimal))
+            {
+                if (double.TryParse(value, out double numVal))
+                {
+                    var convertedVal = Convert.ChangeType(numVal, underlyingType);
+                    var constant = Expression.Constant(convertedVal, property.Type);
+                    
+                    switch (op)
+                    {
+                        case ">": return Expression.GreaterThan(property, constant);
+                        case ">=": return Expression.GreaterThanOrEqual(property, constant);
+                        case "<": return Expression.LessThan(property, constant);
+                        case "<=": return Expression.LessThanOrEqual(property, constant);
+                    }
+                }
+            }
+            else if (underlyingType == typeof(DateTime))
+            {
+                if (DateTime.TryParse(value, out DateTime dateVal))
+                {
+                    // EF handles DateTime constants
+                    var constant = Expression.Constant(dateVal, property.Type);
+                    switch (op)
+                    {
+                        case ">": return Expression.GreaterThan(property, constant);
+                        case ">=": return Expression.GreaterThanOrEqual(property, constant);
+                        case "<": return Expression.LessThan(property, constant);
+                        case "<=": return Expression.LessThanOrEqual(property, constant);
+                    }
+                }
+            }
+
+            // Fallback: If it's none of the above, just do string comparison as a fallback, 
+            // even though < > on strings might fail in EF depending on provider.
+            // But usually TYPE is a string and they only use = or !=
+            return BuildStringComparison(property, value, op);
+        }
+
+        private Expression BuildStringComparison(MemberExpression property, string value, string op)
+        {
+            var constant = Expression.Constant(value);
+
+            switch (op)
+            {
+                case "=":
+                    return Expression.Equal(property, constant);
+                case "!=":
+                    return Expression.NotEqual(property, constant);
+                default:
+                    // Fallback to equal
+                    return Expression.Equal(property, constant);
+            }
         }
     }
 }

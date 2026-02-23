@@ -74,7 +74,7 @@ function ProjectDashboard() {
             return <p className={styles['no-data']}>No results found.</p>;
         }
 
-        if (widget.listType === "Task" || widget.listType === "TypedTask") {
+        if (widget.listType === "Tasks" || widget.listType === "TypedTasks") {
             return (
                 <ul className={styles['widget-list']}>
                     {widget.data.map(item => (
@@ -101,7 +101,7 @@ function ProjectDashboard() {
                     ))}
                 </ul>
             );
-        } else if (widget.listType === "Member") {
+        } else if (widget.listType === "Members") {
             return (
                 <ul className={styles['widget-list']}>
                     {widget.data.map(item => (
