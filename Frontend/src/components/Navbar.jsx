@@ -51,7 +51,7 @@ function Navbar({ userName }) {
         <div className={styles.navbar}>
             <div className={styles.navLeft}>
                 <Link to="/home" className={styles.navLogo}>
-                    MySite
+                    TaskBoard
                 </Link>
 
                 <Link to="/home" className={styles.navLink}>

@@ -99,12 +99,11 @@ function TaskTypePopup({ projectId, taskType, onClose, onSaved }) {
                     value={name}
                     onChange={e => setName(e.target.value)}
                 />
-
-                <input
+                {/* <input
                     placeholder="Description of task type"
                     value={description}
                     onChange={e => setDescription(e.target.value)}
-                />
+                /> */}
 
                 <hr style={{ borderColor: "#888" }} />
                 <h3>Icon</h3>
