@@ -48,7 +48,6 @@ function ProjectTasks() {
                     fetchWithAuth(`/api/projects/${projectId}/members`),
                     fetchWithAuth(`/api/projects/${projectId}/statuses`)
                 ]);
-            console.log(tasksData);
             setTasks(tasksData || []);
             setTaskTypes(taskTypesData.taskTypes || []);
             setCollections(collectionsData || []);
