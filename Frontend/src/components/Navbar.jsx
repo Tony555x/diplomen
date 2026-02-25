@@ -108,10 +108,6 @@ function Navbar({ userName }) {
                     )}
                 </div>
 
-                <Link to="/user/settings" className={styles.navBtn} title="User Settings">
-                    ⚙️
-                </Link>
-
                 <div className={styles.userMenuWrapper}>
                     <button
                         className={styles.navBtn}
@@ -125,6 +121,13 @@ function Navbar({ userName }) {
                             <div className={styles.userName}>
                                 {userName || "User"}
                             </div>
+                            <Link
+                                to="/user/settings"
+                                className={styles.menuLink}
+                                onClick={() => setShowUserMenu(false)}
+                            >
+                                Settings
+                            </Link>
                             <button
                                 className={styles.logoutBtn}
                                 onClick={handleLogout}
