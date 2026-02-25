@@ -26,7 +26,7 @@ namespace Taskboard.Controllers
 
             // All Workspaces ordered by last visited (or joined if never visited)
             var recentWorkspaces = await _context.WorkspaceMembers
-                .Where(wm => wm.UserId == userId)
+                .Where(wm => wm.UserId == userId && wm.Status == "Active")
                 .Include(wm => wm.Workspace)
                 .OrderByDescending(wm => wm.LastVisitedAt ?? wm.JoinedAt)
                 .Select(wm => new

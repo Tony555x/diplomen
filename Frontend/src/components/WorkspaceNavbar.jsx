@@ -8,8 +8,7 @@ function WorkspaceNavbar({ workspaceId, workspaceName }) {
 
     const tabs = [
         { name: "Projects", path: `/workspace/${workspaceId}/projects` },
-        { name: "Members", path: `/workspace/${workspaceId}/members` },
-        { name: "Settings", path: `/workspace/${workspaceId}/settings` }
+        { name: "Members & Settings", path: `/workspace/${workspaceId}/members` }
     ];
 
     const isActive = (path) => location.pathname === path;

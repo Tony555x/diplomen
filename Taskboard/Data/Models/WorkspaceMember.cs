@@ -24,6 +24,9 @@ namespace Taskboard.Data.Models
         [MaxLength(50)]
         public string Role { get; set; } = String.Empty;
 
+        [Required]
+        [MaxLength(20)]
+        public string Status { get; set; } = "Active";
 
         [Required]
         public DateTime JoinedAt { get; set; } = DateTime.UtcNow;

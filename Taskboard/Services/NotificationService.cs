@@ -10,6 +10,7 @@ namespace Taskboard.Services
         Task SendNotificationAsync(string userId, NotificationType type, string title, string message, int? relatedEntityId);
         Task SendProjectInviteAsync(Project project, User inviter, List<User> invitees);
         Task SendTaskAssignmentAsync(TaskItem task, User assigner, User assignee);
+        Task SendWorkspaceInviteAsync(Workspace workspace, User inviter, User invitee);
     }
 
     public class NotificationService : INotificationService
@@ -64,6 +65,19 @@ namespace Taskboard.Services
                 "Task Assignment",
                 $"You have been assigned to task '{task.Title}' by {assigner.UserName ?? "a member"}.",
                 task.Id
+            );
+        }
+
+        public async Task SendWorkspaceInviteAsync(Workspace workspace, User inviter, User invitee)
+        {
+            if (invitee.Id == inviter.Id) return;
+
+            await SendNotificationAsync(
+                invitee.Id,
+                NotificationType.WorkspaceInvite,
+                "Workspace Invitation",
+                $"You have been invited to workspace '{workspace.Name}' by {inviter.UserName ?? "a member"}.",
+                workspace.Id
             );
         }
     }

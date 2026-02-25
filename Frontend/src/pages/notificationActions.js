@@ -8,6 +8,12 @@ export function handleNotificationAction(notification, navigate) {
             }
             break;
 
+        case "WorkspaceInvite":
+            if (notification.relatedEntityId) {
+                navigate(`/workspace-invite/${notification.relatedEntityId}`);
+            }
+            break;
+
         case "TaskAssignment":
             if (notification.relatedEntityId && notification.relatedProjectId) {
                 navigate(`/project/${notification.relatedProjectId}/tasks/${notification.relatedEntityId}`);

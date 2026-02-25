@@ -4,6 +4,7 @@ import { fetchWithAuth } from "../auth";
 import Navbar from "../components/Navbar";
 import WorkspaceNavbar from "../components/WorkspaceNavbar";
 import WorkspaceProjects from "./WorkspaceProjects";
+import WorkspaceMembers from "./WorkspaceMembers";
 import "./WorkspacePage.css";
 
 function WorkspacePage() {
@@ -39,8 +40,7 @@ function WorkspacePage() {
                 <Routes>
                     <Route path="/" element={<Navigate to={`/workspace/${workspaceId}/projects`} replace />} />
                     <Route path="/projects" element={<WorkspaceProjects />} />
-                    <Route path="/members" element={<div style={{ padding: '2rem', color: 'rgba(255,255,255,0.6)' }}>Members page - Coming soon</div>} />
-                    <Route path="/settings" element={<div style={{ padding: '2rem', color: 'rgba(255,255,255,0.6)' }}>Settings page - Coming soon</div>} />
+                    <Route path="/members" element={<WorkspaceMembers workspaceName={workspace?.name} />} />
                 </Routes>
             </div>
         </div>

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Taskboard.Data.Models;
+using Taskboard.Services;
 
 namespace Taskboard.Controllers
 {
@@ -12,10 +13,12 @@ namespace Taskboard.Controllers
     public class WorkspacesController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly INotificationService _notificationService;
 
-        public WorkspacesController(AppDbContext context)
+        public WorkspacesController(AppDbContext context, INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         [HttpGet("{id}")]
@@ -24,9 +27,9 @@ namespace Taskboard.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
-            // Check if user is a member of this workspace
+            // Check if user is an active member of this workspace
             var isMember = await _context.WorkspaceMembers
-                .AnyAsync(wm => wm.WorkspaceId == id && wm.UserId == userId);
+                .AnyAsync(wm => wm.WorkspaceId == id && wm.UserId == userId && wm.Status == "Active");
 
             if (!isMember)
             {
@@ -56,9 +59,9 @@ namespace Taskboard.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
-            // Check if user is a member of this workspace
+            // Check if user is an active member of this workspace
             var isMember = await _context.WorkspaceMembers
-                .AnyAsync(wm => wm.WorkspaceId == id && wm.UserId == userId);
+                .AnyAsync(wm => wm.WorkspaceId == id && wm.UserId == userId && wm.Status == "Active");
 
             if (!isMember)
             {
@@ -137,10 +140,176 @@ namespace Taskboard.Controllers
 
             return Ok(new { success = true });
         }
+
+        // GET members (active only)
+        [HttpGet("{id}/members")]
+        public async Task<IActionResult> GetMembers(int id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var membership = await _context.WorkspaceMembers
+                .FirstOrDefaultAsync(wm => wm.WorkspaceId == id && wm.UserId == userId && wm.Status == "Active");
+            if (membership == null) return Forbid();
+
+            var members = await _context.WorkspaceMembers
+                .Where(wm => wm.WorkspaceId == id && wm.Status == "Active")
+                .Include(wm => wm.User)
+                .Select(wm => new
+                {
+                    wm.UserId,
+                    UserName = wm.User != null ? wm.User.UserName : wm.UserId,
+                    Email = wm.User != null ? wm.User.Email : "",
+                    AvatarColor = wm.User != null ? wm.User.AvatarColor : "",
+                    wm.Role,
+                    wm.JoinedAt
+                })
+                .ToListAsync();
+
+            return Ok(new
+            {
+                success = true,
+                members,
+                currentUserRole = membership.Role
+            });
+        }
+
+        // POST invite member by email (sends notification, creates pending record)
+        [HttpPost("{id}/members")]
+        public async Task<IActionResult> InviteMember(int id, [FromBody] AddWorkspaceMemberRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var membership = await _context.WorkspaceMembers
+                .FirstOrDefaultAsync(wm => wm.WorkspaceId == id && wm.UserId == userId && wm.Status == "Active");
+            if (membership == null || membership.Role != "Owner")
+                return Forbid();
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+            if (user == null)
+                return BadRequest(new { success = false, message = "User not found." });
+
+            var already = await _context.WorkspaceMembers
+                .AnyAsync(wm => wm.WorkspaceId == id && wm.UserId == user.Id);
+            if (already)
+                return BadRequest(new { success = false, message = "User is already a member or has a pending invite." });
+
+            // Create pending membership
+            _context.WorkspaceMembers.Add(new WorkspaceMember
+            {
+                WorkspaceId = id,
+                UserId = user.Id,
+                Role = "Member",
+                Status = "Pending",
+                JoinedAt = DateTime.UtcNow
+            });
+            await _context.SaveChangesAsync();
+
+            // Send notification
+            var workspace = await _context.Workspaces.FindAsync(id);
+            var inviter = await _context.Users.FindAsync(userId);
+            if (workspace != null && inviter != null)
+            {
+                await _notificationService.SendWorkspaceInviteAsync(workspace, inviter, user);
+            }
+
+            return Ok(new { success = true, message = "Invitation sent." });
+        }
+
+        // POST accept workspace invite
+        [HttpPost("{id}/accept-invite")]
+        public async Task<IActionResult> AcceptInvite(int id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var member = await _context.WorkspaceMembers
+                .FirstOrDefaultAsync(wm => wm.WorkspaceId == id && wm.UserId == userId);
+
+            if (member == null) return NotFound(new { success = false, message = "Invitation not found." });
+            if (member.Status == "Active")
+                return BadRequest(new { success = false, message = "You are already an active member." });
+
+            member.Status = "Active";
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true });
+        }
+
+        // DELETE remove member
+        [HttpDelete("{id}/members/{targetUserId}")]
+        public async Task<IActionResult> RemoveMember(int id, string targetUserId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var requesterMembership = await _context.WorkspaceMembers
+                .FirstOrDefaultAsync(wm => wm.WorkspaceId == id && wm.UserId == userId);
+            if (requesterMembership == null || requesterMembership.Role != "Owner")
+                return Forbid();
+
+            var target = await _context.WorkspaceMembers
+                .FirstOrDefaultAsync(wm => wm.WorkspaceId == id && wm.UserId == targetUserId);
+            if (target == null)
+                return NotFound(new { success = false, message = "Member not found." });
+            if (target.Role == "Owner")
+                return BadRequest(new { success = false, message = "Cannot remove the Owner." });
+
+            _context.WorkspaceMembers.Remove(target);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true });
+        }
+
+        // POST leave workspace
+        [HttpPost("{id}/leave")]
+        public async Task<IActionResult> LeaveWorkspace(int id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var membership = await _context.WorkspaceMembers
+                .FirstOrDefaultAsync(wm => wm.WorkspaceId == id && wm.UserId == userId);
+            if (membership == null) return Forbid();
+            if (membership.Role == "Owner")
+                return BadRequest(new { success = false, message = "Owner cannot leave. Delete the workspace instead." });
+
+            _context.WorkspaceMembers.Remove(membership);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true });
+        }
+
+        // DELETE delete workspace (owner only)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteWorkspace(int id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var membership = await _context.WorkspaceMembers
+                .FirstOrDefaultAsync(wm => wm.WorkspaceId == id && wm.UserId == userId);
+            if (membership == null || membership.Role != "Owner")
+                return Forbid();
+
+            var workspace = await _context.Workspaces.FindAsync(id);
+            if (workspace == null) return NotFound();
+
+            _context.Workspaces.Remove(workspace);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true });
+        }
     }
 
     public class CreateWorkspaceRequest
     {
         public string Name { get; set; } = string.Empty;
+    }
+
+    public class AddWorkspaceMemberRequest
+    {
+        public string Email { get; set; } = string.Empty;
     }
 }

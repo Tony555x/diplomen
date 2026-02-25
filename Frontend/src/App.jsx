@@ -10,6 +10,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ProjectInvitePage from "./pages/ProjectInvitePage";
 import UserSettingsPage from "./pages/UserSettingsPage";
 import AllNotificationsPage from "./pages/AllNotificationsPage";
+import WorkspaceInvitePage from "./pages/WorkspaceInvitePage";
 
 function App() {
   return (
@@ -69,6 +70,14 @@ function App() {
           element={
             <ProtectedRoute>
               <AllNotificationsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/workspace-invite/:workspaceId"
+          element={
+            <ProtectedRoute>
+              <WorkspaceInvitePage />
             </ProtectedRoute>
           }
         />
