@@ -75,7 +75,6 @@ function AllNotificationsPage() {
                                         </span>
                                     </div>
                                     <div className={styles.message}>{n.message}</div>
-                                    {!n.isRead && <div className={styles.unreadDot} />}
                                 </div>
                             ))}
                         </div>

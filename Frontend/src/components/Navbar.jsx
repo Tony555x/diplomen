@@ -11,6 +11,19 @@ function Navbar({ userName }) {
     const navigate = useNavigate();
     const notifRef = useRef(null);
 
+    const handleNotificationClick = async (notification) => {
+        // Optimistically update the UI and hide popup
+        setShowNotifications(false);
+        setNotifications(prev => prev.filter(n => n.id !== notification.id));
+
+        // Mark as read in the backend
+        if (!notification.isRead) {
+            try {
+                await fetchWithAuth(`/api/notifications/${notification.id}/mark-read`, { method: "POST" });
+            } catch { /* ignore */ }
+        }
+    };
+
     const handleLogout = () => {
         removeToken();
         navigate("/");
@@ -91,7 +104,7 @@ function Navbar({ userName }) {
                                     <NotificationItem
                                         key={n.id}
                                         notification={n}
-                                        onClick={() => setShowNotifications(false)}
+                                        onClick={() => handleNotificationClick(n)}
                                     />
                                 ))}
                             </div>

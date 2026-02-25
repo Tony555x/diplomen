@@ -13,7 +13,7 @@ function NotificationItem({ notification, onClick }) {
 
     return (
         <div
-            className={styles.item}
+            className={`${styles.item} ${!notification.isRead ? styles.unread : ""}`}
             onClick={handleClick}
         >
             <div className={styles.title}>
