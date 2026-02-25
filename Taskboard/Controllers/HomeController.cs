@@ -60,6 +60,7 @@ namespace Taskboard.Controllers
                     t.Id,
                     t.Title,
                     IsCompleted = t.Completed,
+                    ProjectId = t.ProjectId,
                     ProjectName = t.Project != null ? t.Project.Name : "No Project"
                 })
                 .Take(10)

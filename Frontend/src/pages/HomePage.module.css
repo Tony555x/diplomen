@@ -111,6 +111,14 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.taskItem:hover {
+    background-color: #252525;
 }
 
 .taskItem:last-child {

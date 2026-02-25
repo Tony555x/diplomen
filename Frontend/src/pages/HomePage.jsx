@@ -114,7 +114,11 @@ function HomePage() {
                     {data?.tasks?.length > 0 ? (
                         <div className={styles.taskList}>
                             {data.tasks.map((task) => (
-                                <div key={task.id} className={styles.taskItem}>
+                                <Link
+                                    key={task.id}
+                                    to={`/project/${task.projectId}/tasks/${task.id}`}
+                                    className={styles.taskItem}
+                                >
                                     <div className={styles.taskInfo}>
                                         <h3>{task.title}</h3>
                                         <p>{task.projectName}</p>
@@ -122,7 +126,7 @@ function HomePage() {
                                     <span className={styles.taskStatus}>
                                         {task.isCompleted ? "Completed" : "In Progress"}
                                     </span>
-                                </div>
+                                </Link>
                             ))}
                         </div>
                     ) : (

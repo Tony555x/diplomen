@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { fetchWithAuth, getCurrentUser } from "../auth";
 import Column from "../components/Column";
 import TaskDetailsPopup from "../components/TaskDetailsPopup/TaskDetailsPopup";
 import styles from "./ProjectTasks.module.css";
 
 function ProjectTasks() {
-    const { projectId } = useParams();
+    const { projectId, taskId: taskIdParam } = useParams();
+    const navigate = useNavigate();
 
     const [members, setMembers] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
@@ -72,6 +73,24 @@ function ProjectTasks() {
         // Fire-and-forget: update last visited timestamp
         fetchWithAuth(`/api/projects/${projectId}/visit`, { method: "POST" }).catch(() => { });
     }, [projectId]);
+
+    // Auto-open a task when taskId is in the URL and tasks have loaded
+    useEffect(() => {
+        if (!taskIdParam || tasks.length === 0) return;
+        const id = parseInt(taskIdParam, 10);
+        const match = tasks.find(t => t.id === id);
+        if (match) setSelectedTask(match);
+    }, [taskIdParam, tasks]);
+
+    const openTask = (task) => {
+        setSelectedTask(task);
+        navigate(`/project/${projectId}/tasks/${task.id}`, { replace: true });
+    };
+
+    const closeTask = () => {
+        setSelectedTask(null);
+        navigate(`/project/${projectId}/tasks`, { replace: true });
+    };
 
     const addTask = async (status, title, taskTypeId, selectedCollectionKey) => {
         if (!title.trim()) return;
@@ -360,7 +379,7 @@ function ProjectTasks() {
                             onSelectCollection={setSelectedCollectionKey}
                             onDragStart={handleDragStart}
                             onDrop={handleDrop}
-                            onTaskClick={setSelectedTask}
+                            onTaskClick={openTask}
                             onRenameCollection={renameCollection}
                             onDeleteCollection={deleteCollection}
                             filterState={filterState}
@@ -388,7 +407,7 @@ function ProjectTasks() {
                     task={selectedTask}
                     statuses={statuses}
                     taskTypes={taskTypes}
-                    onClose={() => setSelectedTask(null)}
+                    onClose={closeTask}
                     onUpdate={handleTaskUpdate}
                     onDelete={canCreateTasks ? handleTaskDelete : null}
                     onDrop={handleDrop}

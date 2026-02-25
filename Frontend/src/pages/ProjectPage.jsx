@@ -43,6 +43,7 @@ function ProjectPage() {
                     <Route path="/" element={<Navigate to={`/project/${projectId}/dashboard`} replace />} />
                     <Route path="/dashboard" element={<ProjectDashboard />} />
                     <Route path="/tasks" element={<ProjectTasks />} />
+                    <Route path="/tasks/:taskId" element={<ProjectTasks />} />
                     <Route path="/members" element={<ProjectMembers />} />
                     <Route path="/settings/*" element={<ProjectSettings />} />
                 </Routes>
