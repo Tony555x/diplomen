@@ -91,6 +91,11 @@ function ProjectDashboard() {
                             </div>
                             <div className={styles['task-item-details']}>
                                 <span className={styles['task-status']}>{item.status}</span>
+                                {item.dueDate && (
+                                    <span className={styles['task-date']}>
+                                        📅 {new Date(item.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                    </span>
+                                )}
                                 {item.assignees && item.assignees.length > 0 && (
                                     <span className={styles['task-assignees']} title={item.assignees.join(', ')}>
                                         👤 {item.assignees.length}
