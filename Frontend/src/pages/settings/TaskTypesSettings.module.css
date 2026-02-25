@@ -74,3 +74,9 @@
     opacity: 0.85;
     flex-shrink: 0;
 }
+
+.itemLeft {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
