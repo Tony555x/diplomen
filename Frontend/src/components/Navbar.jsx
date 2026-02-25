@@ -99,8 +99,10 @@ function Navbar({ userName }) {
 
                             <button
                                 className={styles.viewAllBtn}
-                                disabled
-                                onClick={() => navigate("/notifications")}
+                                onClick={() => {
+                                    setShowNotifications(false);
+                                    navigate("/notifications");
+                                }}
                             >
                                 View all notifications
                             </button>

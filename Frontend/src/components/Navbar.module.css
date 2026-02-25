@@ -197,7 +197,14 @@
   border: 1px solid #374151;
   background: #2c2c2c;
   color: rgba(255, 255, 255, 0.7);
-  cursor: not-allowed;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.viewAllBtn:hover {
+  background: #333333;
+  border-color: #4b5563;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .notificationList {

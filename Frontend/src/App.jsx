@@ -9,6 +9,7 @@ import WorkspacePage from "./pages/WorkspacePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProjectInvitePage from "./pages/ProjectInvitePage";
 import UserSettingsPage from "./pages/UserSettingsPage";
+import AllNotificationsPage from "./pages/AllNotificationsPage";
 
 function App() {
   return (
@@ -60,6 +61,14 @@ function App() {
           element={
             <ProtectedRoute>
               <UserSettingsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <AllNotificationsPage />
             </ProtectedRoute>
           }
         />
