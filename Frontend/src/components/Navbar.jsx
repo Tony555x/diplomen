@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import styles from "./Navbar.module.css";
 import { Link, useNavigate } from "react-router-dom";
-import { removeToken, fetchWithAuth } from "../auth";
+import { removeToken, fetchWithAuth, getCurrentUser } from "../auth";
 import NotificationItem from "./NotificationItem";
 
 function Navbar({ userName }) {
@@ -10,6 +10,9 @@ function Navbar({ userName }) {
     const [notifications, setNotifications] = useState([]);
     const navigate = useNavigate();
     const notifRef = useRef(null);
+    const currentUser = getCurrentUser();
+
+    const displayUserName = userName || (currentUser ? (currentUser.unique_name || currentUser.name || "User") : "User");
 
     const handleNotificationClick = async (notification) => {
         // Optimistically update the UI and hide popup
@@ -134,7 +137,7 @@ function Navbar({ userName }) {
                     {showUserMenu && (
                         <div className={styles.userMenu}>
                             <div className={styles.userName}>
-                                {userName || "User"}
+                                {displayUserName}
                             </div>
                             <Link
                                 to="/user/settings"
