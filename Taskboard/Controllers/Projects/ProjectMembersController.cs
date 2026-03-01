@@ -15,11 +15,13 @@ public class ProjectMembersController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly INotificationService _notificationService;
+    private readonly IProjectAccessService _projectAccessService;
 
-    public ProjectMembersController(AppDbContext context, INotificationService notificationService)
+    public ProjectMembersController(AppDbContext context, INotificationService notificationService, IProjectAccessService projectAccessService)
     {
         _context = context;
         _notificationService = notificationService;
+        _projectAccessService = projectAccessService;
     }
 
     [HttpGet]
@@ -28,11 +30,11 @@ public class ProjectMembersController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null) return Unauthorized();
 
-        var currentUserMembership = await _context.ProjectMembers
-            .Include(pm => pm.ProjectRole)
-            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
+        // Allow access via project access level (Public/Workspace)
+        if (!await _projectAccessService.HasViewAccessAsync(projectId, userId))
+            return Forbid();
 
-        if (currentUserMembership == null) return Forbid();
+        var currentUserMembership = await _projectAccessService.GetMembershipAsync(projectId, userId);
 
         var members = await _context.ProjectMembers
             .Where(pm => pm.ProjectId == projectId)
@@ -68,11 +70,22 @@ public class ProjectMembersController : ControllerBase
             .ThenBy(r => r.RoleName)
             .ToListAsync();
 
-        return Ok(new
+        // Guest access (via Public/Workspace access level, not an explicit member)
+        object currentUserRole;
+        if (currentUserMembership == null)
         {
-            success = true,
-            members,
-            roles,
+            currentUserRole = new
+            {
+                RoleName = "Guest",
+                CanAddEditMembers = false,
+                CanEditProjectSettings = false,
+                CanCreateEditDeleteTasks = false,
+                CanCreateDeleteTaskStatuses = false,
+                IsOwner = false
+            };
+        }
+        else
+        {
             currentUserRole = new
             {
                 RoleName = currentUserMembership.ProjectRole!.RoleName,
@@ -81,7 +94,15 @@ public class ProjectMembersController : ControllerBase
                 CanCreateEditDeleteTasks = currentUserMembership.ProjectRole.CanCreateEditDeleteTasks,
                 CanCreateDeleteTaskStatuses = currentUserMembership.ProjectRole.CanCreateDeleteTaskStatuses,
                 IsOwner = currentUserMembership.ProjectRole.IsOwner
-            }
+            };
+        }
+
+        return Ok(new
+        {
+            success = true,
+            members,
+            roles,
+            currentUserRole
         });
     }
 

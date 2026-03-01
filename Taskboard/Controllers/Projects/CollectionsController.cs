@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Taskboard.Data.Models;
+using Taskboard.Services;
 
 namespace Taskboard.Controllers.Projects
 {
@@ -13,10 +14,12 @@ namespace Taskboard.Controllers.Projects
     public class CollectionsController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IProjectAccessService _projectAccessService;
 
-        public CollectionsController(AppDbContext context)
+        public CollectionsController(AppDbContext context, IProjectAccessService projectAccessService)
         {
             _context = context;
+            _projectAccessService = projectAccessService;
         }
 
         [HttpGet]
@@ -25,14 +28,9 @@ namespace Taskboard.Controllers.Projects
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
-            // Verify user has access to this project
-            var hasAccess = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
-
-            if (!hasAccess)
-            {
+            // Verify user has view access to this project (member or access level)
+            if (!await _projectAccessService.HasViewAccessAsync(projectId, userId))
                 return Forbid();
-            }
 
             var collections = await _context.Collections
                 .Where(c => c.ProjectId == projectId)

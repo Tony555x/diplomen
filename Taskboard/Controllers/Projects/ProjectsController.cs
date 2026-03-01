@@ -19,11 +19,13 @@ public class ProjectsController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly INotificationService _notificationService;
+    private readonly IProjectAccessService _projectAccessService;
 
-    public ProjectsController(AppDbContext context, INotificationService notificationService)
+    public ProjectsController(AppDbContext context, INotificationService notificationService, IProjectAccessService projectAccessService)
     {
         _context = context;
         _notificationService = notificationService;
+        _projectAccessService = projectAccessService;
     }
 
     [HttpPost]
@@ -175,6 +177,12 @@ public class ProjectsController : ControllerBase
     [HttpGet("{projectId}/statuses")]
     public async Task<IActionResult> GetTaskStatuses(int projectId)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return Unauthorized();
+
+        if (!await _projectAccessService.HasViewAccessAsync(projectId, userId))
+            return Forbid();
+
         var statuses = await _context.UserTaskStatuses
             .Where(ts => ts.ProjectId == projectId)
             .OrderBy(ts => ts.Order)

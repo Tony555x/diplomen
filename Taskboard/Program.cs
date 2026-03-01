@@ -59,6 +59,7 @@ builder.Services.AddControllers()
 
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IWidgetService, WidgetService>();
+builder.Services.AddScoped<IProjectAccessService, ProjectAccessService>();
 
 var app = builder.Build();
 

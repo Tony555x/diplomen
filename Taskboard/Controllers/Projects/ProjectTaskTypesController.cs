@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Taskboard.Contracts.Projects;
 using Taskboard.Data.Models;
+using Taskboard.Services;
 
 namespace Taskboard.Controllers.Projects;
 
@@ -13,10 +14,12 @@ namespace Taskboard.Controllers.Projects;
 public class ProjectTaskTypesController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IProjectAccessService _projectAccessService;
 
-    public ProjectTaskTypesController(AppDbContext context)
+    public ProjectTaskTypesController(AppDbContext context, IProjectAccessService projectAccessService)
     {
         _context = context;
+        _projectAccessService = projectAccessService;
     }
 
     [HttpGet]
@@ -25,8 +28,8 @@ public class ProjectTaskTypesController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null) return Unauthorized();
 
-        var hasAccess = await _context.ProjectMembers.AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
-        if (!hasAccess) return Forbid();
+        if (!await _projectAccessService.HasViewAccessAsync(projectId, userId))
+            return Forbid();
 
         var taskTypes = await _context.TaskTypes
             .Where(tt => tt.ProjectId == projectId)
