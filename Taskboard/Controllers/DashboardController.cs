@@ -27,6 +27,47 @@ namespace Taskboard.Controllers
             _userManager = userManager;
         }
 
+        // ─── Widget Templates ────────────────────────────────────────────────────
+
+        [HttpGet("widget-templates")]
+        public async Task<IActionResult> GetWidgetTemplates(int projectId)
+        {
+            // Fetch available custom fields for the project so the frontend can populate them
+            var taskFields = await _context.TaskFields
+                .Where(tf => tf.TaskType!.ProjectId == projectId)
+                .Select(tf => new { tf.Name, tf.Type, TaskTypeName = tf.TaskType!.Name })
+                .Distinct()
+                .ToListAsync();
+
+            var statuses = await _context.UserTaskStatuses
+                .Where(s => s.ProjectId == projectId)
+                .OrderBy(s => s.Order)
+                .Select(s => s.Name)
+                .ToListAsync();
+
+            var taskTypes = await _context.TaskTypes
+                .Where(tt => tt.ProjectId == projectId)
+                .Select(tt => new { tt.Id, tt.Name, tt.Icon })
+                .ToListAsync();
+
+            var templates = await _context.WidgetTemplates
+                .OrderBy(t => t.Id)
+                .ToListAsync();
+
+            return Ok(new
+            {
+                templates,
+                projectContext = new
+                {
+                    statuses,
+                    taskTypes,
+                    taskFields
+                }
+            });
+        }
+
+        // ─── Widgets CRUD ────────────────────────────────────────────────────────
+
         [HttpGet("widgets")]
         public async Task<IActionResult> GetWidgets(int projectId)
         {
@@ -39,61 +80,34 @@ namespace Taskboard.Controllers
 
             var results = new List<object>();
 
-            foreach(var widget in widgets)
+            foreach (var widget in widgets)
             {
-                if (widget.Type == WidgetType.ListResult)
+                try
                 {
-                    try 
+                    var result = await _widgetService.ExecuteQueryAsync(widget);
+                    results.Add(new
                     {
-                        var (list, listType) = await _widgetService.ProcessListResultAsync(widget);
-                        
-                        object processedData = list;
-                        if (listType == "Tasks" || listType == "TypedTasks")
-                        {
-                            processedData = list.Cast<TaskItem>().Select(t => new {
-                                t.Id,
-                                t.Title,
-                                t.Status,
-                                t.Completed,
-                                t.DueDate,
-                                TaskType = t.TaskType != null ? new { t.TaskType.Name, t.TaskType.Icon } : null,
-                                Assignees = t.UserTasks?.Select(ut => ut.User?.UserName).ToList()
-                            }).ToList();
-                        }
-                        else if (listType == "Members")
-                        {
-                            processedData = list.Cast<ProjectMember>().Select(m => new {
-                                m.ProjectId,
-                                m.UserId,
-                                User = m.User != null ? new { m.User.UserName } : null,
-                                ProjectRole = m.ProjectRole != null ? new { m.ProjectRole.RoleName } : null,
-                                m.JoinedAt,
-                                Status = m.Status.ToString()
-                            }).ToList();
-                        }
-
-                        results.Add(new {
-                            widget.Id,
-                            widget.Name,
-                            widget.Source,
-                            widget.Type,
-                            ListType = listType,
-                            Data = processedData,
-                            Error = (string)null
-                        });
-                    }
-                    catch (System.Exception ex)
+                        widget.Id,
+                        widget.Name,
+                        widget.Source,
+                        widget.Type,
+                        result.ResultType,
+                        Data = result.Data,
+                        Error = (string?)null
+                    });
+                }
+                catch (System.Exception ex)
+                {
+                    results.Add(new
                     {
-                        results.Add(new {
-                            widget.Id,
-                            widget.Name,
-                            widget.Source,
-                            widget.Type,
-                            ListType = "Error",
-                            Data = new List<object>(),
-                            Error = ex.Message
-                        });
-                    }
+                        widget.Id,
+                        widget.Name,
+                        widget.Source,
+                        widget.Type,
+                        ResultType = "Error",
+                        Data = new List<object>(),
+                        Error = ex.Message
+                    });
                 }
             }
 
@@ -102,9 +116,9 @@ namespace Taskboard.Controllers
 
         public class CreateWidgetDto
         {
-            public string Name { get; set; }
-            public WidgetType Type { get; set; }
-            public string Source { get; set; }
+            public string Name { get; set; } = string.Empty;
+            public WidgetType Type { get; set; } = WidgetType.ListResult;
+            public string Source { get; set; } = string.Empty;
         }
 
         [HttpPost("widgets")]
@@ -120,7 +134,7 @@ namespace Taskboard.Controllers
                 Name = dto.Name,
                 Type = dto.Type,
                 Source = dto.Source,
-                Result=""
+                Result = ""
             };
 
             _context.DashboardWidgets.Add(widget);

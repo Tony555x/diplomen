@@ -1,14 +1,35 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Taskboard.Data.Models;
 
 namespace Taskboard.Services
 {
+    // DTO that mirrors the JSON stored in DashboardWidget.Source
+    public class WidgetQueryDto
+    {
+        public string Select { get; set; } = "tasks";               // "tasks" | "members"
+        public List<WidgetFilterDto> Filters { get; set; } = new();
+        public string? GroupBy { get; set; }                        // "status"|"completed"|"type"|"role"|null
+        public WidgetAggregateDto? Aggregate { get; set; }
+        public string? Value { get; set; }                          // alternative to groupBy — single property
+    }
+
+    public class WidgetFilterDto
+    {
+        public string Field { get; set; } = "";   // "status"|"completed"|"type"|"assigneeCount"|"dueDate"|"isBlocked"|"overdue"|"role"|"taskCount"|"field:X"
+        public string Op { get; set; } = "=";     // "="|"!="|">"|">="|"<"|"<="
+        public string Value { get; set; } = "";
+    }
+
+    public class WidgetAggregateDto
+    {
+        public string Func { get; set; } = "count";  // "count"
+    }
+
     public class WidgetService : IWidgetService
     {
         private readonly AppDbContext _context;
@@ -18,261 +39,278 @@ namespace Taskboard.Services
             _context = context;
         }
 
-        private List<string> Tokenize(string source)
+        public async Task<WidgetResult> ExecuteQueryAsync(DashboardWidget widget)
         {
-            var tokens = new List<string>();
-            bool inQuotes = false;
-            var currentToken = new StringBuilder();
-            
-            foreach (char c in source)
-            {
-                if (c == '"')
-                {
-                    inQuotes = !inQuotes;
-                }
-                else if (char.IsWhiteSpace(c) && !inQuotes)
-                {
-                    if (currentToken.Length > 0)
-                    {
-                        tokens.Add(currentToken.ToString());
-                        currentToken.Clear();
-                    }
-                }
-                else
-                {
-                    currentToken.Append(c);
-                }
-            }
-            if (currentToken.Length > 0)
-            {
-                tokens.Add(currentToken.ToString());
-            }
-            return tokens;
-        }
-
-        public async Task<(List<object> Results, string ListType)> ProcessListResultAsync(DashboardWidget widget)
-        {
-            var results = new List<object>();
-            string listType = "Unknown";
-
             if (string.IsNullOrWhiteSpace(widget.Source))
-                return (results, listType);
+                return new WidgetResult { ResultType = "TaskList", Data = new List<object>() };
 
-            var tokens = Tokenize(widget.Source);
-            int i = 0;
-            
-            // Find SELECT
-            while (i < tokens.Count && tokens[i].ToUpperInvariant() != "SELECT") i++;
-            if (i < tokens.Count) i++; // skip SELECT
-
-            if (i < tokens.Count)
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            WidgetQueryDto query;
+            try
             {
-                string target = tokens[i].ToUpperInvariant();
-                i++;
-                
-                if (target == "TASKS")
-                {
-                    listType = "Tasks";
-                    var param = Expression.Parameter(typeof(TaskItem), "t");
-                    Expression body = null;
-                    
-                    // Find WHERE
-                    while (i < tokens.Count && tokens[i].ToUpperInvariant() != "WHERE") i++;
-                    if (i < tokens.Count) i++; // skip WHERE
-                    
-                    while (i < tokens.Count)
-                    {
-                        string detail = tokens[i].ToUpperInvariant();
-                        i++;
-                        if (i >= tokens.Count) throw new Exception("Error: Expected operator.");
-                        
-                        string op = tokens[i].ToUpperInvariant();
-                        i++;
-                        if (i >= tokens.Count) throw new Exception("Error: Expected value.");
-                        
-                        string val = tokens[i];
-                        i++;
-
-                        Expression condition = null;
-                        if (detail == "TYPE")
-                        {
-                            listType = "TypedTasks";
-                            var navTaskType = Expression.Property(param, "TaskType");
-                            var navNotNull = Expression.NotEqual(navTaskType, Expression.Constant(null, typeof(TaskType)));
-                            var propName = Expression.Property(navTaskType, "Name");
-                            condition = BuildComparison(propName, val, op);
-                            if (condition != null)
-                                condition = Expression.AndAlso(navNotNull, condition);
-                        }
-                        else if (detail == "COMPLETED")
-                        {
-                            if (bool.TryParse(val, out bool isCompleted))
-                            {
-                                var propCompleted = Expression.Property(param, "Completed");
-                                condition = Expression.Equal(propCompleted, Expression.Constant(isCompleted));
-                            }
-                        }
-                        else if (detail == "STATUS")
-                        {
-                            var propStatus = Expression.Property(param, "Status");
-                            condition = BuildStringComparison(propStatus, val, op);
-                        }
-
-                        if (condition != null)
-                        {
-                            body = body == null ? condition : Expression.AndAlso(body, condition);
-                        }
-                    }
-
-                    IQueryable<TaskItem> query = _context.Tasks
-                        .Include(t => t.Project)
-                        .Include(t => t.TaskType)
-                        .Include(t => t.UserTasks).ThenInclude(u => u.User)
-                        .Include(t => t.FieldValues).ThenInclude(fv => fv.TaskField)
-                        .Where(t => t.ProjectId == widget.ProjectId);
-
-                    if (body != null)
-                    {
-                        var lambda = Expression.Lambda<Func<TaskItem, bool>>(body, param);
-                        query = query.Where(lambda);
-                    }
-
-                    var taskResults = await query.ToListAsync();
-                    results.AddRange(taskResults);
-                }
-                else if (target == "MEMBERS")
-                {
-                    listType = "Members";
-                    var param = Expression.Parameter(typeof(ProjectMember), "m");
-                    Expression body = null;
-                    
-                    // Find WHERE
-                    while (i < tokens.Count && tokens[i].ToUpperInvariant() != "WHERE") i++;
-                    if (i < tokens.Count) i++; // skip WHERE
-                    
-                    while (i < tokens.Count)
-                    {
-                        string detail = tokens[i].ToUpperInvariant();
-                        i++;
-                        if (i >= tokens.Count) throw new Exception("Error: Expected operator.");
-                        
-                        string op = tokens[i].ToUpperInvariant();
-                        i++;
-                        if (i >= tokens.Count) throw new Exception("Error: Expected value.");
-
-                        string val = tokens[i];
-                        i++;
-
-                        Expression condition = null;
-                        if (detail == "ROLE")
-                        {
-                            var navRole = Expression.Property(param, "ProjectRole");
-                            var navNotNull = Expression.NotEqual(navRole, Expression.Constant(null, typeof(ProjectRole)));
-                            var propName = Expression.Property(navRole, "RoleName");
-                            condition = BuildStringComparison(propName, val, op);
-                            if (condition != null)
-                                condition = Expression.AndAlso(navNotNull, condition);
-                        }
-
-                        if (condition != null)
-                        {
-                            body = body == null ? condition : Expression.AndAlso(body, condition);
-                        }
-                    }
-
-                    IQueryable<ProjectMember> query = _context.ProjectMembers
-                        .Include(pm => pm.User)
-                        .Include(pm => pm.ProjectRole)
-                        .Where(pm => pm.ProjectId == widget.ProjectId);
-
-                    if (body != null)
-                    {
-                        var lambda = Expression.Lambda<Func<ProjectMember, bool>>(body, param);
-                        query = query.Where(lambda);
-                    }
-
-                    var memberResults = await query.ToListAsync();
-                    results.AddRange(memberResults);
-                }
-                else
-                {
-                    throw new ArgumentException($"Invalid SELECT target: '{target}'. Expected 'TASKS' or 'MEMBERS'.");
-                }
+                query = JsonSerializer.Deserialize<WidgetQueryDto>(widget.Source, options)
+                        ?? new WidgetQueryDto();
             }
-            else
+            catch
             {
-                throw new ArgumentException("Invalid query format. Expected 'SELECT [TASKS | MEMBERS] ...'");
+                throw new ArgumentException("Invalid widget query JSON.");
             }
 
-            return (results, listType);
+            if (query.Select?.ToLower() == "members")
+                return await ExecuteMembersQueryAsync(widget.ProjectId, query);
+
+            return await ExecuteTasksQueryAsync(widget.ProjectId, query);
         }
 
-        private Expression BuildComparison(MemberExpression property, string value, string op)
+        // ─── TASKS ──────────────────────────────────────────────────────────────
+
+        private async Task<WidgetResult> ExecuteTasksQueryAsync(int projectId, WidgetQueryDto query)
         {
-            if (op == "=" || op == "!=")
+            // Load all tasks for the project with required navigation properties
+            var allTasks = await _context.Tasks
+                .Where(t => t.ProjectId == projectId)
+                .Include(t => t.TaskType).ThenInclude(tt => tt!.Fields)
+                .Include(t => t.UserTasks).ThenInclude(ut => ut.User)
+                .Include(t => t.FieldValues).ThenInclude(fv => fv.TaskField)
+                .ToListAsync();
+
+            // Pre-compute isBlocked in memory (needs subquery join)
+            var blockedIds = await _context.TaskBlockers
+                .Where(tb => tb.BlockedTask!.ProjectId == projectId && !tb.BlockingTask!.Completed)
+                .Select(tb => tb.BlockedTaskId)
+                .Distinct()
+                .ToListAsync();
+
+            var blockedSet = new HashSet<int>(blockedIds);
+
+            // Apply filters in memory
+            var filtered = allTasks.Where(t => MatchesTaskFilters(t, query.Filters, blockedSet)).ToList();
+
+            // GroupBy + Aggregate
+            if (!string.IsNullOrWhiteSpace(query.GroupBy))
             {
-                return BuildStringComparison(property, value, op);
+                var groups = GroupTasks(filtered, query.GroupBy, query.Aggregate?.Func ?? "count");
+                return new WidgetResult { ResultType = "GroupedResult", Data = groups };
             }
 
-            // For <, >, <=, >= we need to handle numerical or date comparisons if possible.
-            // But since our properties are mostly strings or enums right now, if they want to
-            // do > or < on a string, it's not directly supported by EF core in a simple Expression.LessThan.
-            // Let's at least throw or handle if the underlying type is not string.
-            
-            var underlyingType = Nullable.GetUnderlyingType(property.Type) ?? property.Type;
-            
-            if (underlyingType == typeof(int) || underlyingType == typeof(long) || underlyingType == typeof(double) || underlyingType == typeof(decimal))
-            {
-                if (double.TryParse(value, out double numVal))
-                {
-                    var convertedVal = Convert.ChangeType(numVal, underlyingType);
-                    var constant = Expression.Constant(convertedVal, property.Type);
-                    
-                    switch (op)
-                    {
-                        case ">": return Expression.GreaterThan(property, constant);
-                        case ">=": return Expression.GreaterThanOrEqual(property, constant);
-                        case "<": return Expression.LessThan(property, constant);
-                        case "<=": return Expression.LessThanOrEqual(property, constant);
-                    }
-                }
-            }
-            else if (underlyingType == typeof(DateTime))
-            {
-                if (DateTime.TryParse(value, out DateTime dateVal))
-                {
-                    // EF handles DateTime constants
-                    var constant = Expression.Constant(dateVal, property.Type);
-                    switch (op)
-                    {
-                        case ">": return Expression.GreaterThan(property, constant);
-                        case ">=": return Expression.GreaterThanOrEqual(property, constant);
-                        case "<": return Expression.LessThan(property, constant);
-                        case "<=": return Expression.LessThanOrEqual(property, constant);
-                    }
-                }
-            }
-
-            // Fallback: If it's none of the above, just do string comparison as a fallback, 
-            // even though < > on strings might fail in EF depending on provider.
-            // But usually TYPE is a string and they only use = or !=
-            return BuildStringComparison(property, value, op);
+            // Map to DTO
+            var data = filtered.Select(t => MapTask(t, blockedSet)).ToList<object>();
+            return new WidgetResult { ResultType = "TaskList", Data = data };
         }
 
-        private Expression BuildStringComparison(MemberExpression property, string value, string op)
+        private bool MatchesTaskFilters(TaskItem t, List<WidgetFilterDto> filters, HashSet<int> blockedSet)
         {
-            var constant = Expression.Constant(value);
-
-            switch (op)
+            foreach (var f in filters)
             {
-                case "=":
-                    return Expression.Equal(property, constant);
-                case "!=":
-                    return Expression.NotEqual(property, constant);
+                var field = f.Field.ToLower();
+                var op = f.Op;
+                var val = f.Value;
+
+                switch (field)
+                {
+                    case "completed":
+                        if (!bool.TryParse(val, out var bComplete)) break;
+                        if (!ApplyBoolOp(t.Completed, bComplete, op)) return false;
+                        break;
+
+                    case "status":
+                        if (!ApplyStringOp(t.Status, val, op)) return false;
+                        break;
+
+                    case "type":
+                        var typeName = t.TaskType?.Name ?? "";
+                        if (!ApplyStringOp(typeName, val, op)) return false;
+                        break;
+
+                    case "assigneecount":
+                        if (!double.TryParse(val, out var assigneeTarget)) break;
+                        if (!ApplyNumericOp(t.UserTasks?.Count ?? 0, assigneeTarget, op)) return false;
+                        break;
+
+                    case "isblocked":
+                        if (!bool.TryParse(val, out var bBlocked)) break;
+                        var isBlocked = blockedSet.Contains(t.Id);
+                        if (!ApplyBoolOp(isBlocked, bBlocked, op)) return false;
+                        break;
+
+                    case "overdue":
+                        if (!bool.TryParse(val, out var bOverdue)) break;
+                        var isOverdue = t.DueDate.HasValue && !t.Completed && t.DueDate.Value < DateTime.UtcNow;
+                        if (!ApplyBoolOp(isOverdue, bOverdue, op)) return false;
+                        break;
+
+                    case "duedate":
+                        if (!DateTime.TryParse(val, out var dateTarget)) break;
+                        if (t.DueDate == null) return false;
+                        if (!ApplyNumericOp((t.DueDate.Value - DateTime.UtcNow).TotalDays, (dateTarget - DateTime.UtcNow).TotalDays, op)) return false;
+                        break;
+
+                    default:
+                        // Task-type custom field: "field:FieldName"
+                        if (field.StartsWith("field:"))
+                        {
+                            var fieldName = f.Field.Substring(6);
+                            var fv = t.FieldValues?.FirstOrDefault(v => v.TaskField?.Name == fieldName);
+                            // If task has no such field, treat filter as false
+                            if (fv == null) return false;
+                            if (!ApplyStringOp(fv.Value ?? "", val, op)) return false;
+                        }
+                        break;
+                }
+            }
+            return true;
+        }
+
+        private List<object> GroupTasks(List<TaskItem> tasks, string groupBy, string aggFunc)
+        {
+            IEnumerable<IGrouping<string, TaskItem>> groups;
+
+            switch (groupBy.ToLower())
+            {
+                case "status":
+                    groups = tasks.GroupBy(t => t.Status);
+                    break;
+                case "completed":
+                    groups = tasks.GroupBy(t => t.Completed ? "Completed" : "Incomplete");
+                    break;
+                case "type":
+                    groups = tasks.GroupBy(t => t.TaskType?.Name ?? "(No type)");
+                    break;
                 default:
-                    // Fallback to equal
-                    return Expression.Equal(property, constant);
+                    if (groupBy.StartsWith("field:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var fieldName = groupBy.Substring(6);
+                        groups = tasks.GroupBy(t =>
+                            t.FieldValues?.FirstOrDefault(fv => fv.TaskField?.Name == fieldName)?.Value ?? "(none)");
+                    }
+                    else
+                    {
+                        groups = tasks.GroupBy(t => t.Status);
+                    }
+                    break;
             }
+
+            return groups.Select(g => (object)new
+            {
+                Label = g.Key,
+                Value = aggFunc.ToLower() == "count" ? g.Count() : 0
+            }).OrderBy(x => ((dynamic)x).Label).ToList();
+        }
+
+        private object MapTask(TaskItem t, HashSet<int> blockedSet) => new
+        {
+            t.Id,
+            t.Title,
+            t.Status,
+            t.Completed,
+            t.DueDate,
+            IsBlocked = blockedSet.Contains(t.Id),
+            TaskType = t.TaskType != null ? new { t.TaskType.Name, t.TaskType.Icon } : null,
+            Assignees = t.UserTasks?.Select(ut => ut.User?.UserName).ToList()
+        };
+
+        // ─── MEMBERS ─────────────────────────────────────────────────────────────
+
+        private async Task<WidgetResult> ExecuteMembersQueryAsync(int projectId, WidgetQueryDto query)
+        {
+            var allMembers = await _context.ProjectMembers
+                .Where(pm => pm.ProjectId == projectId && pm.Status == ProjectMemberStatus.Active)
+                .Include(pm => pm.User)
+                .Include(pm => pm.ProjectRole)
+                .ToListAsync();
+
+            // Precompute task counts per user
+            var taskCounts = await _context.UserTasks
+                .Where(ut => ut.TaskItem!.ProjectId == projectId)
+                .GroupBy(ut => ut.UserId)
+                .Select(g => new { UserId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.UserId, x => x.Count);
+
+            var filtered = allMembers.Where(m => MatchesMemberFilters(m, query.Filters, taskCounts)).ToList();
+
+            if (!string.IsNullOrWhiteSpace(query.GroupBy))
+            {
+                var groups = GroupMembers(filtered, query.GroupBy, query.Aggregate?.Func ?? "count", taskCounts);
+                return new WidgetResult { ResultType = "GroupedResult", Data = groups };
+            }
+
+            var data = filtered.Select(m => (object)new
+            {
+                m.UserId,
+                UserName = m.User?.UserName ?? m.UserId,
+                Email = m.User?.Email,
+                AvatarColor = m.User?.AvatarColor,
+                Role = m.ProjectRole?.RoleName ?? "Member",
+                TaskCount = taskCounts.TryGetValue(m.UserId, out var tc) ? tc : 0
+            }).ToList();
+
+            return new WidgetResult { ResultType = "MemberList", Data = data };
+        }
+
+        private bool MatchesMemberFilters(ProjectMember m, List<WidgetFilterDto> filters, Dictionary<string, int> taskCounts)
+        {
+            foreach (var f in filters)
+            {
+                switch (f.Field.ToLower())
+                {
+                    case "role":
+                        if (!ApplyStringOp(m.ProjectRole?.RoleName ?? "", f.Value, f.Op)) return false;
+                        break;
+                    case "taskcount":
+                        if (!double.TryParse(f.Value, out var target)) break;
+                        var count = taskCounts.TryGetValue(m.UserId, out var tc) ? tc : 0;
+                        if (!ApplyNumericOp(count, target, f.Op)) return false;
+                        break;
+                }
+            }
+            return true;
+        }
+
+        private List<object> GroupMembers(List<ProjectMember> members, string groupBy, string aggFunc, Dictionary<string, int> taskCounts)
+        {
+            IEnumerable<IGrouping<string, ProjectMember>> groups;
+            switch (groupBy.ToLower())
+            {
+                case "role":
+                    groups = members.GroupBy(m => m.ProjectRole?.RoleName ?? "(No role)");
+                    break;
+                default:
+                    groups = members.GroupBy(m => m.ProjectRole?.RoleName ?? "(No role)");
+                    break;
+            }
+
+            return groups.Select(g => (object)new
+            {
+                Label = g.Key,
+                Value = aggFunc.ToLower() == "count" ? g.Count() : 0
+            }).OrderBy(x => ((dynamic)x).Label).ToList();
+        }
+
+        // ─── Helpers ─────────────────────────────────────────────────────────────
+
+        private bool ApplyBoolOp(bool actual, bool target, string op)
+            => op == "!=" ? actual != target : actual == target;
+
+        private bool ApplyStringOp(string actual, string target, string op)
+        {
+            return op switch
+            {
+                "!=" => !string.Equals(actual, target, StringComparison.OrdinalIgnoreCase),
+                _    => string.Equals(actual, target, StringComparison.OrdinalIgnoreCase)
+            };
+        }
+
+        private bool ApplyNumericOp(double actual, double target, string op)
+        {
+            return op switch
+            {
+                ">"  => actual > target,
+                ">=" => actual >= target,
+                "<"  => actual < target,
+                "<=" => actual <= target,
+                "!=" => actual != target,
+                _    => actual == target
+            };
         }
     }
 }

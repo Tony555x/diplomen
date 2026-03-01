@@ -246,6 +246,106 @@
     margin: 0 0 6px 0;
 }
 
+.widget-error p {
+    margin: 0 0 6px 0;
+}
+
 .widget-error p:last-child {
     margin-bottom: 0;
+}
+
+/* ── Chart card ─────────────────────────────────── */
+.chart-card {
+    grid-column: span 2;
+}
+
+.bar-chart {
+    display: block;
+    width: 100%;
+    overflow: visible;
+}
+
+.bar-label {
+    font-size: 11px;
+    fill: rgba(255, 255, 255, 0.7);
+    font-family: inherit;
+}
+
+.bar-rect {
+    fill: #7c6af7;
+    opacity: 0.85;
+    transition: opacity 0.15s;
+}
+
+.bar-rect:hover {
+    opacity: 1;
+}
+
+.bar-value {
+    font-size: 11px;
+    fill: rgba(255, 255, 255, 0.75);
+    font-family: inherit;
+}
+
+/* ── Member list ─────────────────────────────────── */
+.widget-member-item {
+    flex-direction: row !important;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.member-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.member-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.member-name {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.member-role {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.member-tasks {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.45);
+    white-space: nowrap;
+}
+
+/* ── Blocked task indicator ─────────────────────── */
+.blocked-task {
+    border-left: 3px solid #ef4444;
+}
+
+.blocked-task .task-title::before {
+    content: "🔴 ";
+    font-size: 0.7em;
+}
+
+/* ── Clickable task item ─────────────────────────── */
+.widget-task-item {
+    cursor: pointer;
 }

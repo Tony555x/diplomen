@@ -30,6 +30,7 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<TaskHistory> TaskHistories { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<DashboardWidget> DashboardWidgets { get; set; }
+    public DbSet<WidgetTemplate> WidgetTemplates { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -190,5 +191,17 @@ public class AppDbContext : IdentityDbContext<User>
             .WithMany()
             .HasForeignKey(th => th.UserId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // Seed premade widget templates
+        builder.Entity<WidgetTemplate>().HasData(
+            new WidgetTemplate { Id = 1, Name = "All Tasks", Description = "Lists every task in the project.", Category = "Tasks", QueryJson = "{\"select\":\"tasks\",\"filters\":[],\"groupBy\":null,\"aggregate\":null,\"value\":null}" },
+            new WidgetTemplate { Id = 2, Name = "Open Tasks", Description = "Tasks that are not yet completed.", Category = "Tasks", QueryJson = "{\"select\":\"tasks\",\"filters\":[{\"field\":\"completed\",\"op\":\"=\",\"value\":\"false\"}],\"groupBy\":null,\"aggregate\":null,\"value\":null}" },
+            new WidgetTemplate { Id = 3, Name = "Overdue Tasks", Description = "Incomplete tasks past their due date.", Category = "Tasks", QueryJson = "{\"select\":\"tasks\",\"filters\":[{\"field\":\"overdue\",\"op\":\"=\",\"value\":\"true\"}],\"groupBy\":null,\"aggregate\":null,\"value\":null}" },
+            new WidgetTemplate { Id = 4, Name = "Blocked Tasks", Description = "Tasks that are blocked by an unresolved dependency.", Category = "Tasks", QueryJson = "{\"select\":\"tasks\",\"filters\":[{\"field\":\"isBlocked\",\"op\":\"=\",\"value\":\"true\"}],\"groupBy\":null,\"aggregate\":null,\"value\":null}" },
+            new WidgetTemplate { Id = 5, Name = "Tasks by Status", Description = "Count of tasks grouped by their status.", Category = "Tasks", QueryJson = "{\"select\":\"tasks\",\"filters\":[],\"groupBy\":\"status\",\"aggregate\":{\"func\":\"count\"},\"value\":null}" },
+            new WidgetTemplate { Id = 6, Name = "Tasks by Type", Description = "Count of tasks grouped by task type.", Category = "Tasks", QueryJson = "{\"select\":\"tasks\",\"filters\":[],\"groupBy\":\"type\",\"aggregate\":{\"func\":\"count\"},\"value\":null}" },
+            new WidgetTemplate { Id = 7, Name = "Project Members", Description = "Lists all active project members.", Category = "Members", QueryJson = "{\"select\":\"members\",\"filters\":[],\"groupBy\":null,\"aggregate\":null,\"value\":null}" },
+            new WidgetTemplate { Id = 8, Name = "Members by Role", Description = "Count of members grouped by role.", Category = "Members", QueryJson = "{\"select\":\"members\",\"filters\":[],\"groupBy\":\"role\",\"aggregate\":{\"func\":\"count\"},\"value\":null}" }
+        );
     }
 }
