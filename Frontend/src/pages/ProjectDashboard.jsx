@@ -8,32 +8,47 @@ import AddWidgetPopup from "../components/AddWidgetPopup/AddWidgetPopup";
 
 function BarChart({ data }) {
     if (!data || data.length === 0) return <p className={styles["no-data"]}>No data to chart.</p>;
-    const max = Math.max(...data.map(d => d.value), 1);
-    const BAR_H = 22;
-    const LABEL_W = 120;
-    const VALUE_W = 36;
-    const GAP = 6;
-    const BAR_MAX_W = 220;
-    const height = data.length * (BAR_H + GAP);
+    const total = data.reduce((sum, d) => sum + d.value, 0) || 1;
 
     return (
-        <svg width="100%" viewBox={`0 0 ${LABEL_W + BAR_MAX_W + VALUE_W + 16} ${height}`} className={styles["bar-chart"]}>
-            {data.map((d, i) => {
-                const y = i * (BAR_H + GAP);
-                const barW = (d.value / max) * BAR_MAX_W;
+        <div className={styles["chart-table"]}>
+            {/* Header */}
+            <div className={styles["chart-header"]}>
+                <span className={styles["chart-col-name"]}>Name</span>
+                <span className={styles["chart-col-bar"]} />
+                <span className={styles["chart-col-count"]}>Count</span>
+                <span className={styles["chart-col-pct"]}>%</span>
+            </div>
+            <div className={styles["chart-divider"]} />
+
+            {/* Rows */}
+            {data.map(d => {
+                const pct = total > 0 ? Math.round((d.value / total) * 100) : 0;
+                const barPct = (d.value / total) * 100;
                 return (
-                    <g key={d.label}>
-                        <text x={LABEL_W - 8} y={y + BAR_H * 0.72} textAnchor="end" className={styles["bar-label"]}>
-                            {d.label}
-                        </text>
-                        <rect x={LABEL_W} y={y + 2} width={Math.max(barW, 2)} height={BAR_H - 4} rx="4" className={styles["bar-rect"]} />
-                        <text x={LABEL_W + barW + 6} y={y + BAR_H * 0.72} className={styles["bar-value"]}>
-                            {d.value}
-                        </text>
-                    </g>
+                    <div key={d.label} className={styles["chart-row"]}>
+                        <span className={styles["chart-col-name"]}>{d.label}</span>
+                        <span className={styles["chart-col-bar"]}>
+                            <span
+                                className={styles["chart-pill"]}
+                                style={{ width: `${Math.max(barPct, 3)}%` }}
+                            />
+                        </span>
+                        <span className={styles["chart-col-count"]}>{d.value}</span>
+                        <span className={styles["chart-col-pct"]}>{pct}%</span>
+                    </div>
                 );
             })}
-        </svg>
+
+            {/* Total */}
+            <div className={styles["chart-divider"]} />
+            <div className={`${styles["chart-row"]} ${styles["chart-total"]}`}>
+                <span className={styles["chart-col-name"]}>Total</span>
+                <span className={styles["chart-col-bar"]} />
+                <span className={styles["chart-col-count"]}>{total}</span>
+                <span className={styles["chart-col-pct"]}>100%</span>
+            </div>
+        </div>
     );
 }
 
@@ -187,7 +202,7 @@ function ProjectDashboard() {
             ) : (
                 <div className={styles["widgets-grid"]}>
                     {widgets.map(w => (
-                        <div key={w.id} className={`${styles["widget-card"]} ${w.resultType === "GroupedResult" ? styles["chart-card"] : ""}`}>
+                        <div key={w.ixd} className={`${styles["widget-card"]} ${w.resultType === "GroupedResult" ? styles["chart-card"] : ""}`}>
                             <div className={styles["widget-card-header"]}>
                                 <h3>{w.name || `Widget #${w.id}`}</h3>
                                 <div className={styles["widget-actions"]}>

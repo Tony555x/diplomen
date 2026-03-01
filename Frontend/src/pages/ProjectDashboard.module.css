@@ -254,37 +254,90 @@
     margin-bottom: 0;
 }
 
-/* ── Chart card ─────────────────────────────────── */
-.chart-card {
-    grid-column: span 2;
-}
-
-.bar-chart {
-    display: block;
+/* ── Chart table layout ────────────────────────── */
+.chart-table {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
     width: 100%;
-    overflow: visible;
 }
 
-.bar-label {
-    font-size: 11px;
-    fill: rgba(255, 255, 255, 0.7);
-    font-family: inherit;
+.chart-header {
+    display: grid;
+    grid-template-columns: 130px 1fr 52px 44px;
+    gap: 0 0.5rem;
+    padding: 0 0 6px 0;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.4);
 }
 
-.bar-rect {
-    fill: #7c6af7;
-    opacity: 0.85;
-    transition: opacity 0.15s;
+.chart-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 4px 0;
 }
 
-.bar-rect:hover {
-    opacity: 1;
+.chart-row {
+    display: grid;
+    grid-template-columns: 130px 1fr 52px 44px;
+    gap: 0 0.5rem;
+    align-items: center;
+    padding: 7px 0;
 }
 
-.bar-value {
-    font-size: 11px;
-    fill: rgba(255, 255, 255, 0.75);
-    font-family: inherit;
+.chart-col-name {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.85);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chart-col-bar {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.chart-pill {
+    display: block;
+    height: 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.88);
+    transition: width 0.35s ease;
+    min-width: 8px;
+}
+
+.chart-col-count {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: right;
+}
+
+.chart-col-pct {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.45);
+    text-align: right;
+}
+
+.chart-total .chart-col-name {
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.chart-total .chart-col-count {
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.chart-total .chart-col-pct {
+    color: rgba(255, 255, 255, 0.5);
 }
 
 /* ── Member list ─────────────────────────────────── */
