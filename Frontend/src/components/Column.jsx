@@ -93,6 +93,8 @@ function Column({
       filterState.uncompleted ||
       filterState.noDate ||
       filterState.overdue ||
+      filterState.blocked ||
+      filterState.unblocked ||
       (filterState.typeIds && filterState.typeIds.length > 0);
 
     if (!hasFilters) return true;
@@ -117,6 +119,16 @@ function Column({
     }
     if (filterState.uncompleted && !filterState.completed) {
       if (task.completed) return false;
+    }
+
+    // Blocker Filters
+    if (filterState.blocked && !filterState.unblocked) {
+      // Must be uncompleted and blocked to be considered currently "blocked"
+      if (task.completed || !task.isBlocked) return false;
+    }
+    if (filterState.unblocked && !filterState.blocked) {
+      // Show if it's NOT blocked (or if it's completed, it's effectively unblocked)
+      if (!task.completed && task.isBlocked) return false;
     }
 
     // Date Filters
@@ -247,6 +259,8 @@ function Column({
     filterState.uncompleted ||
     filterState.noDate ||
     filterState.overdue ||
+    filterState.blocked ||
+    filterState.unblocked ||
     (filterState.typeIds && filterState.typeIds.length > 0)
   );
 

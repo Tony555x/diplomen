@@ -86,6 +86,8 @@ const FilterPopup = ({
             assignedToUserName: null,
             completed: false,
             uncompleted: false,
+            blocked: false,
+            unblocked: false,
             noDate: false,
             overdue: false,
             typeIds: []
@@ -167,6 +169,20 @@ const FilterPopup = ({
                     checked={!!filterState.uncompleted}
                     onChange={() => handleCheckboxChange("uncompleted")}
                     label="Uncompleted tasks"
+                />
+            </div>
+
+            <div className={styles.section}>
+                <div className={styles.sectionTitle}>Blockers</div>
+                <StyledCheckbox
+                    checked={!!filterState.blocked}
+                    onChange={() => handleCheckboxChange("blocked")}
+                    label="Blocked tasks"
+                />
+                <StyledCheckbox
+                    checked={!!filterState.unblocked}
+                    onChange={() => handleCheckboxChange("unblocked")}
+                    label="Unblocked tasks"
                 />
             </div>
 
