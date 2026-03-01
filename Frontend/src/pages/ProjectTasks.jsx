@@ -195,6 +195,35 @@ function ProjectTasks() {
         }
     };
 
+    const renameStatus = async (statusId, newName) => {
+        if (!newName || !newName.trim()) return;
+
+        try {
+            const result = await fetchWithAuth(
+                `/api/projects/${projectId}/statuses/${statusId}`,
+                {
+                    method: "PATCH",
+                    body: { name: newName.trim() }
+                }
+            );
+
+            if (result.success) {
+                const oldName = statuses.find(s => s.id === statusId)?.name;
+                setStatuses(prev => prev.map(s => s.id === statusId ? result.status : s));
+
+                // Update local tasks to use the new status name
+                if (oldName) {
+                    setTasks(prev => prev.map(t => t.status === oldName ? { ...t, status: result.status.name } : t));
+                }
+            } else {
+                alert(result.message || "Failed to rename status.");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error renaming status.");
+        }
+    };
+
     const handleDragStart = (task) => {
         setDraggedTaskId(task.id);
     };
@@ -387,6 +416,7 @@ function ProjectTasks() {
                             members={members}
                             currentUser={currentUser}
                             onDeleteStatus={() => deleteStatus(status.id)}
+                            onRenameStatus={(newName) => renameStatus(status.id, newName)}
                             canCreateTasks={canCreateTasks}
                             canManageStatuses={canManageStatuses}
                         />

@@ -24,6 +24,7 @@ function Column({
   members,
   currentUser,
   onDeleteStatus,
+  onRenameStatus,
   canCreateTasks,
   canManageStatuses
 }) {
@@ -35,6 +36,8 @@ function Column({
   const [isAddingCollection, setIsAddingCollection] = useState(false);
   const [newCollectionName, setNewCollectionName] = useState("");
   const [showFilter, setShowFilter] = useState(false);
+  const [isEditingLabel, setIsEditingLabel] = useState(false);
+  const [editLabelValue, setEditLabelValue] = useState(label);
 
   const scrollContainerRef = useRef(null);
   const scrollIntervalRef = useRef(null);
@@ -62,6 +65,24 @@ function Column({
       setSelectedType(taskTypes[0].id);
     }
   }, [taskTypes, selectedType]);
+
+  const handleLabelClick = () => {
+    if (canManageStatuses) {
+      setIsEditingLabel(true);
+      setEditLabelValue(label);
+    }
+  };
+
+  const handleLabelBlurOrEnter = () => {
+    setIsEditingLabel(false);
+    if (editLabelValue.trim() && editLabelValue.trim() !== label) {
+      if (onRenameStatus) {
+        onRenameStatus(editLabelValue.trim());
+      }
+    } else {
+      setEditLabelValue(label);
+    }
+  };
 
   // Filtering Helper
   const isTaskVisible = (task) => {
@@ -237,7 +258,30 @@ function Column({
       onDrop={handleDrop}
     >
       <div className={styles.headerRow}>
-        <h2>{label}</h2>
+        {isEditingLabel ? (
+          <input
+            autoFocus
+            className={styles.headerTitleInput}
+            value={editLabelValue}
+            onChange={(e) => setEditLabelValue(e.target.value)}
+            onBlur={handleLabelBlurOrEnter}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleLabelBlurOrEnter();
+              if (e.key === "Escape") {
+                setIsEditingLabel(false);
+                setEditLabelValue(label);
+              }
+            }}
+          />
+        ) : (
+          <h2
+            onClick={handleLabelClick}
+            style={{ cursor: canManageStatuses ? 'pointer' : 'default' }}
+            title={canManageStatuses ? "Click to rename" : ""}
+          >
+            {label}
+          </h2>
+        )}
         <button
           ref={filterBtnRef}
           className={`${styles.filterBtn} ${isFilterActive ? styles.active : ""}`}
@@ -252,7 +296,7 @@ function Column({
             onClick={onDeleteStatus}
             title="Delete Status"
           >
-            ×
+            <img src="/buttonicons/delete.png" alt="Delete" width="20" height="20" />
           </button>
         )}
 

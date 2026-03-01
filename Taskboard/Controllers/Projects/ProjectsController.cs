@@ -264,6 +264,54 @@ public class ProjectsController : ControllerBase
         return Ok(new { success = true });
     }
 
+    [HttpPatch("{projectId}/statuses/{statusId}")]
+    public async Task<IActionResult> UpdateTaskStatus(int projectId, int statusId, [FromBody] UpdateUserTaskStatusRequest request)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return Unauthorized();
+
+        var membership = await _context.ProjectMembers
+            .Include(pm => pm.ProjectRole)
+            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
+
+        if (membership == null || membership.ProjectRole == null || !membership.ProjectRole.CanCreateDeleteTaskStatuses)
+            return Forbid();
+
+        if (string.IsNullOrWhiteSpace(request.Name))
+            return BadRequest(new { success = false, message = "Status name is required." });
+
+        var newStatusName = request.Name.Trim();
+
+        var status = await _context.UserTaskStatuses.FirstOrDefaultAsync(ts => ts.Id == statusId && ts.ProjectId == projectId);
+        if (status == null) return NotFound(new { success = false, message = "Status not found." });
+
+        if (status.Name == newStatusName)
+            return Ok(new { success = true, status }); // No change needed
+
+        // Check if another status already exists with this name in the same project to avoid confusion
+        var existingStatus = await _context.UserTaskStatuses
+            .AnyAsync(ts => ts.ProjectId == projectId && ts.Name == newStatusName && ts.Id != statusId);
+        if (existingStatus)
+            return BadRequest(new { success = false, message = "A status with this name already exists." });
+
+        var oldStatusName = status.Name;
+        status.Name = newStatusName;
+
+        // Update all tasks that currently use the old status name
+        var tasksToUpdate = await _context.Tasks
+            .Where(t => t.ProjectId == projectId && t.Status == oldStatusName)
+            .ToListAsync();
+
+        foreach (var task in tasksToUpdate)
+        {
+            task.Status = newStatusName;
+        }
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new { success = true, status });
+    }
+
     [HttpPatch("{projectId}")]
     public async Task<IActionResult> UpdateProject(
         int projectId,
