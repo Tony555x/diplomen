@@ -32,9 +32,12 @@ const STRING_OPS = ["=", "!="];
 const BOOL_OPS = ["="];
 
 function WidgetQueryBuilder({ query, onChange, projectContext }) {
-    const { statuses = [], taskTypes = [], taskFields = [] } = projectContext || {};
+    const { statuses = [], taskTypes = [], taskFields = [], roles = [] } = projectContext || {};
 
-    const setField = (key, val) => onChange({ ...query, [key]: val });
+    // Deduplicate task fields by name (same field name can appear across multiple task types)
+    const uniqueTaskFields = taskFields.filter(
+        (tf, idx, arr) => arr.findIndex(x => x.name === tf.name) === idx
+    );
 
     const selectTarget = query.select || "tasks";
     const filters = query.filters || [];
@@ -42,12 +45,12 @@ function WidgetQueryBuilder({ query, onChange, projectContext }) {
 
     const filterFields = selectTarget === "tasks" ? [
         ...TASK_FILTER_FIELDS,
-        ...taskFields.map(tf => ({ value: `field:${tf.name}`, label: `Field: ${tf.name}`, type: "text" }))
+        ...uniqueTaskFields.map(tf => ({ value: `field:${tf.name}`, label: `Field: ${tf.name}`, type: "text" }))
     ] : MEMBER_FILTER_FIELDS;
 
     const groupByOptions = selectTarget === "tasks" ? [
         ...TASK_GROUP_BY_OPTIONS,
-        ...taskFields.map(tf => ({ value: `field:${tf.name}`, label: `Field: ${tf.name}` }))
+        ...uniqueTaskFields.map(tf => ({ value: `field:${tf.name}`, label: `Field: ${tf.name}` }))
     ] : MEMBER_GROUP_BY_OPTIONS;
 
     const addFilter = () => {
@@ -67,13 +70,13 @@ function WidgetQueryBuilder({ query, onChange, projectContext }) {
         onChange({ ...query, filters: filters.filter((_, idx) => idx !== i) });
     };
 
-    const getValueOptions = (fieldDef, filterFields) => {
+    const getValueOptions = (fieldDef) => {
         if (!fieldDef) return [];
         switch (fieldDef.type) {
             case "status": return statuses;
             case "tasktype": return taskTypes.map(tt => tt.name);
             case "bool": return BOOL_VALUES;
-            case "role": return [];  // roles are project-specific, user types free text
+            case "role": return roles;
             default: return [];
         }
     };
@@ -112,7 +115,7 @@ function WidgetQueryBuilder({ query, onChange, projectContext }) {
                 {filters.map((f, i) => {
                     const fieldDef = filterFields.find(ff => ff.value === f.field);
                     const ops = getOpsForField(fieldDef);
-                    const valOptions = getValueOptions(fieldDef, filterFields);
+                    const valOptions = getValueOptions(fieldDef);
                     return (
                         <div key={i} className={styles.filterRow}>
                             {/* Field */}

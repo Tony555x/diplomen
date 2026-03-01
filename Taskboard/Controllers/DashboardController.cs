@@ -50,6 +50,12 @@ namespace Taskboard.Controllers
                 .Select(tt => new { tt.Id, tt.Name, tt.Icon })
                 .ToListAsync();
 
+            var roles = await _context.ProjectRoles
+                .Where(r => r.ProjectId == projectId)
+                .Select(r => r.RoleName)
+                .OrderBy(r => r)
+                .ToListAsync();
+
             var templates = await _context.WidgetTemplates
                 .OrderBy(t => t.Id)
                 .ToListAsync();
@@ -61,7 +67,8 @@ namespace Taskboard.Controllers
                 {
                     statuses,
                     taskTypes,
-                    taskFields
+                    taskFields,
+                    roles
                 }
             });
         }
