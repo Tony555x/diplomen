@@ -176,7 +176,7 @@ namespace Taskboard.Controllers
             _context.DashboardWidgets.Remove(widget);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(new { success = true });
         }
     }
 }
