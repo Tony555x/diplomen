@@ -69,7 +69,10 @@ namespace Taskboard.Controllers
             }
 
             var projects = await _context.Projects
-                .Where(p => p.WorkspaceId == id)
+                .Where(p => p.WorkspaceId == id && 
+                           (p.AccessLevel == ProjectAccessLevel.Public || 
+                            p.AccessLevel == ProjectAccessLevel.Workspace || 
+                            p.Members.Any(pm => pm.UserId == userId && pm.Status == ProjectMemberStatus.Active)))
                 .Select(p => new
                 {
                     p.Id,

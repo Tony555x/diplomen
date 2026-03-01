@@ -173,7 +173,8 @@ namespace Taskboard.Controllers
                 {
                     p.Id,
                     p.Name,
-                    p.WorkspaceId
+                    p.WorkspaceId,
+                    p.AccessLevel
                 })
                 .FirstOrDefaultAsync();
 
