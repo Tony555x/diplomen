@@ -32,8 +32,8 @@ namespace Taskboard.Data.Models
         [ForeignKey("ProjectId")]
         public virtual Project Project { get; set; }
 
-        public string Source { get; set; }
+        public string Source { get; set; } = String.Empty;
 
-        public string Result { get; set; }
+        public string Result { get; set; } = String.Empty;
     }
 }
