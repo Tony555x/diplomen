@@ -3,7 +3,7 @@ import { fetchWithAuth } from "../../auth";
 import sharedStyles from "../../components/PopupStyles.module.css";
 import styles from "./TaskTypePopup.module.css";
 
-const FIELD_TYPES = ["Text", "Number", "Date", "Checkbox"];
+const FIELD_TYPES = ["Text", "Number", "Date", "Checkbox", "Dropdown"];
 
 const ICONS = [
     "task.png", "bug.png", "bolt.png", "clone.png",
@@ -17,7 +17,16 @@ function TaskTypePopup({ projectId, taskType, onClose, onSaved }) {
     const [name, setName] = useState(taskType.name || "");
     const [description, setDescription] = useState(taskType.description || "");
     const [icon, setIcon] = useState(taskType.icon || "task.png");
-    const [fields, setFields] = useState(taskType.fields || []);
+    const [fields, setFields] = useState(() =>
+        (taskType.fields || []).map(f => ({
+            ...f,
+            // normalise: backend stores Select, show as Dropdown; parse options JSON to array
+            type: f.type === "Select" ? "Dropdown" : (f.type ?? "Text"),
+            _options: (() => {
+                try { return JSON.parse(f.options || "[]"); } catch { return []; }
+            })()
+        }))
+    );
     const [error, setError] = useState("");
 
     const addField = () => {
@@ -27,7 +36,9 @@ function TaskTypePopup({ projectId, taskType, onClose, onSaved }) {
                 name: "",
                 type: "Text",
                 isRequired: false,
-                defaultValue: ""
+                defaultValue: "",
+                // options is a JS array for Dropdown fields; serialized to JSON on save
+                _options: []
             }
         ]);
     };
@@ -67,6 +78,18 @@ function TaskTypePopup({ projectId, taskType, onClose, onSaved }) {
         setError("");
 
         try {
+            // Normalise fields: map Dropdown→Select and serialize options array
+            const normalisedFields = fields.map(f => {
+                const isDropdown = f.type === "Dropdown";
+                return {
+                    ...f,
+                    type: isDropdown ? "Select" : f.type,
+                    options: isDropdown
+                        ? JSON.stringify((f._options || []).filter(o => o.trim()))
+                        : f.options ?? null
+                };
+            });
+
             await fetchWithAuth(
                 `/api/projects/${projectId}/task-types`,
                 {
@@ -76,7 +99,7 @@ function TaskTypePopup({ projectId, taskType, onClose, onSaved }) {
                         name,
                         description,
                         icon,
-                        fields
+                        fields: normalisedFields
                     }
                 }
             );
@@ -127,27 +150,62 @@ function TaskTypePopup({ projectId, taskType, onClose, onSaved }) {
                 <div className={styles.fields}>
                     {fields.length == 0 && (<div>This task type has no fields. Click 'Add Field' to create a new one.</div>)}
                     {fields.map((f, i) => (
-                        <div key={i} className={styles.fieldRow}>
-                            <input
-                                placeholder="Field name"
-                                value={f.name}
-                                onChange={e =>
-                                    updateField(i, { name: e.target.value })
-                                }
-                            />
+                        <div key={i}>
+                            <div className={styles.fieldRow}>
+                                <input
+                                    placeholder="Field name"
+                                    value={f.name}
+                                    onChange={e =>
+                                        updateField(i, { name: e.target.value })
+                                    }
+                                />
 
-                            <select
-                                value={f.type}
-                                onChange={e =>
-                                    updateField(i, { type: e.target.value })
-                                }
-                            >
-                                {FIELD_TYPES.map(t => (
-                                    <option key={t}>{t}</option>
-                                ))}
-                            </select>
+                                <select
+                                    value={f.type}
+                                    onChange={e =>
+                                        updateField(i, { type: e.target.value, _options: f._options ?? [] })
+                                    }
+                                >
+                                    {FIELD_TYPES.map(t => (
+                                        <option key={t}>{t}</option>
+                                    ))}
+                                </select>
 
-                            <button onClick={() => removeField(i)}>×</button>
+                                <button onClick={() => removeField(i)}>×</button>
+                            </div>
+
+                            {/* Option editor — shown only for Dropdown */}
+                            {f.type === "Dropdown" && (
+                                <div className={styles.optionEditor}>
+                                    {(f._options || []).map((opt, oi) => (
+                                        <div key={oi} className={styles.optionRow}>
+                                            <input
+                                                placeholder={`Option ${oi + 1}`}
+                                                value={opt}
+                                                onChange={e => {
+                                                    const next = [...(f._options || [])];
+                                                    next[oi] = e.target.value;
+                                                    updateField(i, { _options: next });
+                                                }}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const next = (f._options || []).filter((_, idx) => idx !== oi);
+                                                    updateField(i, { _options: next });
+                                                }}
+                                            >×</button>
+                                        </div>
+                                    ))}
+                                    <button
+                                        type="button"
+                                        className={styles.addOptionBtn}
+                                        onClick={() => updateField(i, { _options: [...(f._options || []), ""] })}
+                                    >
+                                        + Add option
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>

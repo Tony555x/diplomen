@@ -50,6 +50,30 @@ function CustomField({ field, value, onChange, readOnly = false }) {
                 </div>
             );
 
+        case "Select": {
+            let opts = [];
+            try { opts = JSON.parse(field.options || "[]"); } catch { opts = []; }
+            return (
+                <div className={styles.formGroup} key={field.id}>
+                    <label>{field.name}</label>
+                    <select
+                        value={value}
+                        onChange={handleChange}
+                        disabled={readOnly}
+                        className={styles.selectField}
+                    >
+                        <option value="">— Select —</option>
+                        {opts.map(opt => (
+                            <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                    </select>
+                    {field.description && (
+                        <small className={styles.hint}>{field.description}</small>
+                    )}
+                </div>
+            );
+        }
+
         default:
             return (
                 <div className={styles.formGroup} key={field.id}>

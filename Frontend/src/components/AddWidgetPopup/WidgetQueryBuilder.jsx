@@ -77,6 +77,17 @@ function WidgetQueryBuilder({ query, onChange, projectContext }) {
             case "tasktype": return taskTypes.map(tt => tt.name);
             case "bool": return BOOL_VALUES;
             case "role": return roles;
+            case "text": {
+                // Check if this is a custom Dropdown field — parse its stored options
+                if (fieldDef.value?.startsWith("field:")) {
+                    const fieldName = fieldDef.value.slice(6);
+                    const tf = uniqueTaskFields.find(f => f.name === fieldName);
+                    if (tf?.options) {
+                        try { return JSON.parse(tf.options); } catch { return []; }
+                    }
+                }
+                return [];
+            }
             default: return [];
         }
     };
