@@ -40,7 +40,14 @@ namespace Taskboard.Controllers
                 });
             }
 
-            var user = new User { UserName = request.Username, Email = request.Email };
+            var avatarColors = new[]
+            {
+                "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6",
+                "#ec4899", "#06b6d4", "#84cc16", "#f97316", "#6366f1"
+            };
+            var avatarColor = avatarColors[Random.Shared.Next(avatarColors.Length)];
+
+            var user = new User { UserName = request.Username, Email = request.Email, AvatarColor = avatarColor };
             var result = await _userManager.CreateAsync(user, request.Password);
 
             if (!result.Succeeded)

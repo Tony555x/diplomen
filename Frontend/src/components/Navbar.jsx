@@ -159,7 +159,7 @@ function Navbar({ userName }) {
                                         <div
                                             key={w.id}
                                             className={styles.searchResultItem}
-                                            onClick={() => navigateTo(`/workspaces/${w.id}`)}
+                                            onClick={() => navigateTo(`/workspace/${w.id}/projects`)}
                                         >
                                             {w.name}
                                         </div>
@@ -174,7 +174,7 @@ function Navbar({ userName }) {
                                         <div
                                             key={p.id}
                                             className={styles.searchResultItem}
-                                            onClick={() => navigateTo(`/workspaces/${p.workspaceId}/projects/${p.id}`)}
+                                            onClick={() => navigateTo(`/project/${p.id}/tasks`)}
                                         >
                                             {p.name}
                                         </div>
@@ -189,7 +189,7 @@ function Navbar({ userName }) {
                                         <div
                                             key={t.id}
                                             className={styles.searchResultItem}
-                                            onClick={() => navigateTo(`/workspaces/projects/${t.projectId}/tasks`)}
+                                            onClick={() => navigateTo(`/project/${t.projectId}/tasks/${t.id}`)}
                                         >
                                             {t.taskTypeIcon && (
                                                 <img
