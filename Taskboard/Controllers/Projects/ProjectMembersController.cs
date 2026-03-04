@@ -266,4 +266,34 @@ public class ProjectMembersController : ControllerBase
 
         return Ok(new { success = true, message = "Member removed successfully." });
     }
+
+    [HttpGet("{userId}/activity")]
+    public async Task<IActionResult> GetMemberActivity(int projectId, string userId)
+    {
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (currentUserId == null) return Unauthorized();
+
+        if (!await _projectAccessService.HasViewAccessAsync(projectId, currentUserId))
+            return Forbid();
+
+        var activity = await _context.TaskHistories
+            .Where(h => h.UserId == userId && h.Task != null && h.Task.ProjectId == projectId)
+            .Include(h => h.Task)
+            .Include(h => h.User)
+            .OrderByDescending(h => h.CreatedAt)
+            .Select(h => new
+            {
+                h.Id,
+                h.ActionType,
+                h.Details,
+                h.CreatedAt,
+                TaskId = h.TaskId,
+                TaskTitle = h.Task != null ? h.Task.Title : null,
+                UserName = h.User != null ? h.User.UserName : null
+            })
+            .Take(100)
+            .ToListAsync();
+
+        return Ok(new { success = true, activity });
+    }
 }

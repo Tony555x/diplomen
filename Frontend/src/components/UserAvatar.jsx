@@ -6,11 +6,12 @@ import styles from "./UserAvatar.module.css";
  * UserAvatar — reusable avatar circle for any user in a project context.
  *
  * Props:
- *   user        { userId, userName, avatarColor? }
- *   onRemove    optional — if provided, shows "Remove from card" button
- *   size        "sm" | "md" (default "md")
+ *   user            { userId, userName, avatarColor? }
+ *   onRemove        optional — if provided, shows "Remove from card" button
+ *   onViewActivity  optional — if provided, shows "View Activity" button
+ *   size            "sm" | "md" (default "md")
  */
-function UserAvatar({ user, onRemove, size = "md" }) {
+function UserAvatar({ user, onRemove, onViewActivity, size = "md" }) {
     const [open, setOpen] = useState(false);
     const avatarRef = useRef(null);
     const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
@@ -46,10 +47,18 @@ function UserAvatar({ user, onRemove, size = "md" }) {
         >
             <div className={styles.popupAvatar} style={{ backgroundColor: bg }}>{initial}</div>
             <div className={styles.username}>{user.userName}</div>
+            {onViewActivity && (
+                <button
+                    onClick={() => { onViewActivity(user.userId); setOpen(false); }}
+                    className={styles.popupBtn}
+                >
+                    View Activity
+                </button>
+            )}
             {onRemove && (
                 <button
                     onClick={() => { onRemove(user.userId); setOpen(false); }}
-                    className={styles.popupBtn}
+                    className={`${styles.popupBtn} ${styles.popupBtnDanger}`}
                 >
                     Remove from card
                 </button>

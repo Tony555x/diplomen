@@ -1,0 +1,153 @@
+.page {
+    max-width: 750px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    color: rgba(255, 255, 255, 0.87);
+}
+
+.header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.backBtn {
+    background: #2c2c2c;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s;
+}
+
+.backBtn:hover {
+    background: #374151;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.headerText {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.subtitle {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* Timeline */
+.timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-left: 2px solid #374151;
+    margin-left: 0.75rem;
+    padding-left: 0;
+}
+
+.entry {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    padding: 0.85rem 1rem;
+    position: relative;
+    border-bottom: 1px solid rgba(55, 65, 81, 0.4);
+    transition: background 0.12s;
+}
+
+.entry:last-child {
+    border-bottom: none;
+}
+
+.entry:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.entryIcon {
+    position: absolute;
+    left: -1.15rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #1e1e1e;
+    border: 2px solid #374151;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.6);
+    flex-shrink: 0;
+}
+
+.entryBody {
+    padding-left: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+}
+
+.entryMain {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.actionType {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.details {
+    font-size: 0.88rem;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.taskLink {
+    font-size: 0.82rem;
+    color: #60a5fa;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.taskLink:hover {
+    color: #93c5fd;
+}
+
+.timestamp {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.loading,
+.error,
+.empty {
+    padding: 3rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.9rem;
+}
+
+.error {
+    color: #f87171;
+}

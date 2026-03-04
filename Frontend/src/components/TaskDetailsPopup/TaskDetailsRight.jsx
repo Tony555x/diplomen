@@ -47,7 +47,8 @@ function TaskDetailsRight({
     dueDate,
     onDueDateChange,
     onRefresh,
-    canCreateTasks
+    canCreateTasks,
+    onViewActivity
 }) {
     const [blockers, setBlockers] = useState([]);
     const [blockedTasks, setBlockedTasks] = useState([]);
@@ -159,6 +160,7 @@ function TaskDetailsRight({
                             key={a.userId}
                             user={a}
                             onRemove={canCreateTasks ? handleRemove : null}
+                            onViewActivity={onViewActivity}
                         />
                     ))}
 

@@ -11,6 +11,7 @@ import ProjectInvitePage from "./pages/ProjectInvitePage";
 import UserSettingsPage from "./pages/UserSettingsPage";
 import AllNotificationsPage from "./pages/AllNotificationsPage";
 import WorkspaceInvitePage from "./pages/WorkspaceInvitePage";
+import UserActivityPage from "./pages/UserActivityPage";
 
 function App() {
   return (
@@ -78,6 +79,14 @@ function App() {
           element={
             <ProtectedRoute>
               <WorkspaceInvitePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/project/:projectId/members/:userId/activity"
+          element={
+            <ProtectedRoute>
+              <UserActivityPage />
             </ProtectedRoute>
           }
         />

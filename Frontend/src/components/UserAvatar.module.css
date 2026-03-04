@@ -86,3 +86,13 @@
 .popupBtn:hover {
     background: #374151;
 }
+
+.popupBtnDanger {
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.3);
+}
+
+.popupBtnDanger:hover {
+    background: rgba(248, 113, 113, 0.1);
+    border-color: rgba(248, 113, 113, 0.5);
+}

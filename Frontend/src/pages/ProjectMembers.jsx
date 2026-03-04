@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { fetchWithAuth } from "../auth";
 import AddMemberPopup from "../components/AddMemberPopup";
 import CreateRolePopup from "../components/CreateRolePopup";
@@ -9,6 +9,7 @@ import "./ProjectMembers.css";
 
 function ProjectMembers() {
     const { projectId } = useParams();
+    const navigate = useNavigate();
     const [members, setMembers] = useState([]);
     const [roles, setRoles] = useState([]);
     const [currentUserRole, setCurrentUserRole] = useState(null);
@@ -112,6 +113,7 @@ function ProjectMembers() {
                                             <UserAvatar
                                                 user={{ userId: member.userId, userName: member.userName, avatarColor: member.avatarColor }}
                                                 size="sm"
+                                                onViewActivity={(uid) => navigate(`/project/${projectId}/members/${uid}/activity`)}
                                             />
                                         </div>
                                         <div className="member-name">{member.userName}</div>

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import styles from "./TaskDetailsPopup.module.css";
 import sharedStyles from "../PopupStyles.module.css";
 import { fetchWithAuth } from "../../auth";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 import TaskDetailsLeft from "./TaskDetailsLeft";
 import TaskDetailsRight from "./TaskDetailsRight";
@@ -10,6 +10,7 @@ import TaskDetailsChat from "./TaskDetailsChat";
 
 function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpdate, onDelete, onRefresh, canCreateTasks = false }) {
     const { projectId } = useParams();
+    const navigate = useNavigate();
 
     const [title, setTitle] = useState(task.title);
     const [status, setStatus] = useState(task.status);
@@ -162,6 +163,7 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
                         onDueDateChange={handleDueDateChange}
                         onRefresh={onRefresh}
                         canCreateTasks={canCreateTasks}
+                        onViewActivity={(uid) => navigate(`/project/${projectId}/members/${uid}/activity`)}
                     />
 
                     <TaskDetailsChat

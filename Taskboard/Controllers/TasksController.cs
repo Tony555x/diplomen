@@ -141,6 +141,17 @@ namespace Taskboard.Controllers
                 await _context.SaveChangesAsync();
             }
 
+            // Record task creation in history
+            _context.TaskHistories.Add(new TaskHistory
+            {
+                TaskId = task.Id,
+                UserId = userId,
+                ActionType = "Created",
+                Details = $"{task.Title}",
+                CreatedAt = DateTime.UtcNow
+            });
+            await _context.SaveChangesAsync();
+
             return Ok(new
             {
                 success = true,
@@ -156,6 +167,7 @@ namespace Taskboard.Controllers
                 }
             });
         }
+
 
         [HttpGet("project-info")]
         public async Task<IActionResult> GetProjectInfo(int projectId)
