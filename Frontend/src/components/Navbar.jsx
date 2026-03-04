@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import styles from "./Navbar.module.css";
 import { Link, useNavigate } from "react-router-dom";
 import { removeToken, fetchWithAuth, getCurrentUser } from "../auth";
@@ -8,18 +8,23 @@ function Navbar({ userName }) {
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
     const [notifications, setNotifications] = useState([]);
+
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchResults, setSearchResults] = useState(null);
+    const [showSearchResults, setShowSearchResults] = useState(false);
+    const [searchLoading, setSearchLoading] = useState(false);
+
     const navigate = useNavigate();
     const notifRef = useRef(null);
+    const searchRef = useRef(null);
+    const debounceRef = useRef(null);
     const currentUser = getCurrentUser();
 
     const displayUserName = userName || (currentUser ? (currentUser.unique_name || currentUser.name || "User") : "User");
 
     const handleNotificationClick = async (notification) => {
-        // Optimistically update the UI and hide popup
         setShowNotifications(false);
         setNotifications(prev => prev.filter(n => n.id !== notification.id));
-
-        // Mark as read in the backend
         if (!notification.isRead) {
             try {
                 await fetchWithAuth(`/api/notifications/${notification.id}/mark-read`, { method: "POST" });
@@ -32,9 +37,63 @@ function Navbar({ userName }) {
         navigate("/");
     };
 
+    // ─── Search ────────────────────────────────────────────────────────────────
+
+    const doSearch = useCallback(async (q) => {
+        if (!q.trim()) {
+            setSearchResults(null);
+            return;
+        }
+        setSearchLoading(true);
+        try {
+            const data = await fetchWithAuth(`/api/search?q=${encodeURIComponent(q.trim())}`);
+            setSearchResults(data);
+        } catch {
+            setSearchResults(null);
+        } finally {
+            setSearchLoading(false);
+        }
+    }, []);
+
+    const handleSearchChange = (e) => {
+        const val = e.target.value;
+        setSearchQuery(val);
+        setShowSearchResults(true);
+
+        clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => doSearch(val), 300);
+    };
+
+    const handleSearchFocus = () => {
+        if (searchQuery.trim()) setShowSearchResults(true);
+    };
+
+    const closeSearch = () => {
+        setShowSearchResults(false);
+        setSearchQuery("");
+        setSearchResults(null);
+    };
+
+    const navigateTo = (path) => {
+        closeSearch();
+        navigate(path);
+    };
+
+    // Close search on outside click
+    useEffect(() => {
+        const handleClickOutside = e => {
+            if (searchRef.current && !searchRef.current.contains(e.target)) {
+                setShowSearchResults(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    // ─── Notifications ────────────────────────────────────────────────────────
+
     useEffect(() => {
         if (!showNotifications) return;
-
         const loadNotifications = async () => {
             try {
                 const data = await fetchWithAuth("/api/notifications/latest");
@@ -43,7 +102,6 @@ function Navbar({ userName }) {
                 setNotifications([]);
             }
         };
-
         loadNotifications();
     }, [showNotifications]);
 
@@ -53,15 +111,14 @@ function Navbar({ userName }) {
                 setShowNotifications(false);
             }
         };
-
         if (showNotifications) {
             document.addEventListener("mousedown", handleClickOutside);
         }
-
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
+        return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [showNotifications]);
+
+    const hasResults = searchResults &&
+        (searchResults.tasks?.length > 0 || searchResults.projects?.length > 0 || searchResults.workspaces?.length > 0);
 
     return (
         <div className={styles.navbar}>
@@ -74,11 +131,83 @@ function Navbar({ userName }) {
                     Home
                 </Link>
 
-                <input
-                    className={styles.navSearch}
-                    type="text"
-                    placeholder="Search..."
-                />
+                <div className={styles.searchWrapper} ref={searchRef}>
+                    <input
+                        className={styles.navSearch}
+                        type="text"
+                        placeholder="Search tasks, projects, workspaces..."
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                        onFocus={handleSearchFocus}
+                        autoComplete="off"
+                    />
+
+                    {showSearchResults && searchQuery.trim() && (
+                        <div className={styles.searchDropdown}>
+                            {searchLoading && (
+                                <div className={styles.searchEmpty}>Searching...</div>
+                            )}
+
+                            {!searchLoading && !hasResults && (
+                                <div className={styles.searchEmpty}>No results found</div>
+                            )}
+
+                            {!searchLoading && searchResults?.workspaces?.length > 0 && (
+                                <div className={styles.searchGroup}>
+                                    <div className={styles.searchGroupTitle}>Workspaces</div>
+                                    {searchResults.workspaces.map(w => (
+                                        <div
+                                            key={w.id}
+                                            className={styles.searchResultItem}
+                                            onClick={() => navigateTo(`/workspaces/${w.id}`)}
+                                        >
+                                            {w.name}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {!searchLoading && searchResults?.projects?.length > 0 && (
+                                <div className={styles.searchGroup}>
+                                    <div className={styles.searchGroupTitle}>Projects</div>
+                                    {searchResults.projects.map(p => (
+                                        <div
+                                            key={p.id}
+                                            className={styles.searchResultItem}
+                                            onClick={() => navigateTo(`/workspaces/${p.workspaceId}/projects/${p.id}`)}
+                                        >
+                                            {p.name}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {!searchLoading && searchResults?.tasks?.length > 0 && (
+                                <div className={styles.searchGroup}>
+                                    <div className={styles.searchGroupTitle}>Tasks</div>
+                                    {searchResults.tasks.map(t => (
+                                        <div
+                                            key={t.id}
+                                            className={styles.searchResultItem}
+                                            onClick={() => navigateTo(`/workspaces/projects/${t.projectId}/tasks`)}
+                                        >
+                                            {t.taskTypeIcon && (
+                                                <img
+                                                    src={`/cardicons/${t.taskTypeIcon}`}
+                                                    alt=""
+                                                    className={styles.searchTaskIcon}
+                                                />
+                                            )}
+                                            <span className={t.completed ? styles.completedTask : ""}>
+                                                {t.title}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className={styles.navRight}>
@@ -111,7 +240,6 @@ function Navbar({ userName }) {
                                     />
                                 ))}
                             </div>
-
 
                             <button
                                 className={styles.viewAllBtn}
