@@ -276,6 +276,11 @@ public class ProjectMembersController : ControllerBase
         if (!await _projectAccessService.HasViewAccessAsync(projectId, currentUserId))
             return Forbid();
 
+        var projectName = await _context.Projects
+            .Where(p => p.Id == projectId)
+            .Select(p => p.Name)
+            .FirstOrDefaultAsync();
+
         var activity = await _context.TaskHistories
             .Where(h => h.UserId == userId && h.Task != null && h.Task.ProjectId == projectId)
             .Include(h => h.Task)
@@ -294,6 +299,6 @@ public class ProjectMembersController : ControllerBase
             .Take(100)
             .ToListAsync();
 
-        return Ok(new { success = true, activity });
+        return Ok(new { success = true, projectName, activity });
     }
 }

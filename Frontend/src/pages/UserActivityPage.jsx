@@ -9,6 +9,7 @@ function UserActivityPage() {
 
     const [activity, setActivity] = useState([]);
     const [userName, setUserName] = useState("");
+    const [projectName, setProjectName] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -20,6 +21,7 @@ function UserActivityPage() {
                 );
                 if (data.success) {
                     setActivity(data.activity);
+                    setProjectName(data.projectName || "");
                     if (data.activity.length > 0) {
                         setUserName(data.activity[0].userName || "");
                     }
@@ -70,7 +72,7 @@ function UserActivityPage() {
                     <h1 className={styles.title}>
                         {userName ? `${userName}'s Activity` : "User Activity"}
                     </h1>
-                    <span className={styles.subtitle}>Project #{projectId}</span>
+                    <span className={styles.subtitle}>{projectName || `Project #${projectId}`}</span>
                 </div>
             </div>
 

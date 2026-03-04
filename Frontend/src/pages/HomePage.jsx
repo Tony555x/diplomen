@@ -60,7 +60,7 @@ function HomePage() {
                                 onClick={() => navigate(`/workspace/${ws.id}/projects`)}
                             >
                                 <h3>{ws.name}</h3>
-                                <p>Workspace #{ws.id}</p>
+                                <p className={styles.cardLink}>View projects →</p>
                             </div>
                         ))}
                         <div

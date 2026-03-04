@@ -67,6 +67,13 @@
     font-size: 0.9rem;
 }
 
+.cardLink {
+    margin: 0;
+    color: #60a5fa;
+    font-size: 0.85rem;
+    margin-top: 0.35rem;
+}
+
 .createCard {
     border: 2px dashed #2c2c2c;
     border-radius: 8px;

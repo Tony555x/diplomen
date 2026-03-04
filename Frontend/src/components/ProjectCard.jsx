@@ -12,7 +12,7 @@ function ProjectCard({ project }) {
     return (
         <div className="project-card" onClick={handleClick}>
             <h3>{project.name}</h3>
-            <p>Project #{project.id}</p>
+            <p className="project-card-link">View tasks →</p>
         </div>
     );
 }
