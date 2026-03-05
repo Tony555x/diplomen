@@ -10,6 +10,7 @@ namespace Taskboard.Data.Models
         public int Id { get; set; }
 
         [Required]
+        [MaxLength(ModelConstants.Collection.NameMaxLength)]
         public string Name { get; set; } = string.Empty;
 
         [Required]

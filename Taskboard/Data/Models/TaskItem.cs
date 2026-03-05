@@ -8,12 +8,18 @@ namespace Taskboard.Data.Models
         [Key]
         [Required]
         public int Id { get; set; }
+
         [Required]
-        public string Title { get; set; } = String.Empty;
+        [MaxLength(ModelConstants.TaskItem.TitleMaxLength)]
+        public string Title { get; set; } = string.Empty;
+
         [Required]
         public bool Completed { get; set; }
+
         [Required]
+        [MaxLength(ModelConstants.TaskItem.StatusMaxLength)]
         public string Status { get; set; } = "To Do";
+
         [Required]
         public int ProjectId { get; set; }
         [ForeignKey(nameof(ProjectId))]
@@ -24,7 +30,7 @@ namespace Taskboard.Data.Models
         [ForeignKey(nameof(TaskTypeId))]
         public TaskType? TaskType { get; set; }
 
-        public List<UserTask> UserTasks {get;set;} = new();
+        public List<UserTask> UserTasks { get; set; } = new();
         public List<TaskFieldValue> FieldValues { get; set; } = new();
 
         public DateTime? DueDate { get; set; }

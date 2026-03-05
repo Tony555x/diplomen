@@ -16,13 +16,14 @@ namespace Taskboard.Data.Models
         public int Id { get; set; }
 
         [Required]
-        public string Name { get; set; }
+        [MaxLength(ModelConstants.DashboardWidget.NameMaxLength)]
+        public string Name { get; set; } = string.Empty;
 
         [Required]
-        public string UserId { get; set; }
+        public string UserId { get; set; } = string.Empty;
 
         [ForeignKey("UserId")]
-        public virtual User User { get; set; }
+        public virtual User User { get; set; } = null!;
 
         [Required]
         public WidgetType Type { get; set; }
@@ -30,10 +31,12 @@ namespace Taskboard.Data.Models
         [Required]
         public int ProjectId { get; set; }
         [ForeignKey("ProjectId")]
-        public virtual Project Project { get; set; }
+        public virtual Project Project { get; set; } = null!;
 
-        public string Source { get; set; } = String.Empty;
+        [MaxLength(ModelConstants.DashboardWidget.SourceMaxLength)]
+        public string Source { get; set; } = string.Empty;
 
-        public string Result { get; set; } = String.Empty;
+        [MaxLength(ModelConstants.DashboardWidget.ResultMaxLength)]
+        public string Result { get; set; } = string.Empty;
     }
 }

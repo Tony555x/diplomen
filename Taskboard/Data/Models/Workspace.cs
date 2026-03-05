@@ -9,8 +9,10 @@ namespace Taskboard.Data.Models
         [Required]
         [Key]
         public int Id { get; set; }
+
         [Required]
-        public string Name { get; set; } = String.Empty;
+        [MaxLength(ModelConstants.Workspace.NameMaxLength)]
+        public string Name { get; set; } = string.Empty;
 
         public List<Project> Projects { get; set; } = new();
         public List<WorkspaceMember> Members { get; set; } = new();

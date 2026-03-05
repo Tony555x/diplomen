@@ -16,12 +16,16 @@ namespace Taskboard.Data.Models
         [Required]
         [Key]
         public int Id { get; set; }
+
         [Required]
-        public string Name { get; set; } = String.Empty;
+        [MaxLength(ModelConstants.Project.NameMaxLength)]
+        public string Name { get; set; } = string.Empty;
+
         [Required]
         public int WorkspaceId { get; set; }
         [ForeignKey(nameof(WorkspaceId))]
         public Workspace? Workspace { get; set; }
+
         [Required]
         public ProjectAccessLevel AccessLevel { get; set; } = ProjectAccessLevel.Workspace;
 

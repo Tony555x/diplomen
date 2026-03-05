@@ -11,15 +11,15 @@ namespace Taskboard.Data.Models
         public int Id { get; set; }
 
         [Required]
-        [MaxLength(100)]
+        [MaxLength(ModelConstants.WidgetTemplate.NameMaxLength)]
         public string Name { get; set; } = string.Empty;
 
-        [MaxLength(300)]
+        [MaxLength(ModelConstants.WidgetTemplate.DescriptionMaxLength)]
         public string Description { get; set; } = string.Empty;
 
         /// <summary>"Tasks" or "Members"</summary>
         [Required]
-        [MaxLength(20)]
+        [MaxLength(ModelConstants.WidgetTemplate.CategoryMaxLength)]
         public string Category { get; set; } = "Tasks";
 
         /// <summary>Default query JSON for this template (WidgetQueryDto serialized).</summary>
