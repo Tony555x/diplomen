@@ -98,8 +98,20 @@
 
 .footer {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
     padding: 0.65rem 1rem;
     border-top: 1px solid #374151;
+    gap: 0.5rem;
+}
+
+.footerActions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.saveError {
+    color: #f87171;
+    font-size: 0.85rem;
+    text-align: center;
 }

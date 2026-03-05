@@ -26,6 +26,7 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
     const [newMessage, setNewMessage] = useState("");
 
     const [isSaving, setIsSaving] = useState(false);
+    const [saveError, setSaveError] = useState(null);
     const [isEditingTitle, setIsEditingTitle] = useState(false);
 
     const titleInputRef = useRef(null);
@@ -81,6 +82,7 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
     };
 
     const handleSave = async () => {
+        setSaveError(null);
         setIsSaving(true);
         try {
             const updatedTask = canCreateTasks
@@ -88,6 +90,14 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
                 : { ...task, status, completed };
             await onUpdate(updatedTask);
             onClose();
+
+        } catch (err) {
+            // Try to extract a readable message from various shapes
+            const msg =
+                err?.errors ? Object.values(err.errors).flat().join(" ") :
+                    err?.message ||
+                    "Failed to save. Please try again.";
+            setSaveError(msg);
         } finally {
             setIsSaving(false);
         }
@@ -178,27 +188,32 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
                 </div>
 
                 <div className={styles.footer}>
-                    {onDelete && (
-                        <button
-                            className={sharedStyles.deleteButton}
-                            onClick={() => onDelete(task)}
-                        >
-                            Delete
-                        </button>
+                    {saveError && (
+                        <span className={styles.saveError}>{saveError}</span>
                     )}
-                    {!onDelete && <div />}
+                    <div className={styles.footerActions}>
+                        {onDelete && (
+                            <button
+                                className={sharedStyles.deleteButton}
+                                onClick={() => onDelete(task)}
+                            >
+                                Delete
+                            </button>
+                        )}
+                        {!onDelete && <div />}
 
-                    <div className={sharedStyles.rightActions}>
-                        <button className={sharedStyles.cancelButton} onClick={onClose}>
-                            Cancel
-                        </button>
-                        <button
-                            className={sharedStyles.createButton}
-                            onClick={handleSave}
-                            disabled={isSaving || (canCreateTasks && !title.trim())}
-                        >
-                            {isSaving ? "Saving…" : "Save"}
-                        </button>
+                        <div className={sharedStyles.rightActions}>
+                            <button className={sharedStyles.cancelButton} onClick={onClose}>
+                                Cancel
+                            </button>
+                            <button
+                                className={sharedStyles.createButton}
+                                onClick={handleSave}
+                                disabled={isSaving || (canCreateTasks && !title.trim())}
+                            >
+                                {isSaving ? "Saving…" : "Save"}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

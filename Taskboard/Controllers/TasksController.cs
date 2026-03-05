@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Taskboard.Contracts;
 using Taskboard.Data.Models;
 using Taskboard.Services;
 
@@ -79,6 +80,7 @@ namespace Taskboard.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateTask(int projectId, [FromBody] CreateTaskRequest request)
         {
+            if (!ModelState.IsValid) return ValidationProblem(ModelState);
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
@@ -199,10 +201,12 @@ namespace Taskboard.Controllers
         }
 
         [HttpPatch("{taskId}")]
-        public async Task<IActionResult> UpdateTask(int projectId, int taskId, [FromBody] UpdateTaskStatusRequest request)
+        public async Task<IActionResult> UpdateTask(int projectId, int taskId, [FromBody] UpdateTaskRequest request)
         {
+            if (!ModelState.IsValid) return ValidationProblem(ModelState);
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
+
 
             // Verify user has view access to this project (member or access level)
             if (!await _projectAccessService.HasViewAccessAsync(projectId, userId))
@@ -712,43 +716,4 @@ namespace Taskboard.Controllers
         }
     }
 
-    public class CreateTaskRequest
-    {
-        public string Title { get; set; } = string.Empty;
-        public string? Status { get; set; }
-        public int? TaskTypeId { get; set; }
-        public int? CollectionId { get; set; }
-    }
-
-    public class UpdateTaskStatusRequest
-    {
-        public string? Status { get; set; }
-        public string? Title { get; set; }
-        public bool? Completed { get; set; }
-        public List<FieldValueRequest>? FieldValues { get; set; }
-        public int? CollectionId { get; set; }
-    }
-
-    public class FieldValueRequest
-    {
-        public int? Id { get; set; }
-        public int TaskFieldId { get; set; }
-        public string Value { get; set; }
-    }
-    public class AssignUserRequest
-    {
-        public string UserId { get; set; } = string.Empty;
-    }
-    public class SetDueDateRequest
-    {
-        public DateTime? DueDate { get; set; }
-    }
-    public class CreateMessageRequest
-    {
-        public string Content { get; set; } = string.Empty;
-    }
-    public class AddBlockerRequest
-    {
-        public int BlockerTaskId { get; set; }
-    }
 }

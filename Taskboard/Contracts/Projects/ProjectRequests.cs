@@ -6,7 +6,7 @@ namespace Taskboard.Contracts.Projects;
 public class CreateProjectRequest
 {
     [Required]
-    [MaxLength(200)]
+    [MaxLength(ModelConstants.Project.NameMaxLength)]
     public string Name { get; set; } = string.Empty;
 
     [Required]
@@ -20,7 +20,7 @@ public class CreateProjectRequest
 public class UpdateProjectRequest
 {
     [Required]
-    [MaxLength(200)]
+    [MaxLength(ModelConstants.Project.NameMaxLength)]
     public string Name { get; set; } = string.Empty;
 
     public ProjectAccessLevel AccessLevel { get; set; }
@@ -54,15 +54,12 @@ public class CreateProjectRoleRequest
     public int? RoleId { get; set; }
 
     [Required]
-    [MaxLength(100)]
+    [MaxLength(ModelConstants.ProjectRole.RoleNameMaxLength)]
     public string RoleName { get; set; } = string.Empty;
 
     public bool CanAddEditMembers { get; set; }
-
     public bool CanEditProjectSettings { get; set; }
-
     public bool CanCreateEditDeleteTasks { get; set; }
-
     public bool CanCreateDeleteTaskStatuses { get; set; }
 }
 
@@ -71,11 +68,13 @@ public class UpsertTaskTypeRequest
     public int? Id { get; set; }
 
     [Required]
-    [MaxLength(200)]
+    [MaxLength(ModelConstants.TaskType.NameMaxLength)]
     public string Name { get; set; } = string.Empty;
 
+    [MaxLength(ModelConstants.TaskType.DescriptionMaxLength)]
     public string? Description { get; set; }
 
+    [MaxLength(ModelConstants.TaskType.IconMaxLength)]
     public string? Icon { get; set; }
 
     [Required]
@@ -87,7 +86,7 @@ public class UpsertTaskFieldRequest
     public int? Id { get; set; }
 
     [Required]
-    [MaxLength(200)]
+    [MaxLength(ModelConstants.TaskField.NameMaxLength)]
     public string Name { get; set; } = string.Empty;
 
     [Required]
@@ -95,8 +94,10 @@ public class UpsertTaskFieldRequest
 
     public bool IsRequired { get; set; }
 
+    [MaxLength(ModelConstants.TaskField.OptionsMaxLength)]
     public string? Options { get; set; }
 
+    [MaxLength(ModelConstants.TaskField.DefaultValueMaxLength)]
     public string? DefaultValue { get; set; }
 
     public int Order { get; set; }
@@ -105,6 +106,6 @@ public class UpsertTaskFieldRequest
 public class CreateUserTaskStatusRequest
 {
     [Required]
-    [MaxLength(100)]
+    [MaxLength(ModelConstants.TaskItem.StatusMaxLength)]
     public string Name { get; set; } = string.Empty;
 }

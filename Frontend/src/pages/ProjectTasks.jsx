@@ -49,7 +49,8 @@ function ProjectTasks() {
                     fetchWithAuth(`/api/projects/${projectId}/members`),
                     fetchWithAuth(`/api/projects/${projectId}/statuses`)
                 ]);
-            setTasks(tasksData || []);
+            const loadedTasks = tasksData || [];
+            setTasks(loadedTasks);
             setTaskTypes(taskTypesData.taskTypes || []);
             setCollections(collectionsData || []);
             setMembers(membersData.success ? membersData.members : []);
@@ -59,6 +60,14 @@ function ProjectTasks() {
             // Get current user from token
             const user = getCurrentUser();
             setCurrentUser(user);
+
+            // Auto-open task from URL param once tasks are loaded
+            const paramId = taskIdParamRef.current;
+            if (paramId) {
+                const id = parseInt(paramId, 10);
+                const match = loadedTasks.find(t => t.id === id);
+                if (match) setSelectedTask(match);
+            }
 
         } catch (err) {
             console.error(err);
@@ -74,13 +83,18 @@ function ProjectTasks() {
         fetchWithAuth(`/api/projects/${projectId}/visit`, { method: "POST" }).catch(() => { });
     }, [projectId]);
 
-    // Auto-open a task when taskId is in the URL and tasks have loaded
+    // Keep a ref to taskIdParam so refreshTasks can read the latest value
+    const taskIdParamRef = React.useRef(taskIdParam);
+    useEffect(() => { taskIdParamRef.current = taskIdParam; }, [taskIdParam]);
+
+    // When the URL param changes without a full remount (user navigates directly to a task URL)
+    // just open/close the correct task from the already-loaded list.
     useEffect(() => {
-        if (!taskIdParam || tasks.length === 0) return;
-        const id = parseInt(taskIdParam, 10);
-        const match = tasks.find(t => t.id === id);
-        if (match) setSelectedTask(match);
-    }, [taskIdParam, tasks]);
+        if (!taskIdParam) {
+            setSelectedTask(null);
+            return;
+        }
+    }, [taskIdParam]);
 
     const openTask = (task) => {
         setSelectedTask(task);
@@ -88,6 +102,7 @@ function ProjectTasks() {
     };
 
     const closeTask = () => {
+        console.log("set selectedTask null");
         setSelectedTask(null);
         navigate(`/project/${projectId}/tasks`, { replace: true });
     };
@@ -290,7 +305,6 @@ function ProjectTasks() {
                     }
                 }
             );
-
             if (result && result.success && result.task) {
                 const oldTask = tasks.find(t => t.id === updatedTask.id);
                 const fullTask = {
@@ -310,12 +324,12 @@ function ProjectTasks() {
                 );
 
                 if (completionChanged) {
-                    refreshTasks();
+                    await refreshTasks();
                 }
             }
 
         } catch (err) {
-            console.error(err);
+            throw (err);
         }
     };
 

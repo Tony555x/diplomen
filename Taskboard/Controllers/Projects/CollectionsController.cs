@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Taskboard.Contracts.Projects;
 using Taskboard.Data.Models;
 using Taskboard.Services;
 
@@ -49,6 +50,7 @@ namespace Taskboard.Controllers.Projects
         [HttpPost]
         public async Task<IActionResult> CreateCollection(int projectId, [FromBody] CreateCollectionRequest request)
         {
+            if (!ModelState.IsValid) return ValidationProblem(ModelState);
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
@@ -61,10 +63,6 @@ namespace Taskboard.Controllers.Projects
                 return Forbid();
             }
 
-            if (string.IsNullOrWhiteSpace(request.Name))
-            {
-                return BadRequest(new { success = false, message = "Collection name is required." });
-            }
 
             // If parentCollectionId is provided, verify it exists and belongs to the same project
             if (request.ParentCollectionId.HasValue)
@@ -105,6 +103,7 @@ namespace Taskboard.Controllers.Projects
         [HttpPatch("{collectionId}")]
         public async Task<IActionResult> UpdateCollection(int projectId, int collectionId, [FromBody] UpdateCollectionRequest request)
         {
+            if (!ModelState.IsValid) return ValidationProblem(ModelState);
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
@@ -192,15 +191,5 @@ namespace Taskboard.Controllers.Projects
             });
         }
     }
-
-    public class CreateCollectionRequest
-    {
-        public string Name { get; set; } = string.Empty;
-        public int? ParentCollectionId { get; set; }
-    }
-
-    public class UpdateCollectionRequest
-    {
-        public string? Name { get; set; }
-    }
 }
+

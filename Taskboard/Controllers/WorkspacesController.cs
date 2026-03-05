@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Taskboard.Contracts;
 using Taskboard.Data.Models;
 using Taskboard.Services;
 
@@ -86,6 +87,7 @@ namespace Taskboard.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateWorkspace([FromBody] CreateWorkspaceRequest request)
         {
+            if (!ModelState.IsValid) return ValidationProblem(ModelState);
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
@@ -305,14 +307,5 @@ namespace Taskboard.Controllers
             return Ok(new { success = true });
         }
     }
-
-    public class CreateWorkspaceRequest
-    {
-        public string Name { get; set; } = string.Empty;
-    }
-
-    public class AddWorkspaceMemberRequest
-    {
-        public string Email { get; set; } = string.Empty;
-    }
 }
+

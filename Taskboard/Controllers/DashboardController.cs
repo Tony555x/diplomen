@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Taskboard.Contracts.Projects;
 using Taskboard.Data.Models;
 using Taskboard.Services;
 
@@ -121,16 +122,10 @@ namespace Taskboard.Controllers
             return Ok(results);
         }
 
-        public class CreateWidgetDto
-        {
-            public string Name { get; set; } = string.Empty;
-            public WidgetType Type { get; set; } = WidgetType.ListResult;
-            public string Source { get; set; } = string.Empty;
-        }
-
         [HttpPost("widgets")]
         public async Task<IActionResult> CreateWidget(int projectId, [FromBody] CreateWidgetDto dto)
         {
+            if (!ModelState.IsValid) return ValidationProblem(ModelState);
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
