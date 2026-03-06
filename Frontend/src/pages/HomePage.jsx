@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { fetchWithAuth } from "../auth";
 import Navbar from "../components/Navbar";
 import ProjectCard from "../components/ProjectCard";
+import { usePageTitle } from "../hooks/usePageTitle";
 import styles from "./HomePage.module.css";
 
 const RECENT_LIMIT = 4;
@@ -14,6 +15,7 @@ function HomePage() {
     const [showAllWorkspaces, setShowAllWorkspaces] = useState(false);
     const [showAllProjects, setShowAllProjects] = useState(false);
     const navigate = useNavigate();
+    usePageTitle("Home");
 
     useEffect(() => {
         const loadData = async () => {

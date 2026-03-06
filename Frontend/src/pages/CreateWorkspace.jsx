@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchWithAuth } from "../auth";
 import Navbar from "../components/Navbar";
+import { usePageTitle } from "../hooks/usePageTitle";
 import styles from "../components/PopupStyles.module.css";
 
 function CreateWorkspace() {
@@ -9,6 +10,8 @@ function CreateWorkspace() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    usePageTitle("Create Workspace");
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();

@@ -5,11 +5,13 @@ import Navbar from "../components/Navbar";
 import WorkspaceNavbar from "../components/WorkspaceNavbar";
 import WorkspaceProjects from "./WorkspaceProjects";
 import WorkspaceMembers from "./WorkspaceMembers";
+import { usePageTitle } from "../hooks/usePageTitle";
 import "./WorkspacePage.css";
 
 function WorkspacePage() {
     const { workspaceId } = useParams();
     const [workspace, setWorkspace] = useState(null);
+    usePageTitle(workspace?.name ? workspace.name : "Workspace");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 

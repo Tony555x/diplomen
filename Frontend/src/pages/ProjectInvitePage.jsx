@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchWithAuth } from "../auth";
+import { usePageTitle } from "../hooks/usePageTitle";
 import styles from "./ProjectInvitePage.module.css";
 import Navbar from "../components/Navbar";
 
@@ -9,6 +10,8 @@ function ProjectInvitePage() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    usePageTitle("Project Invitation");
+
 
     const handleAccept = async () => {
         setLoading(true);

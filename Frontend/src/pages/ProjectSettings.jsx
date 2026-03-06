@@ -3,11 +3,13 @@ import { NavLink, Routes, Route, Navigate, useParams } from "react-router-dom";
 import GeneralSettings from "./settings/GeneralSettings";
 import TaskTypesSettings from "./settings/TaskTypesSettings";
 import { fetchWithAuth } from "../auth";
+import { usePageTitle } from "../hooks/usePageTitle";
 import styles from "./ProjectSettings.module.css";
 
 function ProjectSettings() {
     const { projectId } = useParams();
     const [currentUserRole, setCurrentUserRole] = useState(null);
+    usePageTitle("Project Settings");
 
     useEffect(() => {
         fetchWithAuth(`/api/projects/${projectId}/members`)

@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { fetchWithAuth } from "../../auth";
 import TaskTypePopup from "./TaskTypePopup";
+import { usePageTitle } from "../../hooks/usePageTitle";
 import styles from "./TaskTypesSettings.module.css";
 
 function TaskTypesSettings({ projectId, currentUserRole }) {
     const [taskTypes, setTaskTypes] = useState([]);
     const [selectedType, setSelectedType] = useState(null);
     const [loading, setLoading] = useState(true);
+    usePageTitle("Task Types Settings");
+
 
     const canEdit = currentUserRole?.canEditProjectSettings === true;
 

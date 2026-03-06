@@ -6,12 +6,14 @@ import ProjectNavbar from "../components/ProjectNavbar";
 import ProjectDashboard from "./ProjectDashboard";
 import ProjectTasks from "./ProjectTasks";
 import ProjectMembers from "./ProjectMembers";
+import { usePageTitle } from "../hooks/usePageTitle";
 import "./ProjectPage.css";
 import ProjectSettings from "./ProjectSettings";
 
 function ProjectPage() {
     const { projectId } = useParams();
     const [project, setProject] = useState(null);
+    usePageTitle(project?.name ? project.name : "Project");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 

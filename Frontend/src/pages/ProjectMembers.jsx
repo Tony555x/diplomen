@@ -5,11 +5,13 @@ import AddMemberPopup from "../components/AddMemberPopup";
 import CreateRolePopup from "../components/CreateRolePopup";
 import EditMemberPopup from "../components/EditMemberPopup";
 import UserAvatar from "../components/UserAvatar";
+import { usePageTitle } from "../hooks/usePageTitle";
 import "./ProjectMembers.css";
 
 function ProjectMembers() {
     const { projectId } = useParams();
     const navigate = useNavigate();
+    usePageTitle("Project Members");
     const [members, setMembers] = useState([]);
     const [roles, setRoles] = useState([]);
     const [currentUserRole, setCurrentUserRole] = useState(null);

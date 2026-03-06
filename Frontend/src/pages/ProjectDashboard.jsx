@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchWithAuth } from "../auth";
+import { usePageTitle } from "../hooks/usePageTitle";
 import styles from "./ProjectDashboard.module.css";
 import AddWidgetPopup from "../components/AddWidgetPopup/AddWidgetPopup";
 
@@ -144,6 +145,7 @@ function ProjectDashboard() {
 
     const [showWidgetPopup, setShowWidgetPopup] = useState(false);
     const [editingWidgetId, setEditingWidgetId] = useState(null);
+    usePageTitle("Dashboard");
 
     const loadWidgets = async () => {
         setLoading(true);

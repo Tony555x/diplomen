@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchWithAuth } from "../../auth";
+import { usePageTitle } from "../../hooks/usePageTitle";
 import styles from "./GeneralSettings.module.css";
 
 function GeneralSettings({ projectId, currentUserRole }) {
@@ -11,6 +12,8 @@ function GeneralSettings({ projectId, currentUserRole }) {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
     const navigate = useNavigate();
+    usePageTitle("General Settings");
+
 
     const canEdit = currentUserRole?.canEditProjectSettings === true;
     const isOwner = currentUserRole?.isOwner === true;

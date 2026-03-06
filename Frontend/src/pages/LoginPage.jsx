@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { login, isLoggedIn } from "../auth";
 import Navbar from "../components/Navbar";
+import { usePageTitle } from "../hooks/usePageTitle";
 import "./AuthPages.css";
 
 export default function LoginPage() {
@@ -9,6 +10,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  usePageTitle("Login");
 
   // Auto-redirect if already logged in
   useEffect(() => {

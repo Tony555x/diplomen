@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { register } from "../auth";
 import Navbar from "../components/Navbar";
+import { usePageTitle } from "../hooks/usePageTitle";
 import "./AuthPages.css";
 
 export default function RegisterPage() {
@@ -10,6 +11,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  usePageTitle("Register");
 
   const handleRegister = async () => {
     setError("");

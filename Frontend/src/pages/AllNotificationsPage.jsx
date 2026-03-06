@@ -3,12 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { fetchWithAuth } from "../auth";
 import Navbar from "../components/Navbar";
 import { handleNotificationAction } from "./notificationActions";
+import { usePageTitle } from "../hooks/usePageTitle";
 import styles from "./AllNotificationsPage.module.css";
 
 function AllNotificationsPage() {
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    usePageTitle("Notifications");
+
 
     useEffect(() => {
         const load = async () => {

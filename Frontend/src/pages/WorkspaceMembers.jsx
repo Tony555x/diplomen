@@ -2,12 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchWithAuth, getCurrentUser } from "../auth";
 import UserAvatar from "../components/UserAvatar";
+import { usePageTitle } from "../hooks/usePageTitle";
 import "./ProjectMembers.css";
 import "./WorkspaceMembers.css";
 
 function WorkspaceMembers({ workspaceName }) {
     const { workspaceId } = useParams();
     const navigate = useNavigate();
+    usePageTitle(workspaceName ? `${workspaceName} — Members` : "Workspace Members");
 
     const [members, setMembers] = useState([]);
     const [currentUserRole, setCurrentUserRole] = useState(null);

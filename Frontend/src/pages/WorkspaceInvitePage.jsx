@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchWithAuth } from "../auth";
 import Navbar from "../components/Navbar";
+import { usePageTitle } from "../hooks/usePageTitle";
 import styles from "./ProjectInvitePage.module.css";
 
 function WorkspaceInvitePage() {
     const { workspaceId } = useParams();
     const navigate = useNavigate();
+    usePageTitle("Workspace Invitation");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 

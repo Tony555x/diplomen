@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchWithAuth } from "../auth";
+import { usePageTitle } from "../hooks/usePageTitle";
 import styles from "./UserActivityPage.module.css";
 
 function UserActivityPage() {
@@ -10,6 +11,7 @@ function UserActivityPage() {
     const [activity, setActivity] = useState([]);
     const [userName, setUserName] = useState("");
     const [projectName, setProjectName] = useState("");
+    usePageTitle(userName ? `${userName}'s Activity` : "User Activity");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 

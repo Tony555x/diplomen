@@ -3,11 +3,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { fetchWithAuth, getCurrentUser } from "../auth";
 import Column from "../components/Column";
 import TaskDetailsPopup from "../components/TaskDetailsPopup/TaskDetailsPopup";
+import { usePageTitle } from "../hooks/usePageTitle";
 import styles from "./ProjectTasks.module.css";
 
 function ProjectTasks() {
     const { projectId, taskId: taskIdParam } = useParams();
     const navigate = useNavigate();
+    usePageTitle("Tasks");
+
 
     const [members, setMembers] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);

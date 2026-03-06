@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { fetchWithAuth } from "../auth";
 import Navbar from "../components/Navbar";
+import { usePageTitle } from "../hooks/usePageTitle";
 import styles from "./UserSettingsPage.module.css";
 
 const PRESET_COLORS = [
@@ -24,6 +25,8 @@ function UserSettingsPage() {
     const [saving, setSaving] = useState(false);
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState(null);
+    usePageTitle("User Settings");
+
 
     useEffect(() => {
         fetchWithAuth("/api/user/profile")
