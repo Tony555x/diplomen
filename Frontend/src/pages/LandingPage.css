@@ -213,10 +213,17 @@
   background: rgba(255, 255, 255, 0.07);
 }
 
-.landing-feature-icon {
-  font-size: 2rem;
+.landing-feature-num {
   display: block;
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
   margin-bottom: 1rem;
+  background: linear-gradient(135deg, #60a5fa, #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -1px;
 }
 
 .landing-feature-title {

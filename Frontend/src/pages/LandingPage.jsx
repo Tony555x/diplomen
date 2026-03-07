@@ -57,28 +57,28 @@ export default function LandingPage() {
         <div className="landing-feature-grid">
           {[
             {
-              icon: "📋",
+              num: "01",
               title: "Tasks & Boards",
               desc: "Create tasks, assign owners, set deadlines, and track progress with Kanban-style boards.",
             },
             {
-              icon: "👥",
+              num: "02",
               title: "Team Workspaces",
               desc: "Invite teammates to dedicated workspaces with fine-grained roles and permissions.",
             },
             {
-              icon: "🔔",
+              num: "03",
               title: "Real-time Notifications",
               desc: "Stay informed with live notifications for assignments, comments, and status changes.",
             },
             {
-              icon: "🔍",
+              num: "04",
               title: "Powerful Search",
               desc: "Find any task, project, or workspace in seconds with full-text global search.",
             },
-          ].map(({ icon, title, desc }) => (
+          ].map(({ num, title, desc }) => (
             <div key={title} className="landing-feature-card">
-              <span className="landing-feature-icon">{icon}</span>
+              <span className="landing-feature-num">{num}</span>
               <h3 className="landing-feature-title">{title}</h3>
               <p className="landing-feature-desc">{desc}</p>
             </div>
