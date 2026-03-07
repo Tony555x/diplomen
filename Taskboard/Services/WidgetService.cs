@@ -163,36 +163,37 @@ namespace Taskboard.Services
 
         private List<object> GroupTasks(List<TaskItem> tasks, string groupBy, string aggFunc)
         {
-            IEnumerable<IGrouping<string, TaskItem>> groups;
+            IEnumerable<IGrouping<(string Label, string? Icon), TaskItem>> groups;
 
             switch (groupBy.ToLower())
             {
                 case "status":
-                    groups = tasks.GroupBy(t => t.Status);
+                    groups = tasks.GroupBy(t => (t.Status ?? "(Unknown)", (string?)null));
                     break;
                 case "completed":
-                    groups = tasks.GroupBy(t => t.Completed ? "Completed" : "Incomplete");
+                    groups = tasks.GroupBy(t => (t.Completed ? "Completed" : "Incomplete", (string?)null));
                     break;
                 case "type":
-                    groups = tasks.GroupBy(t => t.TaskType?.Name ?? "(No type)");
+                    groups = tasks.GroupBy(t => (t.TaskType?.Name ?? "(No type)", t.TaskType?.Icon));
                     break;
                 default:
                     if (groupBy.StartsWith("field:", StringComparison.OrdinalIgnoreCase))
                     {
                         var fieldName = groupBy.Substring(6);
                         groups = tasks.GroupBy(t =>
-                            t.FieldValues?.FirstOrDefault(fv => fv.TaskField?.Name == fieldName)?.Value ?? "(none)");
+                            (t.FieldValues?.FirstOrDefault(fv => fv.TaskField?.Name == fieldName)?.Value ?? "(none)", (string?)null));
                     }
                     else
                     {
-                        groups = tasks.GroupBy(t => t.Status);
+                        groups = tasks.GroupBy(t => (t.Status ?? "(Unknown)", (string?)null));
                     }
                     break;
             }
 
             return groups.Select(g => (object)new
             {
-                Label = g.Key,
+                Label = g.Key.Label,
+                Icon = g.Key.Icon,
                 Value = aggFunc.ToLower() == "count" ? g.Count() : 0
             }).OrderBy(x => ((dynamic)x).Label).ToList();
         }
@@ -268,20 +269,21 @@ namespace Taskboard.Services
 
         private List<object> GroupMembers(List<ProjectMember> members, string groupBy, string aggFunc, Dictionary<string, int> taskCounts)
         {
-            IEnumerable<IGrouping<string, ProjectMember>> groups;
+            IEnumerable<IGrouping<(string Label, string? Icon), ProjectMember>> groups;
             switch (groupBy.ToLower())
             {
                 case "role":
-                    groups = members.GroupBy(m => m.ProjectRole?.RoleName ?? "(No role)");
+                    groups = members.GroupBy(m => (m.ProjectRole?.RoleName ?? "(No role)", (string?)null));
                     break;
                 default:
-                    groups = members.GroupBy(m => m.ProjectRole?.RoleName ?? "(No role)");
+                    groups = members.GroupBy(m => (m.ProjectRole?.RoleName ?? "(No role)", (string?)null));
                     break;
             }
 
             return groups.Select(g => (object)new
             {
-                Label = g.Key,
+                Label = g.Key.Label,
+                Icon = g.Key.Icon,
                 Value = aggFunc.ToLower() == "count" ? g.Count() : 0
             }).OrderBy(x => ((dynamic)x).Label).ToList();
         }

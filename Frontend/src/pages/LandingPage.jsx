@@ -16,6 +16,12 @@ export default function LandingPage() {
 
   return (
     <div className="landing-root">
+      {/* ── Background Blobs ──────────────────────────────────────── */}
+      <div className="landing-background">
+        <div className="landing-blob landing-blob-1" aria-hidden="true" />
+        <div className="landing-blob landing-blob-2" aria-hidden="true" />
+      </div>
+
       {/* ── Header ──────────────────────────────────────────────── */}
       <header className="landing-header">
         <span className="landing-logo">TaskBoard</span>
@@ -46,43 +52,29 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* decorative blobs */}
-        <div className="landing-blob landing-blob-1" aria-hidden="true" />
-        <div className="landing-blob landing-blob-2" aria-hidden="true" />
       </section>
 
       {/* ── Features ────────────────────────────────────────────── */}
       <section className="landing-features">
-        <h2 className="landing-section-title">Everything your team needs</h2>
-        <div className="landing-feature-grid">
-          {[
-            {
-              num: "01",
-              title: "Tasks & Boards",
-              desc: "Create tasks, assign owners, set deadlines, and track progress with Kanban-style boards.",
-            },
-            {
-              num: "02",
-              title: "Team Workspaces",
-              desc: "Invite teammates to dedicated workspaces with fine-grained roles and permissions.",
-            },
-            {
-              num: "03",
-              title: "Real-time Notifications",
-              desc: "Stay informed with live notifications for assignments, comments, and status changes.",
-            },
-            {
-              num: "04",
-              title: "Powerful Search",
-              desc: "Find any task, project, or workspace in seconds with full-text global search.",
-            },
-          ].map(({ num, title, desc }) => (
-            <div key={title} className="landing-feature-card">
-              <span className="landing-feature-num">{num}</span>
-              <h3 className="landing-feature-title">{title}</h3>
-              <p className="landing-feature-desc">{desc}</p>
-            </div>
-          ))}
+        <div className="landing-feature-split">
+          <div className="landing-feature-text">
+            <h2 className="landing-section-title" style={{ textAlign: "left", margin: "0 0 2rem" }}>
+              Everything your team needs
+            </h2>
+            <ul className="landing-feature-list">
+              <li><strong>Tasks</strong> to capture, assign, and track work</li>
+              <li><strong>Collections</strong> to organize boards effectively</li>
+              <li><strong>Users</strong> to collaborate and manage roles</li>
+              <li><strong>Widgets</strong> to build custom dashboard insights</li>
+            </ul>
+          </div>
+          <div className="landing-feature-image-wrapper">
+            <img 
+              src="/landingpage/column_and_widget.png" 
+              alt="Taskboard Preview" 
+              className="landing-feature-img" 
+            />
+          </div>
         </div>
       </section>
 

@@ -7,7 +7,7 @@ import AddWidgetPopup from "../components/AddWidgetPopup/AddWidgetPopup";
 
 // ─── SVG Bar Chart ───────────────────────────────────────────────────────────
 
-function BarChart({ data }) {
+function BarChart({ data, groupByLabel }) {
     if (!data || data.length === 0) return <p className={styles["no-data"]}>No data to chart.</p>;
     const total = data.reduce((sum, d) => sum + d.value, 0) || 1;
 
@@ -15,7 +15,7 @@ function BarChart({ data }) {
         <div className={styles["chart-table"]}>
             {/* Header */}
             <div className={styles["chart-header"]}>
-                <span className={styles["chart-col-name"]}>Name</span>
+                <span className={styles["chart-col-name"]}>{groupByLabel || "Name"}</span>
                 <span className={styles["chart-col-bar"]} />
                 <span className={styles["chart-col-count"]}>Count</span>
                 <span className={styles["chart-col-pct"]}>%</span>
@@ -28,7 +28,17 @@ function BarChart({ data }) {
                 const barPct = (d.value / total) * 100;
                 return (
                     <div key={d.label} className={styles["chart-row"]}>
-                        <span className={styles["chart-col-name"]}>{d.label}</span>
+                        <span className={styles["chart-col-name"]}>
+                            {d.icon && (
+                                <img
+                                    src={`/cardicons/${d.icon}`}
+                                    alt=""
+                                    className={styles["task-type-icon"]}
+                                    style={{ marginRight: '6px' }}
+                                />
+                            )}
+                            {d.label}
+                        </span>
                         <span className={styles["chart-col-bar"]}>
                             <span
                                 className={styles["chart-pill"]}
@@ -71,7 +81,18 @@ function renderWidgetData(widget, navigate, projectId) {
     }
 
     if (resultType === "GroupedResult") {
-        return <BarChart data={data} />;
+        let groupByLabel = "Name";
+        try {
+            if (widget.source) {
+                const query = JSON.parse(widget.source);
+                if (query.groupBy) {
+                    if (query.groupBy.toLowerCase() === "type") groupByLabel = "Task Type";
+                    else if (query.groupBy.startsWith("field:")) groupByLabel = query.groupBy.substring(6);
+                    else groupByLabel = query.groupBy.charAt(0).toUpperCase() + query.groupBy.slice(1);
+                }
+            }
+        } catch { }
+        return <BarChart data={data} groupByLabel={groupByLabel} />;
     }
 
     if (resultType === "TaskList") {
