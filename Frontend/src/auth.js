@@ -50,9 +50,13 @@ export async function login(username, password) {
   const data = await res.json();
 
   if (!res.ok) {
-    if (data.errors && typeof data.errors === 'object') {
-      const firstField = Object.values(data.errors).find(errs => Array.isArray(errs) && errs.length > 0);
-      return { success: false, message: firstField ? firstField[0] : (data.title || "Validation failed.") };
+    if (data.errors) {
+      if (Array.isArray(data.errors) && data.errors.length > 0) {
+        return { success: false, message: data.errors.join("\n") };
+      } else if (typeof data.errors === 'object') {
+        const firstField = Object.values(data.errors).find(errs => Array.isArray(errs) && errs.length > 0);
+        return { success: false, message: firstField ? firstField.join("\n") : (data.title || "Validation failed.") };
+      }
     }
     return { success: false, message: data.message || data.title || `Login failed with status ${res.status}` };
   }
@@ -80,9 +84,13 @@ export async function register(username, email, password) {
   const data = await res.json();
 
   if (!res.ok) {
-    if (data.errors && typeof data.errors === 'object') {
-      const firstField = Object.values(data.errors).find(errs => Array.isArray(errs) && errs.length > 0);
-      return { success: false, message: firstField ? firstField[0] : (data.title || "Validation failed.") };
+    if (data.errors) {
+      if (Array.isArray(data.errors) && data.errors.length > 0) {
+        return { success: false, message: data.errors.join("\n") };
+      } else if (typeof data.errors === 'object') {
+        const firstField = Object.values(data.errors).find(errs => Array.isArray(errs) && errs.length > 0);
+        return { success: false, message: firstField ? firstField.join("\n") : (data.title || "Validation failed.") };
+      }
     }
     return { success: false, message: data.message || data.title || `Registration failed with status ${res.status}` };
   }

@@ -17,7 +17,7 @@ export default function RegisterPage() {
     try {
       const res = await register(username, email, password);
       if (!res.success) {
-        setError(res.errors.join("\n"));
+        setError(res.message || "Registration failed.");
       } else {
         navigate("/login");
       }

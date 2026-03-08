@@ -49,8 +49,8 @@ function GeneralSettings({ projectId, currentUserRole }) {
             });
 
             setSuccess(true);
-        } catch {
-            setError("Failed to save changes.");
+        } catch (err) {
+            setError(err.message || "Failed to save changes.");
         } finally {
             setSaving(false);
         }

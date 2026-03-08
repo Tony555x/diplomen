@@ -38,7 +38,7 @@ function CreateWorkspace() {
             }
         } catch (err) {
             console.error("Error creating workspace:", err);
-            setError("An error occurred. Please try again.");
+            setError(err.message || "An error occurred. Please try again.");
         } finally {
             setLoading(false);
         }

@@ -13,6 +13,7 @@ function CreateProjectPopup({ workspaceId, onClose, onProjectCreated }) {
 
     const handleAddMember = async () => {
         setEmailError("");
+        setError("");
 
         if (!memberEmail.trim()) {
             setEmailError("Please enter an email address.");
@@ -40,7 +41,7 @@ function CreateProjectPopup({ workspaceId, onClose, onProjectCreated }) {
             }
         } catch (err) {
             console.error("Error validating email:", err);
-            setEmailError("User with this email does not exist.");
+            setEmailError(err.message || "User with this email does not exist.");
         }
     };
 
@@ -51,6 +52,7 @@ function CreateProjectPopup({ workspaceId, onClose, onProjectCreated }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
+        setEmailError("");
 
         if (!name.trim()) {
             setError("Project name is required.");
@@ -78,7 +80,7 @@ function CreateProjectPopup({ workspaceId, onClose, onProjectCreated }) {
             }
         } catch (err) {
             console.error("Error creating project:", err);
-            setError("An error occurred. Please try again.");
+            setError(err.message || "An error occurred. Please try again.");
         } finally {
             setLoading(false);
         }

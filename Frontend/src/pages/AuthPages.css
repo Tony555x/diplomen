@@ -1,7 +1,7 @@
 .auth-page {
   max-width: 400px;
   margin: 4rem auto;
-  background-color: #1e2a3a;
+  background-color: #1e1e1e;
   padding: 2rem;
   border-radius: 12px;
   display: flex;
@@ -52,6 +52,7 @@
 .error {
   color: #f87171;
   text-align: center;
+  padding: 0.5rem;
 }
 
 .switch-page {

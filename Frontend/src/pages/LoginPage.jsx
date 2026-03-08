@@ -23,7 +23,7 @@ export default function LoginPage() {
     try {
       const res = await login(username, password); // auth.js function that calls fetch
       if (!res.success) {
-        setError(res.errors.length ? res.errors.join("\n") : res.message);
+        setError(res.message || "Login failed.");
         return;
       }
       navigate("/home");
