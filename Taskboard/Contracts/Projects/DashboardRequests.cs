@@ -5,13 +5,13 @@ namespace Taskboard.Contracts.Projects;
 
 public class CreateWidgetDto
 {
-    [Required]
-    [MaxLength(ModelConstants.DashboardWidget.NameMaxLength)]
+    [Required(ErrorMessage = "Widget name is required.")]
+    [MaxLength(ModelConstants.DashboardWidget.NameMaxLength, ErrorMessage = "Widget name cannot exceed {1} characters.")]
     public string Name { get; set; } = string.Empty;
 
-    [Required]
+    [Required(ErrorMessage = "Widget type is required.")]
     public WidgetType Type { get; set; } = WidgetType.ListResult;
 
-    [MaxLength(ModelConstants.DashboardWidget.SourceMaxLength)]
+    [MaxLength(ModelConstants.DashboardWidget.SourceMaxLength, ErrorMessage = "Widget source cannot exceed {1} characters.")]
     public string Source { get; set; } = string.Empty;
 }

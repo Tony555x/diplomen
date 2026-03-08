@@ -48,6 +48,15 @@ export async function login(username, password) {
   });
 
   const data = await res.json();
+
+  if (!res.ok) {
+    if (data.errors && typeof data.errors === 'object') {
+      const firstField = Object.values(data.errors).find(errs => Array.isArray(errs) && errs.length > 0);
+      return { success: false, message: firstField ? firstField[0] : (data.title || "Validation failed.") };
+    }
+    return { success: false, message: data.message || data.title || `Login failed with status ${res.status}` };
+  }
+
   if (!data.success) return data;
   saveToken(data.token);
   return data;
@@ -69,6 +78,14 @@ export async function register(username, email, password) {
   });
 
   const data = await res.json();
+
+  if (!res.ok) {
+    if (data.errors && typeof data.errors === 'object') {
+      const firstField = Object.values(data.errors).find(errs => Array.isArray(errs) && errs.length > 0);
+      return { success: false, message: firstField ? firstField[0] : (data.title || "Validation failed.") };
+    }
+    return { success: false, message: data.message || data.title || `Registration failed with status ${res.status}` };
+  }
 
   return data;
 }
@@ -110,8 +127,28 @@ export async function fetchWithAuth(endpoint, options = {}) {
     return { success: false, message: "Session expired. Please login again." };
   }
   if (!response.ok) {
-    const msg = (await response.json()).message;
-    throw new Error(msg || `Request failed with ${response.status}`);
+    let errorData;
+    try {
+      errorData = await response.json();
+    } catch {
+      throw new Error(`Request failed with ${response.status}`);
+    }
+
+    // Check for standard custom error format { success: false, message: ... }
+    if (errorData.message) {
+      throw new Error(errorData.message);
+    }
+
+    // Check for ASP.NET Core validation errors format { errors: { FieldName: ["Error"] } }
+    if (errorData.errors && typeof errorData.errors === 'object') {
+      const firstField = Object.values(errorData.errors).find(errs => Array.isArray(errs) && errs.length > 0);
+      if (firstField && firstField.length > 0) {
+        throw new Error(firstField[0]);
+      }
+    }
+
+    // Fallback if structure is unknown
+    throw new Error(errorData.title || `Request failed with ${response.status}`);
   }
 
   return response.json();

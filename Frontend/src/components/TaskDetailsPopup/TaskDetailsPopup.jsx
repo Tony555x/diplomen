@@ -94,9 +94,8 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
         } catch (err) {
             // Try to extract a readable message from various shapes
             const msg =
-                err?.errors ? Object.values(err.errors).flat().join(" ") :
-                    err?.message ||
-                    "Failed to save. Please try again.";
+                err?.message ||
+                "Failed to save. Please try again.";
             setSaveError(msg);
         } finally {
             setIsSaving(false);
