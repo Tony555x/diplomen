@@ -30,6 +30,34 @@ function Collection({
 
     const inputRef = useRef(null);
 
+    useEffect(() => {
+        if (isRenaming && inputRef.current) {
+            inputRef.current.focus();
+            inputRef.current.select();
+        }
+    }, [isRenaming]);
+
+    useEffect(() => {
+        const closeMenu = () => setMenuOpen(false);
+        window.addEventListener("mousedown", closeMenu);
+        window.addEventListener("scroll", closeMenu, true);
+        return () => {
+            window.removeEventListener("mousedown", closeMenu);
+            window.removeEventListener("scroll", closeMenu, true);
+        };
+    }, []);
+
+    const commitRename = () => {
+        const trimmed = nameValue.trim();
+        setIsRenaming(false);
+
+        if (trimmed && trimmed !== collection.name) {
+            onRenameCollection(collection.id, trimmed);
+        } else {
+            setNameValue(collection.name);
+        }
+    };
+
     // Check if THIS specific instance (collection + column) is selected
     const collectionKey = `${collection.id}-${columnKey}`;
     const isSelected = selectedCollectionKey === collectionKey;
