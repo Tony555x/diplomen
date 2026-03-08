@@ -110,6 +110,44 @@
   margin-top: 0.5rem;
 }
 
+.errorBox {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 6px;
+  padding: 6px 8px;
+  gap: 8px;
+}
+
+.errorText {
+  color: #ef4444;
+  /* tailwind red-500 */
+  font-size: 0.8rem;
+  word-break: break-word;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.clearErrorBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  transition: opacity 0.2s, background-color 0.2s;
+}
+
+.clearErrorBtn:hover {
+  opacity: 1;
+  background-color: rgba(239, 68, 68, 0.2);
+}
+
 .inputRow {
   display: flex;
   width: 100%;

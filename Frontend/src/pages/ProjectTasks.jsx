@@ -138,7 +138,7 @@ function ProjectTasks() {
                 setTasks(prev => [...prev, result.task]);
             }
         } catch (err) {
-            console.error(err);
+            throw (err);
         }
     };
 
@@ -168,7 +168,7 @@ function ProjectTasks() {
                 setCollections(prev => [...prev, result.collection]);
             }
         } catch (err) {
-            console.error(err);
+            throw (err);
         }
     };
 

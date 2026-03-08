@@ -39,6 +39,8 @@ function Column({
   const [isEditingLabel, setIsEditingLabel] = useState(false);
   const [editLabelValue, setEditLabelValue] = useState(label);
 
+  const [columnError, setColumnError] = useState("");
+
   const scrollContainerRef = useRef(null);
   const scrollIntervalRef = useRef(null);
   const filterBtnRef = useRef(null);
@@ -159,16 +161,26 @@ function Column({
     t => t.status === columnKey && !t.collectionId && isTaskVisible(t)
   );
 
-  const handleAddTask = () => {
-    addTask(columnKey, newTask, selectedType, selectedCollectionKey);
-    setNewTask("");
-    setIsAddingTask(false);
+  const handleAddTask = async () => {
+    setColumnError("");
+    try {
+      await addTask(columnKey, newTask, selectedType, selectedCollectionKey);
+      setNewTask("");
+      setIsAddingTask(false);
+    } catch (err) {
+      setColumnError(err.message || "Failed to create task");
+    }
   };
 
-  const handleAddCollection = () => {
-    addCollection(newCollectionName, selectedCollectionKey);
-    setNewCollectionName("");
-    setIsAddingCollection(false);
+  const handleAddCollection = async () => {
+    setColumnError("");
+    try {
+      await addCollection(newCollectionName, selectedCollectionKey);
+      setNewCollectionName("");
+      setIsAddingCollection(false);
+    } catch (err) {
+      setColumnError(err.message || "Failed to create collection");
+    }
   };
 
   const handleDragOver = (e) => {
@@ -363,12 +375,21 @@ function Column({
         ))}
       </ul>
 
+      {columnError && (
+        <div className={styles.errorBox}>
+          <span className={styles.errorText}>{columnError}</span>
+        </div>
+      )}
+
       {!isAddingTask && !isAddingCollection ? (
         <div className={styles.addRow}>
           {canCreateTasks && (
             <button
               className={styles.addButton}
-              onClick={() => setIsAddingTask(true)}
+              onClick={() => {
+                setColumnError("");
+                setIsAddingTask(true);
+              }}
             >
               Add Card
             </button>
@@ -376,7 +397,10 @@ function Column({
           {canCreateTasks && (
             <button
               className={styles.addButton}
-              onClick={() => setIsAddingCollection(true)}
+              onClick={() => {
+                setColumnError("");
+                setIsAddingCollection(true);
+              }}
             >
               Add Collection
             </button>
@@ -448,7 +472,7 @@ function Column({
             </button>
             <button
               className={styles.cancelBtn}
-              onClick={() => setIsAddingTask(false)}
+              onClick={() => { setIsAddingTask(false); setColumnError(""); }}
             >
               ×
             </button>
@@ -471,7 +495,7 @@ function Column({
             </button>
             <button
               className={styles.cancelBtn}
-              onClick={() => setIsAddingCollection(false)}
+              onClick={() => { setIsAddingCollection(false); setColumnError(""); }}
             >
               ×
             </button>
