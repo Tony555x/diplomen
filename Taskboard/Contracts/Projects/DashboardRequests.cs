@@ -12,6 +12,6 @@ public class CreateWidgetDto
     [Required(ErrorMessage = "Widget type is required.")]
     public WidgetType Type { get; set; } = WidgetType.ListResult;
 
-    [MaxLength(ModelConstants.DashboardWidget.SourceMaxLength, ErrorMessage = "Widget source cannot exceed {1} characters.")]
+    [MaxLength(ModelConstants.DashboardWidget.SourceMaxLength, ErrorMessage = "Widget settings are too long.")]
     public string Source { get; set; } = string.Empty;
 }
