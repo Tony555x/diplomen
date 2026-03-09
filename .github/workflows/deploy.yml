@@ -35,6 +35,9 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
 
+      - name: Test
+        run: dotnet test --no-build --configuration Release
+
       - name: Install dotnet-ef
         run: dotnet tool install --global dotnet-ef
 
@@ -45,16 +48,15 @@ jobs:
           ConnectionStrings__DefaultConnection: ${{ secrets.DB_CONNECTION_STRING }}
 
       - name: Publish
-        run: dotnet publish --configuration Release --output publish
+        run: dotnet publish --configuration Release --output publish --no-build
 
-      - name: Test
-        run: dotnet test
+
 
       - name: Deploy to SmarterASP
         uses: talunzhang/auto-web-deploy@v1.0.1
         with:
-          website-name: ${{ secrets.WEBSITE_NAME }}
-          server-computer-name: ${{ secrets.SERVER_COMPUTER_NAME }}
-          server-username: ${{ secrets.SERVER_USERNAME }}
-          server-password: ${{ secrets.SERVER_PASSWORD }}
+          website-name: "${{ secrets.WEBSITE_NAME }}"
+          server-computer-name: "${{ secrets.SERVER_COMPUTER_NAME }}"
+          server-username: "${{ secrets.SERVER_USERNAME }}"
+          server-password: "${{ secrets.SERVER_PASSWORD }}"
           source-path: 'publish'
