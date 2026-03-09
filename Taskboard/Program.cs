@@ -9,6 +9,10 @@ using Taskboard.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Load .env file
+DotNetEnv.Env.Load();
+builder.Configuration.AddEnvironmentVariables();
+
 // Database (SQL Server)
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

@@ -55,8 +55,10 @@ packages/
 
 ## Environment / secrets
 .env
+
+# Secrets
+appsettings*.json
 secrets.json
-appsettings.Development.json
 
 ## Publish
 publish/
