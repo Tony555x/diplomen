@@ -12,6 +12,8 @@ using Taskboard.Controllers;
 using Taskboard.Data;
 using Taskboard.Data.Models;
 using Taskboard.Services;
+using Taskboard.Contracts;
+using Taskboard.Contracts.Projects;
 
 namespace Taskboard.Tests.Controllers
 {
@@ -150,7 +152,7 @@ namespace Taskboard.Tests.Controllers
             _context.Tasks.Add(task);
             await _context.SaveChangesAsync();
 
-            var request = new UpdateTaskStatusRequest { Title = "New Title", Status = "In Progress", Completed = false };
+            var request = new UpdateTaskRequest { Title = "New Title", Status = "In Progress", Completed = false };
 
             // Act
             var result = await _tasksController.UpdateTask(projectId, taskId, request) as OkObjectResult;

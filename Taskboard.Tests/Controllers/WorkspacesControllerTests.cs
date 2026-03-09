@@ -12,6 +12,7 @@ using Taskboard.Controllers;
 using Taskboard.Data;
 using Taskboard.Data.Models;
 using Taskboard.Services;
+using Taskboard.Contracts;
 
 namespace Taskboard.Tests.Controllers
 {

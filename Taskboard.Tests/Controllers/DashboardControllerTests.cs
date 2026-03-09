@@ -13,6 +13,7 @@ using Taskboard.Controllers;
 using Taskboard.Data;
 using Taskboard.Data.Models;
 using Taskboard.Services;
+using Taskboard.Contracts.Projects;
 
 namespace Taskboard.Tests.Controllers
 {
@@ -135,7 +136,7 @@ namespace Taskboard.Tests.Controllers
         {
             // Arrange
             var projectId = 1;
-            var dto = new DashboardController.CreateWidgetDto { Name = "New Widget", Source = "source", Type = WidgetType.ListResult };
+            var dto = new CreateWidgetDto { Name = "New Widget", Source = "source", Type = WidgetType.ListResult };
 
             // Act
             var result = await _dashboardController.CreateWidget(projectId, dto) as OkObjectResult;
@@ -163,7 +164,7 @@ namespace Taskboard.Tests.Controllers
             
             _context.Entry(widget).State = EntityState.Detached; // Detach so we can update in controller using tracked entity again
 
-            var dto = new DashboardController.CreateWidgetDto { Name = "Updated Widget", Source = "new source", Type = WidgetType.Counter };
+            var dto = new CreateWidgetDto { Name = "Updated Widget", Source = "new source", Type = WidgetType.Counter };
 
             // Act
             var result = await _dashboardController.UpdateWidget(projectId, widget.Id, dto) as OkObjectResult;
@@ -182,7 +183,7 @@ namespace Taskboard.Tests.Controllers
         public async Task UpdateWidget_ForNonExisting_ReturnsNotFound()
         {
              // Arrange
-            var dto = new DashboardController.CreateWidgetDto { Name = "Updated Widget" };
+            var dto = new CreateWidgetDto { Name = "Updated Widget" };
 
             // Act
             var result = await _dashboardController.UpdateWidget(1, 999, dto);

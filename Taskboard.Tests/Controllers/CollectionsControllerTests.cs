@@ -12,6 +12,7 @@ using Taskboard.Controllers.Projects;
 using Taskboard.Data;
 using Taskboard.Data.Models;
 using Taskboard.Services;
+using Taskboard.Contracts.Projects;
 
 namespace Taskboard.Tests.Controllers.Projects
 {
