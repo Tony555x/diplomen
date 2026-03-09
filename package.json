@@ -4,6 +4,6 @@
   },
   "private": true,
   "scripts": {
-    "dev": "concurrently \"npm run dev --prefix Frontend\" \"dotnet watch --project Taskboard\""
+    "dev": "concurrently \"npm run build:watch --prefix Frontend\" \"dotnet watch --project Taskboard\""
   }
 }
