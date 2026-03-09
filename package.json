@@ -4,6 +4,8 @@
   },
   "private": true,
   "scripts": {
-    "dev": "concurrently \"npm run build:watch --prefix Frontend\" \"dotnet watch --project Taskboard\""
+    "dev": "concurrently \"npm run build:watch --prefix Frontend\" \"dotnet watch --project Taskboard\"",
+    "build": "npm run build --prefix Frontend && dotnet publish Taskboard -c Release -o publish",
+    "start": "dotnet publish/Taskboard.dll"
   }
 }
