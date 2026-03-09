@@ -50,13 +50,6 @@ jobs:
       - name: Publish
         run: dotnet publish --configuration Release --output publish --no-build
 
-
-
-      - name: Deploy to SmarterASP
-        uses: talunzhang/auto-web-deploy@v1.0.1
-        with:
-          website-name: "${{ secrets.WEBSITE_NAME }}"
-          server-computer-name: "${{ secrets.SERVER_COMPUTER_NAME }}"
-          server-username: "${{ secrets.SERVER_USERNAME }}"
-          server-password: "${{ secrets.SERVER_PASSWORD }}"
-          source-path: 'publish'
+      # NOTE: The deployment to Render will happen automatically as long as the Render
+      # dashboard is connected to this GitHub repository. Render will detect the push,
+      # and if these tests pass, it will build the Dockerfile and deploy the new version.
