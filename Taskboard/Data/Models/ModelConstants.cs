@@ -60,7 +60,7 @@ namespace Taskboard.Data.Models
 
         public static class TaskFieldValue
         {
-            public const int ValueMaxLength = 2000;
+            public const int ValueMaxLength = 10000;
         }
 
         public static class TaskHistory
@@ -71,7 +71,7 @@ namespace Taskboard.Data.Models
 
         public static class TaskMessage
         {
-            public const int ContentMaxLength = 4000;
+            public const int ContentMaxLength = 10000;
         }
 
         public static class Notification
