@@ -57,6 +57,7 @@ jobs:
         with:
           website-name: "${{ secrets.WEBSITE_NAME }}"
           server-computer-name: "${{ secrets.SERVER_COMPUTER_NAME }}"
+          #literallyno change but remove '(' from password
           server-username: "${{ secrets.SERVER_USERNAME }}"
           server-password: "${{ secrets.SERVER_PASSWORD }}"
           source-path: 'publish'
