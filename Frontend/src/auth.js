@@ -1,5 +1,5 @@
 // src/auth.js
-import { API_URL } from "./config";
+import { API_URL } from "./config"; //i have no idea how to get env vars working, so deprecated
 
 /**
  * Save JWT token to localStorage.
@@ -41,7 +41,7 @@ export function isLoggedIn() {
  * @throws {object} Throws API response object if login fails.
  */
 export async function login(username, password) {
-  const res = await fetch(`${API_URL}/api/auth/login`, {
+  const res = await fetch(`/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password })
@@ -75,7 +75,7 @@ export async function login(username, password) {
  * @throws {object} Throws API response object if registration fails.
  */
 export async function register(username, email, password) {
-  const res = await fetch(`${API_URL}/api/auth/register`, {
+  const res = await fetch(`/api/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, email, password })
@@ -126,7 +126,7 @@ export async function fetchWithAuth(endpoint, options = {}) {
     finalOptions.body = JSON.stringify(options.body);
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, finalOptions);
+  const response = await fetch(`${endpoint}`, finalOptions);
 
   // Handle session expiration
   if (response.status === 401) {
