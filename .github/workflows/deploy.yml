@@ -51,5 +51,6 @@ jobs:
         run: dotnet publish --configuration Release --output publish --no-build
 
       # NOTE: The deployment to Render will happen automatically as long as the Render
-      # dashboard is connected to this GitHub repository. Render will detect the push,
-      # and if these tests pass, it will build the Dockerfile and deploy the new version.
+      # dashboard is connected to this GitHub repository. Since render.yaml specifies
+      # autoDeployTrigger: checksPass, Render will wait for this workflow to pass
+      # before it builds the Dockerfile and deploys the new version.

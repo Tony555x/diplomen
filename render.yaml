@@ -3,6 +3,7 @@ services:
     name: taskboard-api
     env: docker
     dockerfilePath: Dockerfile
+    autoDeployTrigger: checksPass
     plan: free # or "starter" depending on your billing
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
