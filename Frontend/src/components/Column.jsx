@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Task from "./Task";
 import Collection from "./Collection";
 import FilterPopup from "./FilterPopup";
+import ColumnSettingsPopup from "./ColumnSettingsPopup/ColumnSettingsPopup";
 import styles from "./Column.module.css";
 
 function Column({
@@ -23,8 +24,9 @@ function Column({
   setFilterState,
   members,
   currentUser,
+  status,
   onDeleteStatus,
-  onRenameStatus,
+  onUpdateStatus,
   canCreateTasks,
   canManageStatuses
 }) {
@@ -36,6 +38,7 @@ function Column({
   const [isAddingCollection, setIsAddingCollection] = useState(false);
   const [newCollectionName, setNewCollectionName] = useState("");
   const [showFilter, setShowFilter] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [isEditingLabel, setIsEditingLabel] = useState(false);
   const [editLabelValue, setEditLabelValue] = useState(label);
 
@@ -78,8 +81,8 @@ function Column({
   const handleLabelBlurOrEnter = () => {
     setIsEditingLabel(false);
     if (editLabelValue.trim() && editLabelValue.trim() !== label) {
-      if (onRenameStatus) {
-        onRenameStatus(editLabelValue.trim());
+      if (onUpdateStatus) {
+        onUpdateStatus(editLabelValue.trim(), status?.color, status?.autoComplete);
       }
     } else {
       setEditLabelValue(label);
@@ -276,9 +279,12 @@ function Column({
     (filterState.typeIds && filterState.typeIds.length > 0)
   );
 
+  const columnColor = status?.color || "#3B82F6";
+
   return (
     <div
       className={`${styles.column} ${isDragOver ? styles.dragOver : ""}`}
+      style={{ borderTop: `5px solid ${columnColor}` }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -318,11 +324,12 @@ function Column({
 
         {canManageStatuses && (
           <button
-            className={styles.deleteStatusBtn}
-            onClick={onDeleteStatus}
-            title="Delete Status"
+            className={styles.settingsBtn}
+            onClick={() => setShowSettings(true)}
+            title="Column Settings"
           >
-            <img src="/buttonicons/delete.png" alt="Delete" width="20" height="20" />
+            ...
+            {/*<img src="/buttonicons/settings.png" alt="Settings" width="20" height="20" />*/}
           </button>
         )}
 
@@ -334,6 +341,16 @@ function Column({
             taskTypes={taskTypes}
             onClose={() => setShowFilter(false)}
             ignoreRef={filterBtnRef}
+          />
+        )}
+
+        {showSettings && status && (
+          <ColumnSettingsPopup
+            status={status}
+            onClose={() => setShowSettings(false)}
+            onUpdate={onUpdateStatus}
+            onDelete={onDeleteStatus}
+            canManageStatuses={canManageStatuses}
           />
         )}
       </div>

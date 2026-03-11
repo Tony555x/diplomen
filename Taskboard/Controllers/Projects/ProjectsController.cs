@@ -125,7 +125,9 @@ public class ProjectsController : ControllerBase
             {
                 Name = defaultStatuses[i],
                 ProjectId = project.Id,
-                Order = i
+                Order = i,
+                Color = "#3B82F6",
+                AutoComplete = defaultStatuses[i] == "Done"
             });
         }
         await _context.SaveChangesAsync();
@@ -188,24 +190,6 @@ public class ProjectsController : ControllerBase
             .OrderBy(ts => ts.Order)
             .ToListAsync();
 
-        // If no statuses exist (legacy project), initialize defaults
-        if (statuses.Count == 0)
-        {
-            var defaults = new List<string> { "To Do", "In Progress", "Done" };
-            for (int i = 0; i < defaults.Count; i++)
-            {
-                var ts = new UserTaskStatus
-                {
-                    Name = defaults[i],
-                    ProjectId = projectId,
-                    Order = i
-                };
-                _context.UserTaskStatuses.Add(ts);
-                statuses.Add(ts);
-            }
-            await _context.SaveChangesAsync();
-        }
-
         return Ok(statuses);
     }
 
@@ -234,7 +218,9 @@ public class ProjectsController : ControllerBase
         {
             Name = request.Name.Trim(),
             ProjectId = projectId,
-            Order = maxOrder + 1
+            Order = maxOrder + 1,
+            Color = request.Color ?? "#3B82F6",
+            AutoComplete = request.AutoComplete
         };
 
         _context.UserTaskStatuses.Add(status);
@@ -293,9 +279,6 @@ public class ProjectsController : ControllerBase
         var status = await _context.UserTaskStatuses.FirstOrDefaultAsync(ts => ts.Id == statusId && ts.ProjectId == projectId);
         if (status == null) return NotFound(new { success = false, message = "Status not found." });
 
-        if (status.Name == newStatusName)
-            return Ok(new { success = true, status }); // No change needed
-
         // Check if another status already exists with this name in the same project to avoid confusion
         var existingStatus = await _context.UserTaskStatuses
             .AnyAsync(ts => ts.ProjectId == projectId && ts.Name == newStatusName && ts.Id != statusId);
@@ -314,6 +297,12 @@ public class ProjectsController : ControllerBase
         {
             task.Status = newStatusName;
         }
+
+        if (request.Color != null)
+        {
+            status.Color = request.Color;
+        }
+        status.AutoComplete = request.AutoComplete;
 
         await _context.SaveChangesAsync();
 

@@ -19,5 +19,9 @@ namespace Taskboard.Data.Models
 
         [Required]
         public int Order { get; set; }
+
+        public string Color { get; set; } = "#3B82F6";
+
+        public bool AutoComplete { get; set; } = false;
     }
 }

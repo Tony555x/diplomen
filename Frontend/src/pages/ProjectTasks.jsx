@@ -213,7 +213,7 @@ function ProjectTasks() {
         }
     };
 
-    const renameStatus = async (statusId, newName) => {
+    const updateStatus = async (statusId, newName, newColor, newAutoComplete) => {
         if (!newName || !newName.trim()) return;
 
         try {
@@ -221,7 +221,11 @@ function ProjectTasks() {
                 `/api/projects/${projectId}/statuses/${statusId}`,
                 {
                     method: "PATCH",
-                    body: { name: newName.trim() }
+                    body: { 
+                        name: newName.trim(), 
+                        color: newColor, 
+                        autoComplete: newAutoComplete
+                    }
                 }
             );
 
@@ -229,16 +233,16 @@ function ProjectTasks() {
                 const oldName = statuses.find(s => s.id === statusId)?.name;
                 setStatuses(prev => prev.map(s => s.id === statusId ? result.status : s));
 
-                // Update local tasks to use the new status name
-                if (oldName) {
+                // Update local tasks to use the new status name if it changed
+                if (oldName && oldName !== newName.trim()) {
                     setTasks(prev => prev.map(t => t.status === oldName ? { ...t, status: result.status.name } : t));
                 }
             } else {
-                alert(result.message || "Failed to rename status.");
+                alert(result.message || "Failed to update status.");
             }
         } catch (err) {
             console.error(err);
-            alert("Error renaming status.");
+            alert("Error updating status.");
         }
     };
 
@@ -432,8 +436,9 @@ function ProjectTasks() {
                             setFilterState={setFilterState}
                             members={members}
                             currentUser={currentUser}
+                            status={status}
                             onDeleteStatus={() => deleteStatus(status.id)}
-                            onRenameStatus={(newName) => renameStatus(status.id, newName)}
+                            onUpdateStatus={(newName, newColor, newAutoComplete) => updateStatus(status.id, newName, newColor, newAutoComplete)}
                             canCreateTasks={canCreateTasks}
                             canManageStatuses={canManageStatuses}
                         />

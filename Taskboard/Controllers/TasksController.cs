@@ -237,6 +237,22 @@ namespace Taskboard.Controllers
                         ActionType = "Moved this card to",
                         Details = request.Status
                     });
+                    
+                    var targetStatus = await _context.UserTaskStatuses
+                        .FirstOrDefaultAsync(s => s.ProjectId == projectId && s.Name == request.Status);
+
+                    if (targetStatus != null && targetStatus.AutoComplete && !task.Completed)
+                    {
+                        task.Completed = true;
+                        _context.TaskHistories.Add(new TaskHistory
+                        {
+                            TaskId = task.Id,
+                            UserId = userId,
+                            ActionType = "Marked this card as completed",
+                            Details = "automatically via column rules"
+                        });
+                    }
+
                     task.Status = request.Status;
                 }
             }
