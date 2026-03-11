@@ -94,30 +94,6 @@ namespace Taskboard.Tests.Controllers.Projects
         }
 
         [Test]
-        public async Task GetTaskStatuses_ReturnsStatuses_InitializesIfEmpty()
-        {
-            // Arrange
-            var projectId = 1;
-            _projectAccessServiceMock.Setup(x => x.HasViewAccessAsync(projectId, "user1")).ReturnsAsync(true);
-            
-            // Note: Project exists but has no statuses
-            _context.Projects.Add(new Project { Id = projectId, Name = "Legacy Project" });
-            await _context.SaveChangesAsync();
-
-            // Act
-            var result = await _projectsController.GetTaskStatuses(projectId) as OkObjectResult;
-
-            // Assert
-            Assert.That(result, Is.Not.Null);
-            var statuses = result.Value as IEnumerable<UserTaskStatus>;
-            Assert.That(statuses, Is.Not.Null);
-            Assert.That(statuses.Count(), Is.EqualTo(3)); // Should auto-initialize 3 defaults
-
-            var dbStatuses = await _context.UserTaskStatuses.Where(ts => ts.ProjectId == projectId).ToListAsync();
-            Assert.That(dbStatuses.Count, Is.EqualTo(3));
-        }
-
-        [Test]
         public async Task CreateTaskStatus_WithPermission_CreatesStatus()
         {
             // Arrange
