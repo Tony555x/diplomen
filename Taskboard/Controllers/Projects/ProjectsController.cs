@@ -119,6 +119,7 @@ public class ProjectsController : ControllerBase
 
         // Create default statuses
         var defaultStatuses = new List<string> { "To Do", "In Progress", "Done" };
+        var defaultColors = new List<string> { "#6B7280", "#3B82F6", "#10B981" };
         for (int i = 0; i < defaultStatuses.Count; i++)
         {
             _context.UserTaskStatuses.Add(new UserTaskStatus
@@ -126,7 +127,7 @@ public class ProjectsController : ControllerBase
                 Name = defaultStatuses[i],
                 ProjectId = project.Id,
                 Order = i,
-                Color = "#3B82F6",
+                Color = defaultColors[i],
                 AutoComplete = defaultStatuses[i] == "Done"
             });
         }
