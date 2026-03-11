@@ -221,9 +221,9 @@ function ProjectTasks() {
                 `/api/projects/${projectId}/statuses/${statusId}`,
                 {
                     method: "PATCH",
-                    body: { 
-                        name: newName.trim(), 
-                        color: newColor, 
+                    body: {
+                        name: newName.trim(),
+                        color: newColor,
                         autoComplete: newAutoComplete
                     }
                 }
@@ -282,10 +282,18 @@ function ProjectTasks() {
             updatedTask.status = columnKey; // ensure status matches the column where it was dropped
         }
 
+        // Check if the target column has autocomplete enabled
+        const targetStatus = statuses.find(s => s.name === updatedTask.status);
+        if (targetStatus && targetStatus.autoComplete && !updatedTask.completed) {
+            updatedTask.completed = true;
+        }
+
         setTasks(prev => prev.map(t => (t.id === task.id ? updatedTask : t)));
         setDraggedTaskId(null);
 
         try {
+            //does not wait for backend to update
+            //if backed does in fact crash, the project will explode(task marked as completed when it really isnt)
             await fetchWithAuth(`/api/projects/${projectId}/tasks/${task.id}`, {
                 method: "PATCH",
                 body: {
