@@ -79,7 +79,7 @@ namespace Taskboard.Controllers
                 {
                     success = false,
                     message = "Invalid username or password",
-                    errors = new string[] { }
+                    errors = new string[] { "Invalid username or password" }
                 });
             }
 

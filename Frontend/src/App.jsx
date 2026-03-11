@@ -13,6 +13,7 @@ import UserSettingsPage from "./pages/UserSettingsPage";
 import AllNotificationsPage from "./pages/AllNotificationsPage";
 import WorkspaceInvitePage from "./pages/WorkspaceInvitePage";
 import UserActivityPage from "./pages/UserActivityPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
   return (
@@ -92,6 +93,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );
