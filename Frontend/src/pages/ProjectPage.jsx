@@ -9,6 +9,7 @@ import ProjectMembers from "./ProjectMembers";
 import { usePageTitle } from "../hooks/usePageTitle";
 import "./ProjectPage.css";
 import ProjectSettings from "./ProjectSettings";
+import PageBackground from "../components/PageBackground";
 
 function ProjectPage() {
     const { projectId } = useParams();
@@ -38,6 +39,7 @@ function ProjectPage() {
 
     return (
         <div className="project-page">
+            <PageBackground />
             <Navbar />
             <ProjectNavbar projectId={projectId} projectName={project?.name} />
             <div className="project-content">

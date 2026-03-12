@@ -14,6 +14,7 @@ import AllNotificationsPage from "./pages/AllNotificationsPage";
 import WorkspaceInvitePage from "./pages/WorkspaceInvitePage";
 import UserActivityPage from "./pages/UserActivityPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import SearchPage from "./pages/SearchPage";
 
 function App() {
   return (
@@ -90,6 +91,14 @@ function App() {
           element={
             <ProtectedRoute>
               <UserActivityPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/search"
+          element={
+            <ProtectedRoute>
+              <SearchPage />
             </ProtectedRoute>
           }
         />

@@ -15,6 +15,7 @@
   border-radius: 50%;
   filter: blur(100px);
   opacity: 0.25;
+  z-index: -1;
 }
 
 .blob1 {
@@ -31,4 +32,12 @@
   background: radial-gradient(circle, #8b5cf6, transparent 70%);
   bottom: 10vh;
   right: -5vw;
+}
+
+/* ── Mobile: keep only blob1, hide blob2 to prevent convergence ─ */
+@media (max-width: 768px) {
+
+  .blob2 {
+    display: none;
+  }
 }

@@ -7,6 +7,7 @@ import WorkspaceProjects from "./WorkspaceProjects";
 import WorkspaceMembers from "./WorkspaceMembers";
 import { usePageTitle } from "../hooks/usePageTitle";
 import "./WorkspacePage.css";
+import PageBackground from "../components/PageBackground";
 
 function WorkspacePage() {
     const { workspaceId } = useParams();
@@ -36,6 +37,7 @@ function WorkspacePage() {
 
     return (
         <div className="workspace-page">
+            <PageBackground />
             <Navbar />
             <WorkspaceNavbar workspaceId={workspaceId} workspaceName={workspace?.name} />
             <div className="workspace-content">

@@ -1,9 +1,18 @@
+/* Root wrapper — the background lives here, not on .homePage,
+   so the fixed PageBackground blobs show through the content area */
+.homeRoot {
+    min-height: 100vh;
+    background: var(--bg-page);
+    position: relative;
+}
+
 .homePage {
     padding: 2rem;
     max-width: 1200px;
     margin: 0 auto;
-    background: #121212;
     min-height: 100vh;
+    position: relative;
+    z-index: 1;
 }
 
 .homeHeader {
@@ -40,19 +49,19 @@
 }
 
 .card {
-    background: #1e1e1e;
+    background: var(--bg-surface);
     border-radius: 8px;
     padding: 1.5rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-    border: 1px solid #374151;
+    border: 1px solid #4b5563;
     cursor: pointer;
 }
 
 .card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    border-color: #4b5563;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+    border-color: #6b7280;
 }
 
 .card h3 {
@@ -105,11 +114,11 @@
 }
 
 .taskList {
-    background: #1e1e1e;
+    background: var(--bg-surface);
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     overflow: hidden;
-    border: 1px solid #374151;
+    border: 1px solid #4b5563;
 }
 
 .taskItem {

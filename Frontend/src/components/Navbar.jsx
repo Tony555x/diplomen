@@ -59,7 +59,6 @@ function Navbar({ userName }) {
         const val = e.target.value;
         setSearchQuery(val);
         setShowSearchResults(true);
-
         clearTimeout(debounceRef.current);
         debounceRef.current = setTimeout(() => doSearch(val), 300);
     };
@@ -122,16 +121,14 @@ function Navbar({ userName }) {
 
     return (
         <div className={styles.navbar}>
+            {/* ── Left: Logo + desktop search ─────────────────────── */}
             <div className={styles.navLeft}>
                 <Link to="/home" className={styles.navLogo}>
                     TaskBoard
                 </Link>
 
-                <Link to="/home" className={styles.navLink}>
-                    Home
-                </Link>
-
-                <div className={styles.searchWrapper} ref={searchRef}>
+                {/* Desktop-only search bar */}
+                <div className={`${styles.searchWrapper} ${styles.desktopOnly}`} ref={searchRef}>
                     <input
                         className={styles.navSearch}
                         type="text"
@@ -210,11 +207,23 @@ function Navbar({ userName }) {
                 </div>
             </div>
 
+            {/* ── Right: mobile search icon + notifications + user ── */}
             <div className={styles.navRight}>
+                {/* Mobile-only search icon → /search page */}
+                <button
+                    className={`${styles.navBtn} ${styles.mobileOnly}`}
+                    onClick={() => navigate("/search")}
+                    aria-label="Search"
+                >
+                    🔍
+                </button>
+
+                {/* Notifications */}
                 <div className={styles.userMenuWrapper} ref={notifRef}>
                     <button
                         className={styles.navBtn}
                         onClick={() => setShowNotifications(v => !v)}
+                        aria-label="Notifications"
                     >
                         🔔
                     </button>
@@ -254,10 +263,12 @@ function Navbar({ userName }) {
                     )}
                 </div>
 
+                {/* User menu */}
                 <div className={styles.userMenuWrapper}>
                     <button
                         className={styles.navBtn}
                         onClick={() => setShowUserMenu(v => !v)}
+                        aria-label="User menu"
                     >
                         👤
                     </button>

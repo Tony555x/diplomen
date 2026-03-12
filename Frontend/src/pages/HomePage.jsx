@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar";
 import ProjectCard from "../components/ProjectCard";
 import { usePageTitle } from "../hooks/usePageTitle";
 import styles from "./HomePage.module.css";
+import PageBackground from "../components/PageBackground";
 
 const RECENT_LIMIT = 4;
 
@@ -43,7 +44,8 @@ function HomePage() {
     const visibleProjects = showAllProjects ? allProjects : allProjects.slice(0, RECENT_LIMIT);
 
     return (
-        <>
+        <div className={styles.homeRoot}>
+            <PageBackground />
             <Navbar />
             <div className={styles.homePage}>
                 <header className={styles.homeHeader}>
@@ -136,7 +138,7 @@ function HomePage() {
                     )}
                 </section>
             </div>
-        </>
+        </div>
     );
 }
 

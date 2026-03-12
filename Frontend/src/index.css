@@ -7,11 +7,15 @@
   color: rgba(255, 255, 255, 0.87);
   background-color: #111827;
 
+  /* ── Global colour tokens ─────────────────────────────────────── */
+  --bg-page:    #111827;   /* outer page / root background          */
+  --bg-surface: #1e1e1e;   /* elevated card / panel background      */
+  --bg-inner:   #121212;   /* deep content areas (content panes)    */
+
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
 }
 
 #root {
