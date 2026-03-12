@@ -1,0 +1,420 @@
+/* ── Root ─────────────────────────────────────────────────────── */
+.root {
+  min-height: 100vh;
+  background-color: #111827;
+  color: rgba(255, 255, 255, 0.87);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ── Header ───────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 5%;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(17, 24, 39, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.logo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #60a5fa, #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* ── Hamburger Button (hidden on desktop) ─────────────────────── */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.hamburger:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 2px;
+  transition: transform 0.25s ease, opacity 0.2s ease;
+  transform-origin: center;
+}
+
+/* Animate to X when open */
+.hamburgerOpen span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.hamburgerOpen span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.hamburgerOpen span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ── Mobile Nav Drawer ────────────────────────────────────────── */
+.mobileNav {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+  padding: 1rem 5%;
+  background: rgba(17, 24, 39, 0.97);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.mobileNavLink {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  transition: color 0.2s;
+}
+
+.mobileNavLink:hover {
+  color: #fff;
+}
+
+.mobileNavCta {
+  margin-top: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+  justify-content: center;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────── */
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1.25rem;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.btnPrimary:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.btnGhost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1.25rem;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.btnGhost:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.btnLg {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+}
+
+/* ── Hero ─────────────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  z-index: 10;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6rem 5% 5rem;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+}
+
+.heroTitle {
+  font-size: clamp(2.4rem, 6vw, 3.8rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -1.5px;
+  margin: 0 0 1.25rem;
+  color: #fff;
+}
+
+.heroAccent {
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.heroSub {
+  font-size: 1.15rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.7;
+  margin: 0 0 2.5rem;
+}
+
+.heroCta {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ── Features ─────────────────────────────────────────────────── */
+.features {
+  position: relative;
+  z-index: 10;
+  padding: 5rem 5%;
+}
+
+.sectionTitle {
+  text-align: center;
+  font-size: 1.9rem;
+  font-weight: 700;
+  margin: 0 0 3rem;
+  color: #fff;
+}
+
+.featureSplit {
+  display: flex;
+  align-items: center;
+  gap: 4rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.featureText {
+  flex: 1;
+}
+
+.featureList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.featureList li {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.75);
+  padding-left: 2rem;
+  position: relative;
+  line-height: 1.5;
+}
+
+.featureList li::before {
+  content: "✦";
+  position: absolute;
+  left: 0;
+  color: #60a5fa;
+  font-size: 1.2rem;
+}
+
+.featureList strong {
+  color: #fff;
+  font-weight: 600;
+}
+
+.featureImageWrapper {
+  flex: 1.3;
+  background: #1e1e1e;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.featureImg {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  display: block;
+}
+
+/* ── Footer ───────────────────────────────────────────────────── */
+.footer {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: 1.5rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.3);
+  background: #111827;
+}
+
+/* ── Responsive: 900px ────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .featureSplit {
+    flex-direction: column;
+    gap: 3rem;
+  }
+}
+
+/* ── Responsive: Tablet / large mobile (768px) ────────────────── */
+@media (max-width: 768px) {
+  .nav {
+    display: none;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .mobileNav {
+    display: flex;
+  }
+
+  .header {
+    padding: 1rem 4%;
+  }
+
+  .hero {
+    padding: 4rem 5% 3.5rem;
+    text-align: center;
+  }
+
+  .heroTitle {
+    font-size: clamp(2rem, 7vw, 2.8rem);
+    letter-spacing: -1px;
+  }
+
+  .heroSub {
+    font-size: 1rem;
+  }
+
+  .features {
+    padding: 3.5rem 5%;
+  }
+
+  .sectionTitle {
+    font-size: 1.55rem;
+    text-align: left;
+    margin: 0 0 1.5rem;
+  }
+
+  .featureList li {
+    font-size: 1.05rem;
+  }
+
+  .featureImageWrapper {
+    padding: 1rem;
+  }
+}
+
+/* ── Responsive: Small mobile (480px) ────────────────────────── */
+@media (max-width: 480px) {
+  .logo {
+    font-size: 1.2rem;
+  }
+
+  .hero {
+    padding: 3rem 5% 2.5rem;
+  }
+
+  .heroTitle {
+    font-size: clamp(1.8rem, 8vw, 2.4rem);
+    letter-spacing: -0.5px;
+  }
+
+  .heroSub {
+    font-size: 0.95rem;
+  }
+
+  .heroCta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btnLg {
+    width: 100%;
+    justify-content: center;
+    padding: 0.8rem 1.5rem;
+  }
+
+  .features {
+    padding: 2.5rem 5%;
+  }
+
+  .featureSplit {
+    gap: 2rem;
+  }
+
+  .featureList li {
+    font-size: 0.95rem;
+  }
+
+  .footer {
+    padding: 1.25rem;
+    font-size: 0.8rem;
+  }
+}

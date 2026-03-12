@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { isLoggedIn } from "../auth";
 import { usePageTitle } from "../hooks/usePageTitle";
-import "./LandingPage.css";
+import PageBackground from "../components/PageBackground";
+import styles from "./LandingPage.module.css";
 
 export default function LandingPage() {
   usePageTitle("TaskBoard – Manage your work");
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   React.useEffect(() => {
     if (isLoggedIn()) {
@@ -14,80 +16,91 @@ export default function LandingPage() {
     }
   }, [navigate]);
 
+  const handleNavClick = () => setMenuOpen(false);
+
   return (
-    <div className="landing-root">
-      {/* ── Background Blobs ──────────────────────────────────────── */}
-      <div className="landing-background">
-        <div className="landing-blob landing-blob-1" aria-hidden="true" />
-        <div className="landing-blob landing-blob-2" aria-hidden="true" />
-      </div>
+    <div className={styles.root}>
+      {/* ── Shared animated background ───────────────────────────── */}
+      <PageBackground />
 
       {/* ── Header ──────────────────────────────────────────────── */}
-      <header className="landing-header">
-        <span className="landing-logo">TaskBoard</span>
-        <nav className="landing-nav">
-          <Link to="/login" className="landing-nav-link">Login</Link>
-          <Link to="/register" className="landing-btn-primary">Get Started</Link>
+      <header className={styles.header}>
+        <span className={styles.logo}>TaskBoard</span>
+
+        {/* Desktop nav */}
+        <nav className={styles.nav} aria-label="Main navigation">
+          <Link to="/login" className={styles.btnGhost}>Login</Link>
+          <Link to="/register" className={styles.btnPrimary}>Get Started</Link>
         </nav>
+
+        {/* Hamburger button (mobile only) */}
+        <button
+          className={`${styles.hamburger}${menuOpen ? ` ${styles.hamburgerOpen}` : ""}`}
+          onClick={() => setMenuOpen((o) => !o)}
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
       </header>
 
+      {/* ── Mobile nav drawer ────────────────────────────────────── */}
+      {menuOpen && (
+        <div className={styles.mobileNav} role="dialog" aria-modal="true" aria-label="Mobile navigation">
+          <Link to="/login"    className={styles.mobileNavLink} onClick={handleNavClick}>Login</Link>
+          <Link to="/register" className={`${styles.btnPrimary} ${styles.mobileNavCta}`} onClick={handleNavClick}>Get Started</Link>
+        </div>
+      )}
+
       {/* ── Hero ────────────────────────────────────────────────── */}
-      <section className="landing-hero">
-        <div className="landing-hero-content">
-          <h1 className="landing-hero-title">
+      <section className={styles.hero}>
+        <div className={styles.heroContent}>
+          <h1 className={styles.heroTitle}>
             Organize work.<br />
-            <span className="landing-hero-accent">Ship faster.</span>
+            <span className={styles.heroAccent}>Ship faster.</span>
           </h1>
-          <p className="landing-hero-sub">
+          <p className={styles.heroSub}>
             TaskBoard brings your team's projects, tasks, and workflows into one
             beautifully simple space — so you can focus on what matters.
           </p>
-          <div className="landing-hero-cta">
-            <Link to="/register" className="landing-btn-primary landing-btn-lg">
+          <div className={styles.heroCta}>
+            <Link to="/register" className={`${styles.btnPrimary} ${styles.btnLg}`}>
               Create free account
             </Link>
-            <Link to="/login" className="landing-btn-ghost landing-btn-lg">
+            <Link to="/login" className={`${styles.btnGhost} ${styles.btnLg}`}>
               Sign in
             </Link>
           </div>
         </div>
-
       </section>
 
       {/* ── Features ────────────────────────────────────────────── */}
-      <section className="landing-features">
-        <div className="landing-feature-split">
-          <div className="landing-feature-text">
-            <h2 className="landing-section-title" style={{ textAlign: "left", margin: "0 0 2rem" }}>
+      <section className={styles.features}>
+        <div className={styles.featureSplit}>
+          <div className={styles.featureText}>
+            <h2 className={styles.sectionTitle} style={{ textAlign: "left", margin: "0 0 2rem" }}>
               Everything your team needs
             </h2>
-            <ul className="landing-feature-list">
+            <ul className={styles.featureList}>
               <li><strong>Tasks</strong> to capture, assign, and track work</li>
               <li><strong>Collections</strong> to organize boards effectively</li>
               <li><strong>Users</strong> to collaborate and manage roles</li>
               <li><strong>Widgets</strong> to build custom dashboard insights</li>
             </ul>
           </div>
-          <div className="landing-feature-image-wrapper">
-            <img 
-              src="/landingpage/column_and_widget.png" 
-              alt="Taskboard Preview" 
-              className="landing-feature-img" 
+          <div className={styles.featureImageWrapper}>
+            <img
+              src="/landingpage/column_and_widget.png"
+              alt="Taskboard Preview"
+              className={styles.featureImg}
             />
           </div>
         </div>
       </section>
 
-      {/* ── CTA Banner ──────────────────────────────────────────── */}
-      {/*<section className="landing-cta-banner">
-        <h2 className="landing-cta-title">Ready to get started?</h2>
-        <p className="landing-cta-sub">Join thousands of teams already using TaskBoard.</p>
-        <Link to="/register" className="landing-btn-primary landing-btn-lg">
-          Sign up for free
-        </Link>
-      </section>*/}
-
-      <footer className="landing-footer">
+      <footer className={styles.footer}>
         © {new Date().getFullYear()} TaskBoard
       </footer>
     </div>
