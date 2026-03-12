@@ -1,25 +1,27 @@
-/* WorkspaceProjects specific styles - common styles are in common.css */
+/* WorkspaceProjects module styles */
 
-.workspace-projects {
+.container {
     padding: 2rem;
     max-width: 1200px;
     margin: 0 auto;
+    position: relative;
+    z-index: 1;
 }
 
-.projects-header {
+.header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1.5rem;
 }
 
-.workspace-projects h2 {
+.title {
     font-size: 1.8rem;
     color: rgba(255, 255, 255, 0.9);
     margin: 0;
 }
 
-.new-project-btn {
+.newBtn {
     padding: 0.75rem 1.5rem;
     background: #3b82f6;
     color: white;
@@ -29,8 +31,31 @@
     cursor: pointer;
     transition: background 0.2s;
     font-size: 1rem;
+    box-sizing: border-box;
 }
 
-.new-project-btn:hover {
+.newBtn:hover {
     background: #2563eb;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.5rem;
+}
+
+.empty {
+    color: rgba(255, 255, 255, 0.5);
+    padding: 2rem 0;
+}
+
+.loading,
+.error {
+    padding: 2rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.error {
+    color: #f87171;
 }

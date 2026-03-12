@@ -48,10 +48,10 @@ function HomePage() {
             <PageBackground />
             <Navbar />
             <div className={styles.homePage}>
-                <header className={styles.homeHeader}>
+                {/*<header className={styles.homeHeader}>
                     <h1>Welcome Back!</h1>
                     <p>Here's what's happening in your workspaces.</p>
-                </header>
+                </header>*/}
 
                 {/* Recent Workspaces */}
                 <section className={styles.homeSection}>

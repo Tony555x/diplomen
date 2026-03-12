@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { fetchWithAuth } from "../auth";
 import CreateProjectPopup from "../components/CreateProjectPopup";
 import ProjectCard from "../components/ProjectCard";
-import "./WorkspaceProjects.css";
+import styles from "./WorkspaceProjects.module.css";
 
 function WorkspaceProjects() {
     const { workspaceId } = useParams();
@@ -30,7 +30,6 @@ function WorkspaceProjects() {
 
     useEffect(() => {
         loadProjects();
-        // Fire-and-forget: update last visited timestamp
         fetchWithAuth(`/api/workspaces/${workspaceId}/visit`, { method: "POST" }).catch(() => { });
     }, [workspaceId]);
 
@@ -39,29 +38,26 @@ function WorkspaceProjects() {
         loadProjects();
     };
 
-    if (loading) return <div className="loading">Loading projects...</div>;
-    if (error) return <div className="error">{error}</div>;
+    if (loading) return <div className={styles.loading}>Loading projects...</div>;
+    if (error) return <div className={styles.error}>{error}</div>;
 
     return (
-        <div className="workspace-projects">
-            <div className="projects-header">
-                <h2>Projects</h2>
-                <button
-                    className="new-project-btn"
-                    onClick={() => setShowCreatePopup(true)}
-                >
+        <div className={styles.container}>
+            <div className={styles.header}>
+                <h2 className={styles.title}>Projects</h2>
+                <button className={styles.newBtn} onClick={() => setShowCreatePopup(true)}>
                     + New Project
                 </button>
             </div>
 
             {projects.length > 0 ? (
-                <div className="projects-grid">
+                <div className={styles.grid}>
                     {projects.map((project) => (
                         <ProjectCard key={project.id} project={project} />
                     ))}
                 </div>
             ) : (
-                <div className="no-projects">
+                <div className={styles.empty}>
                     <p>No projects in this workspace yet.</p>
                     <p>Click "New Project" to create one.</p>
                 </div>

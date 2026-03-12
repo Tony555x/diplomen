@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import "./WorkspaceNavbar.css";
+import styles from "./WorkspaceNavbar.module.css";
 
 function WorkspaceNavbar({ workspaceId, workspaceName }) {
     const navigate = useNavigate();
@@ -14,13 +14,13 @@ function WorkspaceNavbar({ workspaceId, workspaceName }) {
     const isActive = (path) => location.pathname === path;
 
     return (
-        <div className="workspace-navbar">
-            <h2>{workspaceName}</h2>
-            <div className="workspace-tabs">
+        <div className={styles.navbar}>
+            <h2 className={styles.title}>{workspaceName}</h2>
+            <div className={styles.tabs}>
                 {tabs.map((tab) => (
                     <button
                         key={tab.name}
-                        className={`workspace-tab ${isActive(tab.path) ? "active" : ""}`}
+                        className={`${styles.tab}${isActive(tab.path) ? ` ${styles.tabActive}` : ""}`}
                         onClick={() => navigate(tab.path)}
                     >
                         {tab.name}

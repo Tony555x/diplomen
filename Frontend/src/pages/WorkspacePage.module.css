@@ -1,0 +1,22 @@
+.page {
+    min-height: 100vh;
+    background: var(--bg-page);
+    display: flex;
+    flex-direction: column;
+    /* No z-index here — don't create a stacking context at page level */
+}
+
+/* Navbar and sub-nav sit above blobs */
+.navbarLayer {
+    position: relative;
+    z-index: 10;
+    flex-shrink: 0;
+}
+
+/* Content fills remaining height, transparent so blobs show through */
+.content {
+    flex: 1;
+    position: relative;
+    z-index: 15;
+    /* No background — individual panels inside set their own surface color */
+}

@@ -1,0 +1,349 @@
+/* WorkspaceMembers module — layout + workspace-specific elements */
+
+.container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+/* ── Surface panels ───────────────────────────────────────────── */
+.panel {
+    background: var(--bg-surface);
+    border: 1px solid #4b5563;
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+/* ── Section header ───────────────────────────────────────────── */
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.sectionHeader h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* ── Add member form ──────────────────────────────────────────── */
+.addForm {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: #2d2d2d;
+    border: 1px solid #374151;
+    border-radius: 8px;
+}
+
+.addForm input[type="email"] {
+    background: var(--bg-surface);
+    border: 1px solid #374151;
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.87);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    outline: none;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.addForm input[type="email"]:focus {
+    border-color: #3b82f6;
+}
+
+.addError {
+    font-size: 0.8rem;
+    color: #f87171;
+}
+
+.addActions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────── */
+.btnAddMember {
+    padding: 0.55rem 1.1rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-size: 0.9rem;
+}
+
+.btnAddMember:hover {
+    background: #2563eb;
+}
+
+.btnCancel {
+    padding: 0.4rem 1rem;
+    background: transparent;
+    border: 1px solid #4b5563;
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+}
+
+.btnCancel:hover {
+    background: #333333;
+}
+
+.btnSubmit {
+    padding: 0.4rem 1rem;
+    background: #3b82f6;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.btnSubmit:hover:not(:disabled) {
+    background: #2563eb;
+}
+
+.btnSubmit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btnRemove {
+    background: transparent;
+    border: 1px solid #4b5563;
+    border-radius: 4px;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+}
+
+.btnRemove:hover {
+    background: rgba(220, 38, 38, 0.15);
+    border-color: #ef4444;
+    color: #f87171;
+}
+
+.btnLeave {
+    width: 100%;
+    padding: 0.65rem 1rem;
+    background: transparent;
+    border: 1px solid #4b5563;
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background 0.2s, border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.btnLeave:hover {
+    background: rgba(251, 191, 36, 0.1);
+    border-color: #f59e0b;
+    color: #fcd34d;
+}
+
+.btnDelete {
+    width: 100%;
+    padding: 0.65rem 1rem;
+    background: rgba(220, 38, 38, 0.1);
+    border: 1px solid rgba(220, 38, 38, 0.4);
+    border-radius: 6px;
+    color: #fca5a5;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background 0.2s, border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.btnDelete:hover {
+    background: rgba(220, 38, 38, 0.2);
+    border-color: #ef4444;
+}
+
+/* ── Member list ──────────────────────────────────────────────── */
+.membersList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.memberCard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: #2d2d2d;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    transition: all 0.2s;
+    gap: 1rem;
+}
+
+.memberCard:hover {
+    border-color: #4b5563;
+    background: #333333;
+}
+
+.memberMain {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.memberName {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.memberBadges {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.memberSecondary {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+}
+
+.memberEmail {
+    font-size: 0.8125rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.joinedDate {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+    white-space: nowrap;
+}
+
+/* ── Role badges ──────────────────────────────────────────────── */
+.roleBadge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 3px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.roleOwner {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.roleMember {
+    background: rgba(59, 130, 246, 0.2);
+    color: #93c5fd;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* ── Workspace info panel ─────────────────────────────────────── */
+.infoPanel {
+    padding: 1.2rem;
+    background: #2d2d2d;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.infoName {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 0.3rem;
+}
+
+.infoCount {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.emptyState {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.9rem;
+    padding: 1rem 0;
+}
+
+/* ── Loading / error ──────────────────────────────────────────── */
+.loading,
+.error {
+    padding: 2rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.error {
+    color: #f87171;
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .memberCard {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .sectionHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .btnAddMember {
+        width: 100%;
+    }
+}

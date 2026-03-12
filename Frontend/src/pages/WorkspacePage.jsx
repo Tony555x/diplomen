@@ -6,8 +6,8 @@ import WorkspaceNavbar from "../components/WorkspaceNavbar";
 import WorkspaceProjects from "./WorkspaceProjects";
 import WorkspaceMembers from "./WorkspaceMembers";
 import { usePageTitle } from "../hooks/usePageTitle";
-import "./WorkspacePage.css";
 import PageBackground from "../components/PageBackground";
+import styles from "./WorkspacePage.module.css";
 
 function WorkspacePage() {
     const { workspaceId } = useParams();
@@ -28,19 +28,22 @@ function WorkspacePage() {
                 setLoading(false);
             }
         };
-
         loadWorkspace();
     }, [workspaceId]);
 
-    if (loading) return <div className="loading">Loading workspace...</div>;
-    if (error) return <div className="error">{error}</div>;
+    if (loading) return <div>Loading workspace...</div>;
+    if (error) return <div>{error}</div>;
 
     return (
-        <div className="workspace-page">
+        <div className={styles.page}>
             <PageBackground />
-            <Navbar />
-            <WorkspaceNavbar workspaceId={workspaceId} workspaceName={workspace?.name} />
-            <div className="workspace-content">
+            {/* Navbar stack in their own layer so they sit above blobs */}
+            <div className={styles.navbarLayer}>
+                <Navbar />
+                <WorkspaceNavbar workspaceId={workspaceId} workspaceName={workspace?.name} />
+            </div>
+            {/* Content is transparent so background blobs show through */}
+            <div className={styles.content}>
                 <Routes>
                     <Route path="/" element={<Navigate to={`/workspace/${workspaceId}/projects`} replace />} />
                     <Route path="/projects" element={<WorkspaceProjects />} />
