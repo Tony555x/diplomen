@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { login, isLoggedIn } from "../auth";
 import { usePageTitle } from "../hooks/usePageTitle";
 import "./AuthPages.css";
+import PageBackground from "../components/PageBackground";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -11,7 +12,6 @@ export default function LoginPage() {
   const navigate = useNavigate();
   usePageTitle("Login");
 
-  // Auto-redirect if already logged in
   useEffect(() => {
     if (isLoggedIn()) {
       navigate("/home");
@@ -21,7 +21,7 @@ export default function LoginPage() {
   const handleLogin = async () => {
     setError("");
     try {
-      const res = await login(username, password); // auth.js function that calls fetch
+      const res = await login(username, password);
       if (!res.success) {
         setError(res.message || "Login failed.");
         return;
@@ -32,26 +32,28 @@ export default function LoginPage() {
     }
   };
 
-
   return (
-    <div className="auth-page">
-      <h2>Login</h2>
-      <input
-        type="text"
-        placeholder="Username"
-        value={username}
-        onChange={e => setUsername(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-      />
-      <button onClick={handleLogin}>Login</button>
-      {error && <div className="error">{error}</div>}
-      <div className="switch-page">
-        Don't have an account? <Link to="/register">Register</Link>
+    <div className="auth-root">
+      <PageBackground />
+      <div className="auth-page">
+        <h2>Login</h2>
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={e => setUsername(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+        />
+        <button onClick={handleLogin}>Login</button>
+        {error && <div className="error">{error}</div>}
+        <div className="switch-page">
+          Don't have an account? <Link to="/register">Register</Link>
+        </div>
       </div>
     </div>
   );

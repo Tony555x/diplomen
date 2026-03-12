@@ -34,7 +34,7 @@ function Navbar({ userName }) {
 
     const handleLogout = () => {
         removeToken();
-        navigate("/login");
+        navigate("/");
     };
 
     // ─── Search ────────────────────────────────────────────────────────────────

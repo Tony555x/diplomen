@@ -1,6 +1,22 @@
+/* ── Full-page root wrapper ───────────────────────────────────── */
+.auth-root {
+  min-height: 100vh;
+  background-color: #111827;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow-x: hidden;
+  padding: 2rem 1rem;
+  box-sizing: border-box;
+}
+
+/* ── Form card ────────────────────────────────────────────────── */
 .auth-page {
+  position: relative;
+  z-index: 1;       /* sit above the fixed background blobs */
+  width: 100%;
   max-width: 400px;
-  margin: 4rem auto;
   background-color: #1e1e1e;
   padding: 2rem;
   border-radius: 12px;
