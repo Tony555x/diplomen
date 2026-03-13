@@ -1,6 +1,8 @@
 .project-dashboard {
     padding: 20px;
     color: rgba(255, 255, 255, 0.9);
+    position: relative;
+    /* Removed z-index to avoid trapping nested dropdowns */
 }
 
 .dashboard-header {

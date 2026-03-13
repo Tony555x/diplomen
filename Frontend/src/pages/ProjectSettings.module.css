@@ -1,7 +1,8 @@
 .container {
     display: flex;
     min-height: 100%;
-    background-color: #121212;
+    position: relative;
+    /* Removed z-index to avoid trapping nested dropdowns */
 }
 
 .sidebar {

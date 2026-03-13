@@ -11,7 +11,8 @@
   border-bottom: 1px solid #374151;
   box-sizing: border-box;
   flex-shrink: 0;
-  z-index: 100;
+  position: relative; /* Required for z-index to take effect */
+  z-index: 100;      /* Elevated above page content. Its dropdowns will use 101+ */
   overflow: visible;
 }
 
@@ -76,7 +77,7 @@
   border: 1px solid #374151;
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-  z-index: 1000;
+  z-index: 101; /* Keep above Navbar and secondary navbars, but below Modals (1000+) */
   overflow: hidden;
   max-height: 400px;
   overflow-y: auto;
@@ -211,7 +212,7 @@
   border-radius: 8px;
   padding: 0.75rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-  z-index: 1000;
+  z-index: 101; /* Keep above Navbar and secondary navbars, but below Modals (1000+) */
 }
 
 .userName {
@@ -268,7 +269,7 @@
   border-radius: 8px;
   padding: 1rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-  z-index: 1000;
+  z-index: 101; /* Keep above Navbar and secondary navbars, but below Modals (1000+) */
   display: flex;
   flex-direction: column;
 }

@@ -11,6 +11,8 @@
     gap: 2rem;
     box-sizing: border-box;
     overflow-x: hidden;
+    position: relative; /* Required for z-index to take effect */
+    z-index: 10; /* explicitly below main Navbar (100) but above blobs (0) */
 }
 
 .project-navbar h2 {

@@ -3,12 +3,11 @@
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
-    position: relative;
-    z-index: 1;
+    background-color: #111827;
 }
 
 .project-content {
     flex: 1;
     overflow-y: auto;
-    background-color: var(--bg-inner);
+    /* No opaque background — blobs visible through content gap */
 }

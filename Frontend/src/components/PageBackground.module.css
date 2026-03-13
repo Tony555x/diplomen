@@ -14,7 +14,7 @@
   position: absolute;
   border-radius: 50%;
   filter: blur(100px);
-  opacity: 0.25;
+  opacity: 0.2;
   z-index: -1;
 }
 
@@ -29,7 +29,7 @@
 .blob2 {
   width: 550px;
   height: 550px;
-  background: radial-gradient(circle, #8b5cf6, transparent 70%);
+  background: radial-gradient(circle, #5c76f6, transparent 70%);
   bottom: 10vh;
   right: -5vw;
 }

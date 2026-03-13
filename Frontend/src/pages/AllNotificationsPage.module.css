@@ -1,7 +1,14 @@
-.page {
-    background: #121212;
+.root {
     min-height: 100vh;
+    background-color: #111827;
+    position: relative;
+}
+
+.page {
+    /* No opaque background so blobs bleed through under content gap */
     padding: 2rem;
+    position: relative;
+    z-index: 1; /* Content sits cleanly above blobs */
 }
 
 .container {

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchWithAuth } from "../auth";
 import Navbar from "../components/Navbar";
+import PageBackground from "../components/PageBackground";
 import { handleNotificationAction } from "./notificationActions";
 import { usePageTitle } from "../hooks/usePageTitle";
 import styles from "./AllNotificationsPage.module.css";
@@ -43,7 +44,8 @@ function AllNotificationsPage() {
     const unreadCount = notifications.filter(n => !n.isRead).length;
 
     return (
-        <>
+        <div className={styles.root}>
+            <PageBackground />
             <Navbar />
             <div className={styles.page}>
                 <div className={styles.container}>
@@ -84,7 +86,7 @@ function AllNotificationsPage() {
                     )}
                 </div>
             </div>
-        </>
+        </div>
     );
 }
 
