@@ -17,7 +17,7 @@ function ProjectNavbar({ projectId, projectName }) {
 
     return (
         <div className="project-navbar">
-            <h2>{projectName}</h2>
+            <h2 className="navbar-project-name">{projectName}</h2>
             <div className="project-tabs">
                 {tabs.map((tab) => (
                     <button

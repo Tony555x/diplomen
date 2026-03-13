@@ -58,3 +58,9 @@
     color: #6b9eff;
     border-bottom-color: #6b9eff;
 }
+
+@media (max-width: 768px) {
+    .navbar-project-name {
+        display: none;
+    }
+}
