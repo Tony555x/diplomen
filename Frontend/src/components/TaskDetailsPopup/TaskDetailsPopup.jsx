@@ -12,6 +12,8 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
     const { projectId } = useParams();
     const navigate = useNavigate();
 
+    const [activeTab, setActiveTab] = useState("details"); // 'details', 'properties', 'chat'
+
     const [title, setTitle] = useState(task.title);
     const [status, setStatus] = useState(task.status);
     const [completed, setCompleted] = useState(task.completed);
@@ -152,39 +154,66 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
                     <button className={styles.closeBtn} onClick={onClose}>×</button>
                 </div>
 
-                <div className={styles.body}>
-                    <TaskDetailsLeft
-                        taskType={currentTaskType}
-                        completed={completed}
-                        setCompleted={setCompleted}
-                        fieldValues={fieldValues}
-                        setFieldValues={setFieldValues}
-                        canCreateTasks={canCreateTasks}
-                    />
+                    <div className={styles.mobileTabs}>
+                        <button
+                            className={`${styles.tabBtn} ${activeTab === 'details' ? styles.activeTab : ''}`}
+                            onClick={() => setActiveTab('details')}
+                        >
+                            Details
+                        </button>
+                        <button
+                            className={`${styles.tabBtn} ${activeTab === 'properties' ? styles.activeTab : ''}`}
+                            onClick={() => setActiveTab('properties')}
+                        >
+                            Properties
+                        </button>
+                        <button
+                            className={`${styles.tabBtn} ${activeTab === 'chat' ? styles.activeTab : ''}`}
+                            onClick={() => setActiveTab('chat')}
+                        >
+                            Chat
+                        </button>
+                    </div>
 
-                    <TaskDetailsRight
-                        projectId={projectId}
-                        task={task}
-                        assignees={assignees}
-                        members={members}
-                        loadAssignees={loadAssignees}
-                        dueDate={dueDate}
-                        onDueDateChange={handleDueDateChange}
-                        onRefresh={onRefresh}
-                        canCreateTasks={canCreateTasks}
-                        onViewActivity={(uid) => navigate(`/project/${projectId}/members/${uid}/activity`)}
-                    />
+                    <div className={styles.body}>
+                        <div className={`${styles.columnWrapper} ${activeTab === 'details' ? styles.activeColumn : ''}`}>
+                            <TaskDetailsLeft
+                                taskType={currentTaskType}
+                                completed={completed}
+                                setCompleted={setCompleted}
+                                fieldValues={fieldValues}
+                                setFieldValues={setFieldValues}
+                                canCreateTasks={canCreateTasks}
+                            />
+                        </div>
 
-                    <TaskDetailsChat
-                        projectId={projectId}
-                        taskId={task.id}
-                        messages={messages}
-                        newMessage={newMessage}
-                        setNewMessage={setNewMessage}
-                        reloadMessages={loadMessages}
-                        messagesEndRef={messagesEndRef}
-                    />
-                </div>
+                        <div className={`${styles.columnWrapper} ${activeTab === 'properties' ? styles.activeColumn : ''}`}>
+                            <TaskDetailsRight
+                                projectId={projectId}
+                                task={task}
+                                assignees={assignees}
+                                members={members}
+                                loadAssignees={loadAssignees}
+                                dueDate={dueDate}
+                                onDueDateChange={handleDueDateChange}
+                                onRefresh={onRefresh}
+                                canCreateTasks={canCreateTasks}
+                                onViewActivity={(uid) => navigate(`/project/${projectId}/members/${uid}/activity`)}
+                            />
+                        </div>
+
+                        <div className={`${styles.columnWrapper} ${activeTab === 'chat' ? styles.activeColumn : ''}`}>
+                            <TaskDetailsChat
+                                projectId={projectId}
+                                taskId={task.id}
+                                messages={messages}
+                                newMessage={newMessage}
+                                setNewMessage={setNewMessage}
+                                reloadMessages={loadMessages}
+                                messagesEndRef={messagesEndRef}
+                            />
+                        </div>
+                    </div>
 
                 <div className={styles.footer}>
                     {saveError && (
