@@ -3,7 +3,8 @@
     background: var(--bg-page);
     display: flex;
     flex-direction: column;
-    /* No z-index here — don't create a stacking context at page level */
+    position: relative;
+    z-index: 0; /* Creates stacking context: pulls blobs above page background but below content */
 }
 
 /* Navbar and sub-nav sit above blobs */
@@ -16,7 +17,5 @@
 /* Content fills remaining height, transparent so blobs show through */
 .content {
     flex: 1;
-    position: relative;
-    z-index: 15;
-    /* No background — individual panels inside set their own surface color */
+    /* No position or z-index — ensures popups escape bounding box to cover navbar */
 }
