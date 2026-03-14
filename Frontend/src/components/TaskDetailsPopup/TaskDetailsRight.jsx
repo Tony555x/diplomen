@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "./TaskDetailsRight.module.css";
+import columnStyles from "../Column.module.css";
 import UserAvatar from "../UserAvatar";
 import { fetchWithAuth } from "../../auth";
 
@@ -41,6 +43,7 @@ const ExpandableSection = ({ title, count, children, defaultOpen = false }) => {
 function TaskDetailsRight({
     projectId,
     task,
+    taskTypes = [],
     assignees,
     members,
     loadAssignees,
@@ -48,7 +51,8 @@ function TaskDetailsRight({
     onDueDateChange,
     onRefresh,
     canCreateTasks,
-    onViewActivity
+    onViewActivity,
+    onSubtaskCreated
 }) {
     const [blockers, setBlockers] = useState([]);
     const [blockedTasks, setBlockedTasks] = useState([]);
@@ -61,6 +65,33 @@ function TaskDetailsRight({
     const [showAssigneeResults, setShowAssigneeResults] = useState(false);
     const [showBlockerResults, setShowBlockerResults] = useState(false);
     const [showBlockedResults, setShowBlockedResults] = useState(false);
+
+    const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
+    const [newSubtaskType, setNewSubtaskType] = useState("");
+    const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
+    const typeDropdownRef = useRef(null);
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (typeDropdownRef.current && !typeDropdownRef.current.contains(e.target)) {
+                setIsTypeDropdownOpen(false);
+            }
+        };
+        if (isTypeDropdownOpen) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isTypeDropdownOpen]);
+
+    useEffect(() => {
+        if (taskTypes.length > 0 && !newSubtaskType) {
+            setNewSubtaskType(taskTypes[0].id);
+        }
+    }, [taskTypes, newSubtaskType]);
 
     useEffect(() => {
         loadBlockers();
@@ -149,7 +180,35 @@ function TaskDetailsRight({
         onRefresh?.();
     };
 
+    const handleCreateSubtask = async () => {
+        if (!newSubtaskTitle.trim()) return;
+
+        const result = await fetchWithAuth(
+            `/api/projects/${projectId}/tasks`,
+            {
+                method: "POST",
+                body: JSON.stringify({
+                    title: newSubtaskTitle,
+                    taskTypeId: newSubtaskType || (taskTypes.length > 0 ? taskTypes[0].id : null),
+                    parentTaskId: task.id,
+                    status: "To Do"
+                })
+            }
+        );
+
+        if (result && result.success) {
+            setNewSubtaskTitle("");
+            if (onSubtaskCreated) {
+                onSubtaskCreated(result.task);
+            } else {
+                navigate(`/project/${projectId}/tasks/${result.task.id}`);
+                onRefresh?.();
+            }
+        }
+    };
+
     const assignedIds = assignees.map(a => a.userId);
+    const subtasks = allProjectTasks.filter(t => t.parentTaskId === task.id);
 
     return (
         <div className={styles.rightColumn}>
@@ -245,6 +304,116 @@ function TaskDetailsRight({
                     <div className={styles.hint}>No one assigned</div>
                 )}
             </ExpandableSection>
+
+            {!task.parentTaskId && (
+                <ExpandableSection title="Subtasks" count={subtasks.length}>
+                    <div className={styles.assigneesList}>
+                        {subtasks.map(st => {
+                            const stType = taskTypes.find(tt => tt.id === st.taskTypeId);
+                            return (
+                            <div
+                                key={st.id}
+                                className={styles.assigneeRow}
+                                style={{ width: "100%", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
+                                onClick={() => navigate(`/project/${projectId}/tasks/${st.id}`)}
+                            >
+                                {stType?.icon && (
+                                    <img src={`/cardicons/${stType.icon}`} alt="" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />
+                                )}
+                                <span
+                                    style={{
+                                        textDecoration: st.completed
+                                            ? "line-through"
+                                            : "none",
+                                        opacity: st.completed ? 0.7 : 1,
+                                        flex: 1,
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        whiteSpace: "nowrap"
+                                    }}
+                                >
+                                    {st.title}
+                                </span>
+                            </div>
+                        )})}
+
+                        {canCreateTasks && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
+                                <input
+                                    type="text"
+                                    className={styles.searchInput}
+                                    placeholder="Subtask title..."
+                                    value={newSubtaskTitle}
+                                    onChange={e => setNewSubtaskTitle(e.target.value)}
+                                    onKeyDown={e => {
+                                        if (e.key === "Enter") handleCreateSubtask();
+                                    }}
+                                />
+                                <div style={{ display: 'flex', gap: '8px', alignItems: 'stretch' }}>
+                                    <div className={columnStyles.customSelect} ref={typeDropdownRef} style={{ flex: 1 }}>
+                                        <div
+                                            className={columnStyles.addSelect}
+                                            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', padding: '0.4rem 0.5rem', height: '100%', boxSizing: 'border-box' }}
+                                            onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
+                                        >
+                                            {newSubtaskType ? (
+                                                <>
+                                                    {taskTypes.find(tt => tt.id == newSubtaskType)?.icon && (
+                                                        <img
+                                                            src={`/cardicons/${taskTypes.find(tt => tt.id == newSubtaskType).icon}`}
+                                                            alt=""
+                                                            style={{ width: '14px', height: '14px', objectFit: 'contain' }}
+                                                        />
+                                                    )}
+                                                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                        {taskTypes.find(tt => tt.id == newSubtaskType)?.name}
+                                                    </span>
+                                                </>
+                                            ) : (
+                                                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>No type</span>
+                                            )}
+                                            <span style={{ marginLeft: 'auto', fontSize: '0.7rem', opacity: 0.5, flexShrink: 0 }}>▼</span>
+                                        </div>
+
+                                        {isTypeDropdownOpen && (
+                                            <div className={columnStyles.dropdownMenu}>
+                                                {taskTypes.map(tt => (
+                                                    <div
+                                                        key={tt.id}
+                                                        className={columnStyles.dropdownOption}
+                                                        onClick={() => {
+                                                            setNewSubtaskType(tt.id);
+                                                            setIsTypeDropdownOpen(false);
+                                                        }}
+                                                    >
+                                                        {tt.icon ? (
+                                                            <img src={`/cardicons/${tt.icon}`} alt="" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />
+                                                        ) : (
+                                                            <div style={{ width: '14px' }}></div>
+                                                        )}
+                                                        {tt.name}
+                                                    </div>
+                                                ))}
+                                                {taskTypes.length === 0 && <div className={columnStyles.dropdownOption}>No type</div>}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <button
+                                        style={{ whiteSpace: 'nowrap', padding: '0 8px', borderRadius: '4px', border: 'none', background: '#3b82f6', color: 'white', cursor: 'pointer' }}
+                                        onClick={handleCreateSubtask}
+                                        disabled={!newSubtaskTitle.trim()}
+                                    >
+                                        Create
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                        {subtasks.length === 0 && !canCreateTasks && (
+                            <div className={styles.hint}>No subtasks</div>
+                        )}
+                    </div>
+                </ExpandableSection>
+            )}
 
             <ExpandableSection title="Blocked By" count={blockers.length}>
                 <div className={styles.assigneesList}>

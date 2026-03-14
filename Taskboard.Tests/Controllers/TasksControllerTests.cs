@@ -138,6 +138,58 @@ namespace Taskboard.Tests.Controllers
         }
 
         [Test]
+        public async Task CreateTask_WithParentTaskId_AddsSubtask()
+        {
+            // Arrange
+            var projectId = 1;
+            var role = new ProjectRole { Id = 1, ProjectId = projectId, CanCreateEditDeleteTasks = true };
+            _context.ProjectRoles.Add(role);
+            _context.ProjectMembers.Add(new ProjectMember { ProjectId = projectId, UserId = "user1", Status = ProjectMemberStatus.Active, ProjectRoleId = 1, ProjectRole = role });
+            
+            var parentTask = new TaskItem { Id = 10, ProjectId = projectId, Title = "Parent Task" };
+            _context.Tasks.Add(parentTask);
+            await _context.SaveChangesAsync();
+
+            var request = new CreateTaskRequest { Title = "Subtask", Status = "To Do", ParentTaskId = 10 };
+
+            // Act
+            var result = await _tasksController.CreateTask(projectId, request) as OkObjectResult;
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.StatusCode, Is.EqualTo(200));
+
+            var dbTask = await _context.Tasks.FirstOrDefaultAsync(t => t.Title == "Subtask");
+            Assert.That(dbTask, Is.Not.Null);
+            Assert.That(dbTask.ParentTaskId, Is.EqualTo(10));
+        }
+
+        [Test]
+        public async Task CreateTask_WithNestedParentTaskId_ReturnsBadRequest()
+        {
+            // Arrange
+            var projectId = 1;
+            var role = new ProjectRole { Id = 1, ProjectId = projectId, CanCreateEditDeleteTasks = true };
+            _context.ProjectRoles.Add(role);
+            _context.ProjectMembers.Add(new ProjectMember { ProjectId = projectId, UserId = "user1", Status = ProjectMemberStatus.Active, ProjectRoleId = 1, ProjectRole = role });
+            
+            var parentTask = new TaskItem { Id = 10, ProjectId = projectId, Title = "Parent Task" };
+            var subTask = new TaskItem { Id = 11, ProjectId = projectId, Title = "Subtask", ParentTaskId = 10 };
+            _context.Tasks.Add(parentTask);
+            _context.Tasks.Add(subTask);
+            await _context.SaveChangesAsync();
+
+            var request = new CreateTaskRequest { Title = "Subtask 2", Status = "To Do", ParentTaskId = 11 };
+
+            // Act
+            var result = await _tasksController.CreateTask(projectId, request) as BadRequestObjectResult;
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.StatusCode, Is.EqualTo(400));
+        }
+
+        [Test]
         public async Task UpdateTask_WithEditPermission_UpdatesTask()
         {
             // Arrange

@@ -90,20 +90,19 @@ function Column({
   };
 
   // Filtering Helper
-  const isTaskVisible = (task) => {
-    // If no filters are active, show everything
-    const hasFilters = filterState.assignedToMe ||
-      filterState.assignedToUserId ||
-      filterState.completed ||
-      filterState.uncompleted ||
-      filterState.noDate ||
-      filterState.overdue ||
-      filterState.blocked ||
-      filterState.unblocked ||
-      (filterState.typeIds && filterState.typeIds.length > 0);
+  const hasFilters = filterState && (
+    filterState.assignedToMe ||
+    filterState.assignedToUserId ||
+    filterState.completed ||
+    filterState.uncompleted ||
+    filterState.noDate ||
+    filterState.overdue ||
+    filterState.blocked ||
+    filterState.unblocked ||
+    (filterState.typeIds && filterState.typeIds.length > 0)
+  );
 
-    if (!hasFilters) return true;
-
+  const checkSingleTaskVisibility = (task) => {
     // Assignment Filters
     if (filterState.assignedToMe) {
       if (!currentUser) return false;
@@ -155,13 +154,25 @@ function Column({
     return true;
   };
 
+  const isTaskVisible = (task) => {
+    // If no filters are active, show everything
+    if (!hasFilters) return true;
+
+    // If the task itself matches, show it
+    if (checkSingleTaskVisibility(task)) return true;
+
+    // Otherwise, show it if any of its subtasks match
+    const subtasks = tasks.filter(t => t.parentTaskId === task.id);
+    return subtasks.some(st => checkSingleTaskVisibility(st));
+  };
+
   // Show all root collections in every column (collections are now column-agnostic)
   const rootCollections = collections.filter(
     c => !c.parentCollectionId
   );
 
   const rootTasks = tasks.filter(
-    t => t.status === columnKey && !t.collectionId && isTaskVisible(t)
+    t => t.status === columnKey && !t.collectionId && !t.parentTaskId && isTaskVisible(t)
   );
 
   const handleAddTask = async () => {
@@ -388,6 +399,7 @@ function Column({
             columnKey={columnKey}
             onDragStart={onDragStart}
             onClick={onTaskClick}
+            allTasks={tasks}
           />
         ))}
       </ul>

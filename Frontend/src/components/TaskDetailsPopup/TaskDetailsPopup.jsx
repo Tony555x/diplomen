@@ -8,7 +8,7 @@ import TaskDetailsLeft from "./TaskDetailsLeft";
 import TaskDetailsRight from "./TaskDetailsRight";
 import TaskDetailsChat from "./TaskDetailsChat";
 
-function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpdate, onDelete, onRefresh, canCreateTasks = false }) {
+function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpdate, onDelete, onRefresh, canCreateTasks = false, onSubtaskCreated }) {
     const { projectId } = useParams();
     const navigate = useNavigate();
 
@@ -133,17 +133,19 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
                                 </h2>
                             )}
 
-                            <select
-                                className={styles.statusSelect}
-                                value={status}
-                                onChange={e => setStatus(e.target.value)}
-                            >
-                                {statuses.map(s => (
-                                    <option key={s.id} value={s.name}>
-                                        {s.name}
-                                    </option>
-                                ))}
-                            </select>
+                            {!task.parentTaskId && (
+                                <select
+                                    className={styles.statusSelect}
+                                    value={status}
+                                    onChange={e => setStatus(e.target.value)}
+                                >
+                                    {statuses.map(s => (
+                                        <option key={s.id} value={s.name}>
+                                            {s.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
                         </div>
 
                         {currentTaskType && (
@@ -191,6 +193,7 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
                             <TaskDetailsRight
                                 projectId={projectId}
                                 task={task}
+                                taskTypes={taskTypes}
                                 assignees={assignees}
                                 members={members}
                                 loadAssignees={loadAssignees}
@@ -199,6 +202,7 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
                                 onRefresh={onRefresh}
                                 canCreateTasks={canCreateTasks}
                                 onViewActivity={(uid) => navigate(`/project/${projectId}/members/${uid}/activity`)}
+                                onSubtaskCreated={onSubtaskCreated}
                             />
                         </div>
 

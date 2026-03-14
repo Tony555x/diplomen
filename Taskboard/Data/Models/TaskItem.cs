@@ -39,5 +39,12 @@ namespace Taskboard.Data.Models
         public int? CollectionId { get; set; }
         [ForeignKey(nameof(CollectionId))]
         public Collection? Collection { get; set; }
+
+        public int? ParentTaskId { get; set; }
+        [ForeignKey(nameof(ParentTaskId))]
+        public TaskItem? ParentTask { get; set; }
+
+        [InverseProperty(nameof(ParentTask))]
+        public List<TaskItem> Subtasks { get; set; } = new();
     }
 }

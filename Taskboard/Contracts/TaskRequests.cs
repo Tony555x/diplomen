@@ -14,6 +14,7 @@ public class CreateTaskRequest
 
     public int? TaskTypeId { get; set; }
     public int? CollectionId { get; set; }
+    public int? ParentTaskId { get; set; }
 }
 
 public class UpdateTaskRequest
@@ -27,6 +28,7 @@ public class UpdateTaskRequest
     public bool? Completed { get; set; }
     public List<FieldValueRequest>? FieldValues { get; set; }
     public int? CollectionId { get; set; }
+    public int? ParentTaskId { get; set; }
 }
 
 public class FieldValueRequest

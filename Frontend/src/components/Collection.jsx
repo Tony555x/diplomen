@@ -66,7 +66,7 @@ function Collection({
         c => c.parentCollectionId === collection.id
     );
     // Only show tasks that match this column's status
-    const childTasks = tasks.filter(t => t.collectionId === collection.id && t.status === columnKey && isTaskVisible(t));
+    const childTasks = tasks.filter(t => t.collectionId === collection.id && t.status === columnKey && !t.parentTaskId && isTaskVisible(t));
 
     // Determine if this collection has any visible content (recursive check)
     // We need to pass down the visibility check to children
@@ -104,7 +104,7 @@ function Collection({
 
     // Recursive helper defined outside or memoized
     const checkCollectionVisibility = (col, allCols, allTasks, colKey, visibilityFn) => {
-        const directTasks = allTasks.filter(t => t.collectionId === col.id && t.status === colKey && visibilityFn(t));
+        const directTasks = allTasks.filter(t => t.collectionId === col.id && t.status === colKey && !t.parentTaskId && visibilityFn(t));
         if (directTasks.length > 0) return true;
 
         const children = allCols.filter(c => c.parentCollectionId === col.id);
@@ -223,6 +223,7 @@ function Collection({
                                 taskTypes={taskTypes}
                                 onDragStart={onDragStart}
                                 onClick={onTaskClick}
+                                allTasks={tasks}
                             />
                         ))}
                     </ul>

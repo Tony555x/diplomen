@@ -47,6 +47,7 @@ namespace Taskboard.Controllers
                     t.Completed,
                     t.TaskTypeId,
                     t.CollectionId,
+                    t.ParentTaskId,
                     Assignees = t.UserTasks.Select(ut => new 
                     {
                         ut.UserId,
@@ -109,6 +110,16 @@ namespace Taskboard.Controllers
                 }
             }
 
+            // Validate ParentTaskId
+            if (request.ParentTaskId.HasValue)
+            {
+                var parentTask = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == request.ParentTaskId.Value && t.ProjectId == projectId);
+                if (parentTask == null)
+                    return BadRequest(new { success = false, message = "Parent task not found." });
+                if (parentTask.ParentTaskId != null)
+                    return BadRequest(new { success = false, message = "Subtasks cannot have subtasks." });
+            }
+
             var task = new TaskItem
             {
                 Title = request.Title.Trim(),
@@ -116,7 +127,8 @@ namespace Taskboard.Controllers
                 Status = request.Status ?? "To Do",
                 Completed = false,
                 TaskTypeId = request.TaskTypeId,
-                CollectionId = request.CollectionId
+                CollectionId = request.CollectionId,
+                ParentTaskId = request.ParentTaskId
             };
 
             _context.Tasks.Add(task);
@@ -165,6 +177,7 @@ namespace Taskboard.Controllers
                     task.Completed,
                     task.TaskTypeId,
                     task.CollectionId,
+                    task.ParentTaskId,
                     FieldValues = new List<object>()
                 }
             });

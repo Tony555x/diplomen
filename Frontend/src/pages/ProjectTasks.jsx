@@ -473,6 +473,10 @@ function ProjectTasks() {
                     onDrop={handleDrop}
                     onRefresh={refreshTasks}
                     canCreateTasks={canCreateTasks}
+                    onSubtaskCreated={(newTask) => {
+                        setTasks(prev => [...prev, newTask]);
+                        openTask(newTask);
+                    }}
                 />
             )}
         </>
