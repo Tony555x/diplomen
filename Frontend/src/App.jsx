@@ -15,6 +15,7 @@ import WorkspaceInvitePage from "./pages/WorkspaceInvitePage";
 import UserActivityPage from "./pages/UserActivityPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import SearchPage from "./pages/SearchPage";
+import VerifyEmailSuccessPage from "./pages/VerifyEmailSuccessPage";
 
 function App() {
   return (
@@ -102,6 +103,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/verify-email-success" element={<VerifyEmailSuccessPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
