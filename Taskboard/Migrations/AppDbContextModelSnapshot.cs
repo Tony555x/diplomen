@@ -181,7 +181,7 @@ namespace Taskboard.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("Collections");
+                    b.ToTable("Collections", (string)null);
                 });
 
             modelBuilder.Entity("Taskboard.Data.Models.DashboardWidget", b =>
@@ -223,7 +223,7 @@ namespace Taskboard.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("DashboardWidgets");
+                    b.ToTable("DashboardWidgets", (string)null);
                 });
 
             modelBuilder.Entity("Taskboard.Data.Models.Notification", b =>
@@ -264,7 +264,7 @@ namespace Taskboard.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("Taskboard.Data.Models.Project", b =>
@@ -290,7 +290,7 @@ namespace Taskboard.Migrations
 
                     b.HasIndex("WorkspaceId");
 
-                    b.ToTable("Projects");
+                    b.ToTable("Projects", (string)null);
                 });
 
             modelBuilder.Entity("Taskboard.Data.Models.ProjectMember", b =>
@@ -319,7 +319,7 @@ namespace Taskboard.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ProjectMembers");
+                    b.ToTable("ProjectMembers", (string)null);
                 });
 
             modelBuilder.Entity("Taskboard.Data.Models.ProjectRole", b =>
@@ -357,7 +357,7 @@ namespace Taskboard.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("ProjectRoles");
+                    b.ToTable("ProjectRoles", (string)null);
                 });
 
             modelBuilder.Entity("Taskboard.Data.Models.TaskBlocker", b =>
@@ -372,7 +372,7 @@ namespace Taskboard.Migrations
 
                     b.HasIndex("BlockedTaskId");
 
-                    b.ToTable("TaskBlockers");
+                    b.ToTable("TaskBlockers", (string)null);
                 });
 
             modelBuilder.Entity("Taskboard.Data.Models.TaskField", b =>
@@ -416,7 +416,7 @@ namespace Taskboard.Migrations
 
                     b.HasIndex("TaskTypeId");
 
-                    b.ToTable("TaskFields");
+                    b.ToTable("TaskFields", (string)null);
                 });
 
             modelBuilder.Entity("Taskboard.Data.Models.TaskFieldValue", b =>
@@ -443,7 +443,7 @@ namespace Taskboard.Migrations
 
                     b.HasIndex("TaskId");
 
-                    b.ToTable("TaskFieldValues");
+                    b.ToTable("TaskFieldValues", (string)null);
                 });
 
             modelBuilder.Entity("Taskboard.Data.Models.TaskHistory", b =>
@@ -479,7 +479,7 @@ namespace Taskboard.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("TaskHistories");
+                    b.ToTable("TaskHistories", (string)null);
                 });
 
             modelBuilder.Entity("Taskboard.Data.Models.TaskItem", b =>
@@ -533,7 +533,7 @@ namespace Taskboard.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Tasks");
+                    b.ToTable("Tasks", (string)null);
                 });
 
             modelBuilder.Entity("Taskboard.Data.Models.TaskMessage", b =>
@@ -565,7 +565,7 @@ namespace Taskboard.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("TaskMessages");
+                    b.ToTable("TaskMessages", (string)null);
                 });
 
             modelBuilder.Entity("Taskboard.Data.Models.TaskType", b =>
@@ -596,7 +596,7 @@ namespace Taskboard.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("TaskTypes");
+                    b.ToTable("TaskTypes", (string)null);
                 });
 
             modelBuilder.Entity("Taskboard.Data.Models.User", b =>
@@ -686,7 +686,7 @@ namespace Taskboard.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserTasks");
+                    b.ToTable("UserTasks", (string)null);
                 });
 
             modelBuilder.Entity("Taskboard.Data.Models.UserTaskStatus", b =>
@@ -718,7 +718,7 @@ namespace Taskboard.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("UserTaskStatuses");
+                    b.ToTable("UserTaskStatuses", (string)null);
                 });
 
             modelBuilder.Entity("Taskboard.Data.Models.WidgetTemplate", b =>
@@ -750,7 +750,7 @@ namespace Taskboard.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("WidgetTemplates");
+                    b.ToTable("WidgetTemplates", (string)null);
 
                     b.HasData(
                         new
@@ -834,7 +834,7 @@ namespace Taskboard.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Workspaces");
+                    b.ToTable("Workspaces", (string)null);
                 });
 
             modelBuilder.Entity("Taskboard.Data.Models.WorkspaceMember", b =>
@@ -865,7 +865,7 @@ namespace Taskboard.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("WorkspaceMembers");
+                    b.ToTable("WorkspaceMembers", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

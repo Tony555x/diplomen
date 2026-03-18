@@ -40,11 +40,11 @@ export function isLoggedIn() {
  * @param {string} password
  * @throws {object} Throws API response object if login fails.
  */
-export async function login(username, password) {
+export async function login(usernameOrEmail, password) {
   const res = await fetch(`/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password })
+    body: JSON.stringify({ usernameOrEmail, password })
   });
 
   const data = await res.json();

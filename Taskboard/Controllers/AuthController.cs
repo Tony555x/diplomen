@@ -140,7 +140,9 @@ namespace Taskboard.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var user = await _userManager.FindByNameAsync(request.Username);
+            var user = await _userManager.FindByEmailAsync(request.UsernameOrEmail) 
+                       ?? await _userManager.FindByNameAsync(request.UsernameOrEmail);
+            
             if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
             {
                 return Unauthorized(new

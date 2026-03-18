@@ -6,7 +6,7 @@ import "./AuthPages.css";
 import PageBackground from "../components/PageBackground";
 
 export default function LoginPage() {
-  const [username, setUsername] = useState("");
+  const [usernameOrEmail, setUsernameOrEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ export default function LoginPage() {
   const handleLogin = async () => {
     setError("");
     try {
-      const res = await login(username, password);
+      const res = await login(usernameOrEmail, password);
       if (!res.success) {
         setError(res.message || "Login failed.");
         return;
@@ -38,12 +38,12 @@ export default function LoginPage() {
       <div className="auth-page">
         <h2>Login</h2>
         <div className="field-container">
-          <label>Username</label>
+          <label>Email or Username</label>
           <input
             type="text"
-            placeholder="Username"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
+            placeholder="Email or Username"
+            value={usernameOrEmail}
+            onChange={e => setUsernameOrEmail(e.target.value)}
           />
         </div>
         <div className="field-container">
