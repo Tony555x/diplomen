@@ -8,7 +8,7 @@
     padding-right: 0.65rem;
     border-right: 1px solid #374151;
     overflow-y: auto;
-    max-height: 100%;
+    height: 100%;
 }
 
 /* Assignee / Blocker / Blocked Lists */

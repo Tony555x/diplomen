@@ -17,7 +17,7 @@ function GeneralSettings({ projectId, currentUserRole }) {
 
     const canEdit = currentUserRole?.canEditProjectSettings === true;
     const isOwner = currentUserRole?.isOwner === true;
-    console.log(isOwner);
+    const isMember = currentUserRole?.isMember === true;
 
     useEffect(() => {
         const load = async () => {
@@ -122,7 +122,7 @@ function GeneralSettings({ projectId, currentUserRole }) {
             )}
 
             <div className={styles.dangerZone}>
-                {!isOwner && (
+                {!isOwner && isMember && (
                     <button className={styles.leaveButton} onClick={handleLeave}>
                         Leave Project
                     </button>

@@ -105,7 +105,6 @@ function ProjectTasks() {
     };
 
     const closeTask = () => {
-        console.log("set selectedTask null");
         setSelectedTask(null);
         navigate(`/project/${projectId}/tasks`, { replace: true });
     };
@@ -477,6 +476,7 @@ function ProjectTasks() {
                         setTasks(prev => [...prev, newTask]);
                         openTask(newTask);
                     }}
+                    isMember={currentUserRole?.isMember === true}
                 />
             )}
         </>

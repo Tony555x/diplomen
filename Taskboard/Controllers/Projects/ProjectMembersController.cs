@@ -81,7 +81,8 @@ public class ProjectMembersController : ControllerBase
                 CanEditProjectSettings = false,
                 CanCreateEditDeleteTasks = false,
                 CanCreateDeleteTaskStatuses = false,
-                IsOwner = false
+                IsOwner = false,
+                IsMember = false
             };
         }
         else
@@ -93,7 +94,8 @@ public class ProjectMembersController : ControllerBase
                 CanEditProjectSettings = currentUserMembership.ProjectRole.CanEditProjectSettings,
                 CanCreateEditDeleteTasks = currentUserMembership.ProjectRole.CanCreateEditDeleteTasks,
                 CanCreateDeleteTaskStatuses = currentUserMembership.ProjectRole.CanCreateDeleteTaskStatuses,
-                IsOwner = currentUserMembership.ProjectRole.IsOwner
+                IsOwner = currentUserMembership.ProjectRole.IsOwner,
+                IsMember = true
             };
         }
 

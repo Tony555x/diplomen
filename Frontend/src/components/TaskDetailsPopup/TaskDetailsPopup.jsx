@@ -8,7 +8,7 @@ import TaskDetailsLeft from "./TaskDetailsLeft";
 import TaskDetailsRight from "./TaskDetailsRight";
 import TaskDetailsChat from "./TaskDetailsChat";
 
-function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpdate, onDelete, onRefresh, canCreateTasks = false, onSubtaskCreated }) {
+function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpdate, onDelete, onRefresh, canCreateTasks = false, onSubtaskCreated, isMember = true }) {
     const { projectId } = useParams();
     const navigate = useNavigate();
 
@@ -235,16 +235,24 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
                         {!onDelete && <div />}
 
                         <div className={sharedStyles.rightActions}>
-                            <button className={sharedStyles.cancelButton} onClick={onClose}>
-                                Cancel
-                            </button>
-                            <button
-                                className={sharedStyles.createButton}
-                                onClick={handleSave}
-                                disabled={isSaving || (canCreateTasks && !title.trim())}
-                            >
-                                {isSaving ? "Saving…" : "Save"}
-                            </button>
+                            {!isMember ? (
+                                <button className={sharedStyles.cancelButton} onClick={onClose}>
+                                    Close
+                                </button>
+                            ) : (
+                                <>
+                                    <button className={sharedStyles.cancelButton} onClick={onClose}>
+                                        Cancel
+                                    </button>
+                                    <button
+                                        className={sharedStyles.createButton}
+                                        onClick={handleSave}
+                                        disabled={isSaving || (canCreateTasks && !title.trim())}
+                                    >
+                                        {isSaving ? "Saving…" : "Save"}
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
