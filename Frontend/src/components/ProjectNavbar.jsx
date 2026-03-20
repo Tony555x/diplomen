@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import "./ProjectNavbar.css";
+import styles from "./InnerNavbar.module.css";
 
 function ProjectNavbar({ projectId, projectName }) {
     const navigate = useNavigate();
@@ -16,13 +16,13 @@ function ProjectNavbar({ projectId, projectName }) {
     const isActive = (path) => location.pathname === path;
 
     return (
-        <div className="project-navbar">
-            <h2 className="navbar-project-name">{projectName}</h2>
-            <div className="project-tabs">
+        <div className={styles.navbar}>
+            <h2 className={styles.title}>{projectName}</h2>
+            <div className={styles.tabs}>
                 {tabs.map((tab) => (
                     <button
                         key={tab.name}
-                        className={`project-tab ${isActive(tab.path) ? "active" : ""}`}
+                        className={`${styles.tab}${isActive(tab.path) ? ` ${styles.tabActive}` : ""}`}
                         onClick={() => navigate(tab.path)}
                     >
                         {tab.name}
@@ -34,3 +34,4 @@ function ProjectNavbar({ projectId, projectName }) {
 }
 
 export default ProjectNavbar;
+

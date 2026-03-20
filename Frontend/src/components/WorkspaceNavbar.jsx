@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import styles from "./WorkspaceNavbar.module.css";
+import styles from "./InnerNavbar.module.css";
 
 function WorkspaceNavbar({ workspaceId, workspaceName }) {
     const navigate = useNavigate();
@@ -32,3 +32,4 @@ function WorkspaceNavbar({ workspaceId, workspaceName }) {
 }
 
 export default WorkspaceNavbar;
+
