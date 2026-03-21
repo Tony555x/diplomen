@@ -55,7 +55,7 @@ namespace Taskboard.Controllers
 
             // Tasks within those projects
             var tasks = await _context.Tasks
-                .Where(t => projectIds.Contains(t.ProjectId) && t.Title.ToLower().Contains(query))
+                .Where(t => projectIds.Contains(t.ProjectId) && !t.IsArchived && t.Title.ToLower().Contains(query))
                 .Include(t => t.TaskType)
                 .Select(t => new
                 {

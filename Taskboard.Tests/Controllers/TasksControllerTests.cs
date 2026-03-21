@@ -251,5 +251,184 @@ namespace Taskboard.Tests.Controllers
                 It.Is<User>(u => u.Id == "user1"), 
                 It.Is<User>(u => u.Id == assigneeId)), Times.Once);
         }
+
+        // ── Archive / Restore / Permanent Delete ─────────────────────────────────
+
+        private (ProjectMember membership, ProjectRole role) SetupMemberWithEditPermission(int projectId)
+        {
+            var role = new ProjectRole { Id = 1, ProjectId = projectId, CanCreateEditDeleteTasks = true };
+            var membership = new ProjectMember { ProjectId = projectId, UserId = "user1", Status = ProjectMemberStatus.Active, ProjectRoleId = 1, ProjectRole = role };
+            _context.ProjectRoles.Add(role);
+            _context.ProjectMembers.Add(membership);
+            return (membership, role);
+        }
+
+        [Test]
+        public async Task ArchiveTask_WithPermission_SetsIsArchivedAndLogsHistory()
+        {
+            // Arrange
+            var projectId = 1;
+            var taskId = 1;
+            SetupMemberWithEditPermission(projectId);
+            _context.Tasks.Add(new TaskItem { Id = taskId, ProjectId = projectId, Title = "Task to Archive" });
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _tasksController.ArchiveTask(projectId, taskId) as OkObjectResult;
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.StatusCode, Is.EqualTo(200));
+
+            var dbTask = await _context.Tasks.FindAsync(taskId);
+            Assert.That(dbTask!.IsArchived, Is.True);
+            Assert.That(dbTask.ArchivedAt, Is.Not.Null);
+
+            var history = await _context.TaskHistories.FirstOrDefaultAsync(h => h.TaskId == taskId && h.ActionType == "Archived");
+            Assert.That(history, Is.Not.Null);
+        }
+
+        [Test]
+        public async Task ArchiveTask_WithoutPermission_ReturnsForbid()
+        {
+            // Arrange
+            var projectId = 1;
+            var noEditRole = new ProjectRole { Id = 2, ProjectId = projectId, CanCreateEditDeleteTasks = false };
+            _context.ProjectRoles.Add(noEditRole);
+            _context.ProjectMembers.Add(new ProjectMember { ProjectId = projectId, UserId = "user1", Status = ProjectMemberStatus.Active, ProjectRoleId = 2, ProjectRole = noEditRole });
+            _context.Tasks.Add(new TaskItem { Id = 1, ProjectId = projectId, Title = "Task" });
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _tasksController.ArchiveTask(projectId, 1);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<ForbidResult>());
+        }
+
+        [Test]
+        public async Task GetProjectTasks_ExcludesArchivedTasks()
+        {
+            // Arrange
+            var projectId = 1;
+            _projectAccessServiceMock.Setup(x => x.HasViewAccessAsync(projectId, "user1")).ReturnsAsync(true);
+
+            _context.Tasks.Add(new TaskItem { Id = 1, ProjectId = projectId, Title = "Active Task", IsArchived = false });
+            _context.Tasks.Add(new TaskItem { Id = 2, ProjectId = projectId, Title = "Archived Task", IsArchived = true });
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _tasksController.GetProjectTasks(projectId) as OkObjectResult;
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            var tasks = result.Value as IEnumerable<object>;
+            Assert.That(tasks!.Count(), Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task GetArchivedTasks_ReturnsOnlyArchivedTasks()
+        {
+            // Arrange
+            var projectId = 1;
+            _projectAccessServiceMock.Setup(x => x.HasViewAccessAsync(projectId, "user1")).ReturnsAsync(true);
+
+            _context.Tasks.Add(new TaskItem { Id = 1, ProjectId = projectId, Title = "Active", IsArchived = false });
+            _context.Tasks.Add(new TaskItem { Id = 2, ProjectId = projectId, Title = "Archived", IsArchived = true, ArchivedAt = DateTime.UtcNow });
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _tasksController.GetArchivedTasks(projectId) as OkObjectResult;
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            var tasks = result.Value as IEnumerable<object>;
+            Assert.That(tasks!.Count(), Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task RestoreTask_WithPermission_ClearsIsArchivedAndLogsHistory()
+        {
+            // Arrange
+            var projectId = 1;
+            var taskId = 5;
+            SetupMemberWithEditPermission(projectId);
+            _context.Tasks.Add(new TaskItem { Id = taskId, ProjectId = projectId, Title = "Archived Task", IsArchived = true, ArchivedAt = DateTime.UtcNow });
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _tasksController.RestoreTask(projectId, taskId) as OkObjectResult;
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.StatusCode, Is.EqualTo(200));
+
+            var dbTask = await _context.Tasks.FindAsync(taskId);
+            Assert.That(dbTask!.IsArchived, Is.False);
+            Assert.That(dbTask.ArchivedAt, Is.Null);
+
+            var history = await _context.TaskHistories.FirstOrDefaultAsync(h => h.TaskId == taskId && h.ActionType == "Restored");
+            Assert.That(history, Is.Not.Null);
+        }
+
+        [Test]
+        public async Task RestoreTask_OnNonArchivedTask_ReturnsNotFound()
+        {
+            // Arrange
+            var projectId = 1;
+            var taskId = 6;
+            SetupMemberWithEditPermission(projectId);
+            _context.Tasks.Add(new TaskItem { Id = taskId, ProjectId = projectId, Title = "Active Task", IsArchived = false });
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _tasksController.RestoreTask(projectId, taskId);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
+        }
+
+        [Test]
+        public async Task PermanentDeleteTask_WithPermission_RemovesTaskAndSubtasks()
+        {
+            // Arrange
+            var projectId = 1;
+            var taskId = 7;
+            var subtaskId = 8;
+            SetupMemberWithEditPermission(projectId);
+            _context.Tasks.Add(new TaskItem { Id = taskId, ProjectId = projectId, Title = "Parent", IsArchived = true, ArchivedAt = DateTime.UtcNow });
+            _context.Tasks.Add(new TaskItem { Id = subtaskId, ProjectId = projectId, Title = "Subtask", ParentTaskId = taskId });
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _tasksController.PermanentDeleteTask(projectId, taskId) as OkObjectResult;
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.StatusCode, Is.EqualTo(200));
+
+            var dbTask = await _context.Tasks.FindAsync(taskId);
+            Assert.That(dbTask, Is.Null);
+
+            var dbSubtask = await _context.Tasks.FindAsync(subtaskId);
+            Assert.That(dbSubtask, Is.Null);
+        }
+
+        [Test]
+        public async Task PermanentDeleteTask_OnNonArchivedTask_ReturnsNotFound()
+        {
+            // Arrange
+            var projectId = 1;
+            var taskId = 9;
+            SetupMemberWithEditPermission(projectId);
+            _context.Tasks.Add(new TaskItem { Id = taskId, ProjectId = projectId, Title = "Active Task", IsArchived = false });
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _tasksController.PermanentDeleteTask(projectId, taskId);
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<NotFoundObjectResult>());
+        }
     }
 }

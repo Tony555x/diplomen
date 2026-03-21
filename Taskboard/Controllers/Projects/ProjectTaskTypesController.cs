@@ -144,7 +144,7 @@ public class ProjectTaskTypesController : ControllerBase
         var taskType = await _context.TaskTypes.FirstOrDefaultAsync(tt => tt.Id == taskTypeId && tt.ProjectId == projectId);
         if (taskType == null) return NotFound(new { success = false, message = "Task type not found." });
 
-        var isInUse = await _context.Tasks.AnyAsync(t => t.TaskTypeId == taskTypeId);
+        var isInUse = await _context.Tasks.AnyAsync(t => t.TaskTypeId == taskTypeId && !t.IsArchived);
         if (isInUse) return BadRequest(new { success = false, message = "Cannot delete task type that is currently in use by tasks." });
 
         _context.TaskTypes.Remove(taskType);

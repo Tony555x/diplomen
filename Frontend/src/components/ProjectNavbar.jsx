@@ -10,6 +10,7 @@ function ProjectNavbar({ projectId, projectName }) {
         { name: "Dashboard", path: `/project/${projectId}/dashboard` },
         { name: "Tasks", path: `/project/${projectId}/tasks` },
         { name: "Members", path: `/project/${projectId}/members` },
+        { name: "Archived", path: `/project/${projectId}/archived` },
         { name: "Settings", path: `/project/${projectId}/settings` }
     ];
 

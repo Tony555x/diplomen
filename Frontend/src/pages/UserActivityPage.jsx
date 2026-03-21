@@ -55,8 +55,8 @@ function UserActivityPage() {
             case "assigned": return "👤";
             case "removed": return "✕";
             case "created": return "✦";
-            //case "edited": return "✎";
-            //case "commented": return "💬";
+            case "archived": return "◻";
+            case "restored": return "↩";
             default: return "•";
         }
     };

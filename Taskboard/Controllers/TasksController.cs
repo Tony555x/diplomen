@@ -25,18 +25,24 @@ namespace Taskboard.Controllers
             _projectAccessService = projectAccessService;
         }
 
+        // Helper: non-archived tasks for a project
+        private IQueryable<TaskItem> ActiveTasks(int projectId) =>
+            _context.Tasks.Where(t => t.ProjectId == projectId && !t.IsArchived);
+
+        // Helper: all tasks for a project (including archived, for archive-specific endpoints)
+        private IQueryable<TaskItem> AllTasks(int projectId) =>
+            _context.Tasks.Where(t => t.ProjectId == projectId);
+
         [HttpGet]
         public async Task<IActionResult> GetProjectTasks(int projectId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
-            // Verify user has view access to this project (member or access level)
             if (!await _projectAccessService.HasViewAccessAsync(projectId, userId))
                 return Forbid();
 
-            var tasks = await _context.Tasks
-                .Where(t => t.ProjectId == projectId)
+            var tasks = await ActiveTasks(projectId)
                 .Include(t => t.FieldValues)
                     .ThenInclude(fv => fv.TaskField)
                 .Select(t => new
@@ -69,7 +75,6 @@ namespace Taskboard.Controllers
                     {
                         fv.Id,
                         fv.TaskFieldId,
-                        //FieldName = fv.TaskField!.Name,
                         fv.Value
                     }).ToList()
                 })
@@ -85,7 +90,6 @@ namespace Taskboard.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
-            // Verify user has permission to create tasks
             var membership = await _context.ProjectMembers
                 .Include(pm => pm.ProjectRole)
                 .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
@@ -98,7 +102,6 @@ namespace Taskboard.Controllers
                 return BadRequest(new { success = false, message = "Task title is required." });
             }
 
-            // If collectionId is provided, verify it exists and belongs to the same project
             if (request.CollectionId.HasValue)
             {
                 var collectionExists = await _context.Collections
@@ -110,10 +113,9 @@ namespace Taskboard.Controllers
                 }
             }
 
-            // Validate ParentTaskId
             if (request.ParentTaskId.HasValue)
             {
-                var parentTask = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == request.ParentTaskId.Value && t.ProjectId == projectId);
+                var parentTask = await ActiveTasks(projectId).FirstOrDefaultAsync(t => t.Id == request.ParentTaskId.Value);
                 if (parentTask == null)
                     return BadRequest(new { success = false, message = "Parent task not found." });
                 if (parentTask.ParentTaskId != null)
@@ -134,7 +136,6 @@ namespace Taskboard.Controllers
             _context.Tasks.Add(task);
             await _context.SaveChangesAsync();
 
-            // If task has a type, create field values with default values
             if (request.TaskTypeId.HasValue)
             {
                 var taskFields = await _context.TaskFields
@@ -155,7 +156,6 @@ namespace Taskboard.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            // Record task creation in history
             _context.TaskHistories.Add(new TaskHistory
             {
                 TaskId = task.Id,
@@ -190,7 +190,6 @@ namespace Taskboard.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
-            // Verify user has view access to this project (member or access level)
             if (!await _projectAccessService.HasViewAccessAsync(projectId, userId))
                 return Forbid();
 
@@ -220,19 +219,15 @@ namespace Taskboard.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
-
-            // Verify user has view access to this project (member or access level)
             if (!await _projectAccessService.HasViewAccessAsync(projectId, userId))
                 return Forbid();
 
-            // Load membership with role to check write permissions (may be null for access-level guests)
             var membership = await _projectAccessService.GetMembershipAsync(projectId, userId);
-
             var canEditTasks = membership.ProjectRole?.CanCreateEditDeleteTasks == true;
 
-            var task = await _context.Tasks
+            var task = await ActiveTasks(projectId)
                 .Include(t => t.FieldValues)
-                .FirstOrDefaultAsync(t => t.Id == taskId && t.ProjectId == projectId);
+                .FirstOrDefaultAsync(t => t.Id == taskId);
 
             if (task == null)
             {
@@ -291,7 +286,6 @@ namespace Taskboard.Controllers
                 }
             }
 
-            // Update field values if provided
             if (request.FieldValues != null && request.FieldValues.Count > 0)
             {
                 if (canEditTasks)
@@ -318,10 +312,8 @@ namespace Taskboard.Controllers
                 }
             }
 
-            // Update CollectionId if provided
             if (request.CollectionId.HasValue)
             {
-                // Verify collection exists and belongs to the same project
                 var collectionExists = await _context.Collections
                     .AnyAsync(c => c.Id == request.CollectionId.Value && c.ProjectId == projectId);
 
@@ -334,7 +326,6 @@ namespace Taskboard.Controllers
             }
             else if (request.CollectionId == null && request.CollectionId != task.CollectionId)
             {
-                // Explicitly set to null if passed as null
                 task.CollectionId = null;
             }
 
@@ -355,13 +346,85 @@ namespace Taskboard.Controllers
                 }
             });
         }
+
+        // Archive a task (soft-delete) — previously DELETE
         [HttpDelete("{taskId}")]
-        public async Task<IActionResult> DeleteTask(int projectId, int taskId)
+        public async Task<IActionResult> ArchiveTask(int projectId, int taskId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
-            // Verify user has permission to delete tasks
+            var membership = await _context.ProjectMembers
+                .Include(pm => pm.ProjectRole)
+                .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
+
+            if (membership == null) return Forbid();
+            if (membership.ProjectRole?.CanCreateEditDeleteTasks != true) return Forbid();
+
+            var task = await ActiveTasks(projectId).FirstOrDefaultAsync(t => t.Id == taskId);
+
+            if (task == null)
+            {
+                return NotFound(new { success = false, message = "Task not found." });
+            }
+
+            task.IsArchived = true;
+            task.ArchivedAt = DateTime.UtcNow;
+
+            _context.TaskHistories.Add(new TaskHistory
+            {
+                TaskId = task.Id,
+                UserId = userId,
+                ActionType = "Archived",
+                Details = null,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, taskId });
+        }
+
+        // Get list of archived tasks for a project
+        [HttpGet("archived")]
+        public async Task<IActionResult> GetArchivedTasks(int projectId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            if (!await _projectAccessService.HasViewAccessAsync(projectId, userId))
+                return Forbid();
+
+            var tasks = await _context.Tasks
+                .Where(t => t.ProjectId == projectId && t.IsArchived)
+                .Select(t => new
+                {
+                    t.Id,
+                    t.Title,
+                    t.Status,
+                    t.Completed,
+                    t.ArchivedAt,
+                    t.TaskTypeId,
+                    Assignees = t.UserTasks.Select(ut => new
+                    {
+                        ut.UserId,
+                        ut.User!.UserName,
+                        ut.User.AvatarColor
+                    }).ToList()
+                })
+                .OrderByDescending(t => t.ArchivedAt)
+                .ToListAsync();
+
+            return Ok(tasks);
+        }
+
+        // Restore an archived task
+        [HttpPost("{taskId}/restore")]
+        public async Task<IActionResult> RestoreTask(int projectId, int taskId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
             var membership = await _context.ProjectMembers
                 .Include(pm => pm.ProjectRole)
                 .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
@@ -370,29 +433,93 @@ namespace Taskboard.Controllers
             if (membership.ProjectRole?.CanCreateEditDeleteTasks != true) return Forbid();
 
             var task = await _context.Tasks
-                .Include(t => t.FieldValues)
-                .FirstOrDefaultAsync(t => t.Id == taskId && t.ProjectId == projectId);
+                .FirstOrDefaultAsync(t => t.Id == taskId && t.ProjectId == projectId && t.IsArchived);
 
             if (task == null)
+                return NotFound(new { success = false, message = "Archived task not found." });
+
+            task.IsArchived = false;
+            task.ArchivedAt = null;
+
+            _context.TaskHistories.Add(new TaskHistory
             {
-                return NotFound(new { success = false, message = "Task not found." });
+                TaskId = task.Id,
+                UserId = userId,
+                ActionType = "Restored",
+                Details = null,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, taskId });
+        }
+
+        // Permanently delete an archived task
+        [HttpDelete("{taskId}/permanent")]
+        public async Task<IActionResult> PermanentDeleteTask(int projectId, int taskId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var membership = await _context.ProjectMembers
+                .Include(pm => pm.ProjectRole)
+                .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
+
+            if (membership == null) return Forbid();
+            if (membership.ProjectRole?.CanCreateEditDeleteTasks != true) return Forbid();
+
+            var task = await _context.Tasks
+                .FirstOrDefaultAsync(t => t.Id == taskId && t.ProjectId == projectId && t.IsArchived);
+
+            if (task == null)
+                return NotFound(new { success = false, message = "Archived task not found." });
+
+            // Delete subtasks and their related data
+            var subtaskIds = await _context.Tasks
+                .Where(t => t.ParentTaskId == taskId)
+                .Select(t => t.Id)
+                .ToListAsync();
+
+            if (subtaskIds.Any())
+            {
+                var subtaskFieldValues = await _context.TaskFieldValues
+                    .Where(fv => subtaskIds.Contains(fv.TaskId))
+                    .ToListAsync();
+                _context.TaskFieldValues.RemoveRange(subtaskFieldValues);
+
+                var subtaskUserTasks = await _context.UserTasks
+                    .Where(ut => subtaskIds.Contains(ut.TaskItemId))
+                    .ToListAsync();
+                _context.UserTasks.RemoveRange(subtaskUserTasks);
+
+                var subtasks = await _context.Tasks
+                    .Where(t => t.ParentTaskId == taskId)
+                    .ToListAsync();
+                _context.Tasks.RemoveRange(subtasks);
             }
 
-            // Remove related field values first (explicit for safety)
-            if (task.FieldValues.Any())
-            {
-                _context.TaskFieldValues.RemoveRange(task.FieldValues);
-            }
+            var fieldValues = await _context.TaskFieldValues
+                .Where(fv => fv.TaskId == taskId)
+                .ToListAsync();
+            _context.TaskFieldValues.RemoveRange(fieldValues);
+
+            var blockers = await _context.TaskBlockers
+                .Where(tb => tb.BlockingTaskId == taskId || tb.BlockedTaskId == taskId)
+                .ToListAsync();
+            _context.TaskBlockers.RemoveRange(blockers);
+
+            var userTasks = await _context.UserTasks
+                .Where(ut => ut.TaskItemId == taskId)
+                .ToListAsync();
+            _context.UserTasks.RemoveRange(userTasks);
 
             _context.Tasks.Remove(task);
             await _context.SaveChangesAsync();
 
-            return Ok(new
-            {
-                success = true,
-                taskId = taskId
-            });
+            return Ok(new { success = true, taskId });
         }
+
         [HttpGet("{taskId}/assignees")]
         public async Task<IActionResult> GetTaskAssignees(int projectId, int taskId)
         {
@@ -424,7 +551,6 @@ namespace Taskboard.Controllers
             if (!await _projectAccessService.HasViewAccessAsync(projectId, userId))
                 return Forbid();
 
-            // Verify the user being assigned is an active member of the project
             var userToAssign = await _context.ProjectMembers
                 .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == request.UserId);
 
@@ -448,7 +574,6 @@ namespace Taskboard.Controllers
 
             _context.UserTasks.Add(assignment);
             
-            // Log history
             var assignedUser = await _context.Users.FindAsync(request.UserId);
             _context.TaskHistories.Add(new TaskHistory
             {
@@ -461,7 +586,6 @@ namespace Taskboard.Controllers
             
             await _context.SaveChangesAsync();
 
-            // Send notification
             var task = await _context.Tasks.FindAsync(taskId);
             var assigner = await _context.Users.FindAsync(userId);
             
@@ -489,7 +613,6 @@ namespace Taskboard.Controllers
 
             _context.UserTasks.Remove(assignment);
             
-            // Log history
              var unassignedUser = await _context.Users.FindAsync(assignedUserId);
              _context.TaskHistories.Add(new TaskHistory
             {
@@ -502,6 +625,7 @@ namespace Taskboard.Controllers
 
             return Ok(new { success = true });
         }
+
         [HttpGet("{taskId}/due-date")]
         public async Task<IActionResult> GetTaskDueDate(int projectId, int taskId)
         {
@@ -511,13 +635,13 @@ namespace Taskboard.Controllers
             if (!await _projectAccessService.HasViewAccessAsync(projectId, userId))
                 return Forbid();
 
-            var task = await _context.Tasks
-                .FirstOrDefaultAsync(t => t.Id == taskId && t.ProjectId == projectId);
+            var task = await ActiveTasks(projectId).FirstOrDefaultAsync(t => t.Id == taskId);
 
             if (task == null) return NotFound(new { success = false, message = "Task not found." });
 
             return Ok(new { dueDate = task.DueDate });
         }
+
         [HttpPut("{taskId}/due-date")]
         public async Task<IActionResult> SetTaskDueDate(int projectId, int taskId, [FromBody] SetDueDateRequest request)
         {
@@ -527,8 +651,7 @@ namespace Taskboard.Controllers
             if (!await _projectAccessService.HasViewAccessAsync(projectId, userId))
                 return Forbid();
 
-            var task = await _context.Tasks
-                .FirstOrDefaultAsync(t => t.Id == taskId && t.ProjectId == projectId);
+            var task = await ActiveTasks(projectId).FirstOrDefaultAsync(t => t.Id == taskId);
 
             if (task == null) return NotFound(new { success = false, message = "Task not found." });
 
@@ -572,9 +695,7 @@ namespace Taskboard.Controllers
             if (!await _projectAccessService.HasViewAccessAsync(projectId, userId))
                 return Forbid();
 
-            // Verify task exists and belongs to project
-            var taskExists = await _context.Tasks
-                .AnyAsync(t => t.Id == taskId && t.ProjectId == projectId);
+            var taskExists = await ActiveTasks(projectId).AnyAsync(t => t.Id == taskId);
             if (!taskExists) return NotFound(new { success = false, message = "Task not found." });
 
             if (string.IsNullOrWhiteSpace(request.Content))
@@ -593,7 +714,6 @@ namespace Taskboard.Controllers
             _context.TaskMessages.Add(message);
             await _context.SaveChangesAsync();
 
-            // Reload with user info
             var createdMessage = await _context.TaskMessages
                 .Where(tm => tm.Id == message.Id)
                 .Select(tm => new
@@ -662,9 +782,8 @@ namespace Taskboard.Controllers
             if (!await _projectAccessService.HasViewAccessAsync(projectId, userId))
                 return Forbid();
 
-            // Verify both tasks exist and belong to the same project
-            var tasksExist = await _context.Tasks
-                .Where(t => t.ProjectId == projectId && (t.Id == taskId || t.Id == request.BlockerTaskId))
+            var tasksExist = await ActiveTasks(projectId)
+                .Where(t => t.Id == taskId || t.Id == request.BlockerTaskId)
                 .CountAsync();
 
             if (tasksExist != 2)
@@ -672,13 +791,11 @@ namespace Taskboard.Controllers
                 return BadRequest(new { success = false, message = "One or both tasks not found." });
             }
 
-            // Prevent self-blocking
             if (taskId == request.BlockerTaskId)
             {
                 return BadRequest(new { success = false, message = "A task cannot block itself." });
             }
 
-            // Check if relationship already exists
             var alreadyExists = await _context.TaskBlockers
                 .AnyAsync(tb => tb.BlockingTaskId == request.BlockerTaskId && tb.BlockedTaskId == taskId);
 

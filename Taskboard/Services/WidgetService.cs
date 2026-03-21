@@ -68,7 +68,7 @@ namespace Taskboard.Services
         {
             // Load all tasks for the project with required navigation properties
             var allTasks = await _context.Tasks
-                .Where(t => t.ProjectId == projectId)
+                .Where(t => t.ProjectId == projectId && !t.IsArchived)
                 .Include(t => t.TaskType).ThenInclude(tt => tt!.Fields)
                 .Include(t => t.UserTasks).ThenInclude(ut => ut.User)
                 .Include(t => t.FieldValues).ThenInclude(fv => fv.TaskField)

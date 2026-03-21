@@ -348,7 +348,7 @@ function ProjectTasks() {
     };
 
     const handleTaskDelete = async (task) => {
-        if (!window.confirm("Delete this task? This cannot be undone.")) return;
+        if (!window.confirm("Archive this task? You can restore it from the Archived Tasks page.")) return;
 
         try {
             await fetchWithAuth(

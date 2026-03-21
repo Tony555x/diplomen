@@ -6,12 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Taskboard.Contracts;
 using Taskboard.Data.Models;
-using Google.Apis.Auth.OAuth2;
-using Google.Apis.Auth.OAuth2.Flows;
-using Google.Apis.Auth.OAuth2.Responses;
-using MailKit.Net.Smtp;
-using MailKit.Security;
-using MimeKit;
+using Taskboard.Services;
 
 namespace Taskboard.Controllers
 {
@@ -21,12 +16,15 @@ namespace Taskboard.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _config;
+        private readonly IEmailService _emailService;
 
-        public AuthController(UserManager<User> userManager, IConfiguration config)
+        public AuthController(UserManager<User> userManager, IConfiguration config, IEmailService emailService)
         {
             _userManager = userManager;
             _config = config;
+            _emailService = emailService;
         }
+
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
@@ -67,59 +65,14 @@ namespace Taskboard.Controllers
             {
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 var verifyUrl = Url.Action("VerifyEmail", "Auth", new { userId = user.Id, token = token }, Request.Scheme);
-                
-                var gmailUser = _config["GMAIL_EMAIL"];
-                var clientId = _config["GMAIL_CLIENT_ID"];
-                var clientSecret = _config["GMAIL_CLIENT_SECRET"];
-                var refreshToken = _config["GMAIL_REFRESH_TOKEN"];
 
-                if (!string.IsNullOrEmpty(gmailUser) && !string.IsNullOrEmpty(clientId) && 
-                    !string.IsNullOrEmpty(clientSecret) && !string.IsNullOrEmpty(refreshToken))
-                {
-                    // Get access token using refresh token
-                    var clientSecrets = new ClientSecrets { ClientId = clientId, ClientSecret = clientSecret };
-                    var credential = new UserCredential(
-                        new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer { ClientSecrets = clientSecrets }),
-                        "user", 
-                        new TokenResponse { RefreshToken = refreshToken }
-                    );
-
-                    await credential.RefreshTokenAsync(CancellationToken.None);
-                    var accessToken = credential.Token.AccessToken;
-
-                    var message = new MimeMessage();
-                    message.From.Add(new MailboxAddress("Taskboard", gmailUser));
-                    message.To.Add(new MailboxAddress(user.UserName, user.Email));
-                    message.Subject = "Verify your Taskboard account";
-
-                    var bodyBuilder = new BodyBuilder
-                    {
-                        HtmlBody = $"<p>Hi {user.UserName},</p><p>Please verify your email by clicking the link below:</p><p><a href='{verifyUrl}'>Verify Email</a></p>"
-                    };
-                    message.Body = bodyBuilder.ToMessageBody();
-
-                    using var client = new SmtpClient();
-                    // Fix for SSL revocation error
-                    client.CheckCertificateRevocation = false;
-                    
-                    await client.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
-                    
-                    var oauth2 = new SaslMechanismOAuth2(gmailUser, accessToken);
-                    await client.AuthenticateAsync(oauth2);
-
-                    await client.SendAsync(message);
-                    await client.DisconnectAsync(true);
-                }
-                else
-                {
-                    throw new Exception("Gmail configuration is missing in .env");
-                }
+                await _emailService.SendVerificationEmailAsync(user.Email!, user.UserName!, verifyUrl!);
             }
             catch (Exception ex)
             {
                 // Roll back user creation if email fails
                 await _userManager.DeleteAsync(user);
-                
+
                 return BadRequest(new
                 {
                     success = false,

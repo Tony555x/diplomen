@@ -61,7 +61,7 @@ public class NotificationsController : ControllerBase
             .ToList();
 
         var taskProjectMap = await _context.Tasks
-            .Where(t => taskIds.Contains(t.Id))
+            .Where(t => taskIds.Contains(t.Id) && !t.IsArchived)
             .ToDictionaryAsync(t => t.Id, t => t.ProjectId);
 
         return Ok(notifications.Select(n => MapNotification(n, taskProjectMap)));
@@ -85,7 +85,7 @@ public class NotificationsController : ControllerBase
             .ToList();
 
         var taskProjectMap = await _context.Tasks
-            .Where(t => taskIds.Contains(t.Id))
+            .Where(t => taskIds.Contains(t.Id) && !t.IsArchived)
             .ToDictionaryAsync(t => t.Id, t => t.ProjectId);
 
         return Ok(notifications.Select(n => MapNotification(n, taskProjectMap)));

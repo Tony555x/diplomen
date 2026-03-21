@@ -247,7 +247,7 @@ public class ProjectsController : ControllerBase
         if (status == null) return NotFound();
 
         // Check if any tasks are using this status
-        var tasksUsingStatus = await _context.Tasks.AnyAsync(t => t.ProjectId == projectId && t.Status == status.Name);
+        var tasksUsingStatus = await _context.Tasks.AnyAsync(t => t.ProjectId == projectId && !t.IsArchived && t.Status == status.Name);
         if (tasksUsingStatus)
         {
             return BadRequest(new { success = false, message = "Cannot delete status while tasks are using it." });

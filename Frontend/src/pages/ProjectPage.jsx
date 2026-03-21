@@ -10,6 +10,7 @@ import { usePageTitle } from "../hooks/usePageTitle";
 import "./ProjectPage.css";
 import ProjectSettings from "./ProjectSettings";
 import PageBackground from "../components/PageBackground";
+import ArchivedTasksPage from "./ArchivedTasksPage";
 
 function ProjectPage() {
     const { projectId } = useParams();
@@ -50,6 +51,7 @@ function ProjectPage() {
                     <Route path="/tasks/:taskId" element={<ProjectTasks />} />
                     <Route path="/members" element={<ProjectMembers />} />
                     <Route path="/settings/*" element={<ProjectSettings />} />
+                    <Route path="/archived" element={<ArchivedTasksPage />} />
                 </Routes>
             </div>
         </div>

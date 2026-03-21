@@ -46,5 +46,9 @@ namespace Taskboard.Data.Models
 
         [InverseProperty(nameof(ParentTask))]
         public List<TaskItem> Subtasks { get; set; } = new();
+
+        // Soft-delete / archiving
+        public bool IsArchived { get; set; } = false;
+        public DateTime? ArchivedAt { get; set; }
     }
-}
+}

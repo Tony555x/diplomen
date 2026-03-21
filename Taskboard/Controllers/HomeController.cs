@@ -52,7 +52,7 @@ namespace Taskboard.Controllers
 
             // Assigned Tasks (Top 10, not completed)
             var assignedTasks = await _context.Tasks
-                .Where(t => !t.Completed && t.UserTasks.Any(ut => ut.UserId == userId))
+                .Where(t => !t.Completed && !t.IsArchived && t.UserTasks.Any(ut => ut.UserId == userId))
                 .Include(t => t.Project)
                 .OrderByDescending(t => t.Id)
                 .Select(t => new

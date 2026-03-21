@@ -229,7 +229,7 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
                                 className={sharedStyles.deleteButton}
                                 onClick={() => onDelete(task)}
                             >
-                                Delete
+                                Archive
                             </button>
                         )}
                         {!onDelete && <div />}
