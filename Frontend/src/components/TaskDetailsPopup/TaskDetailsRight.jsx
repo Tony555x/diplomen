@@ -52,7 +52,8 @@ function TaskDetailsRight({
     onRefresh,
     canCreateTasks,
     onViewActivity,
-    onSubtaskCreated
+    onSubtaskCreated,
+    onSubtaskClick
 }) {
     const [blockers, setBlockers] = useState([]);
     const [blockedTasks, setBlockedTasks] = useState([]);
@@ -315,7 +316,13 @@ function TaskDetailsRight({
                                 key={st.id}
                                 className={styles.assigneeRow}
                                 style={{ width: "100%", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
-                                onClick={() => navigate(`/project/${projectId}/tasks/${st.id}`)}
+                                onClick={() => {
+                                    if (onSubtaskClick) {
+                                        onSubtaskClick(st);
+                                    } else {
+                                        navigate(`/project/${projectId}/tasks/${st.id}`);
+                                    }
+                                }}
                             >
                                 {stType?.icon && (
                                     <img src={`/cardicons/${stType.icon}`} alt="" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />

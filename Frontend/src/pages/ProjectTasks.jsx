@@ -359,7 +359,23 @@ function ProjectTasks() {
             setTasks(prev => prev.filter(t => t.id !== task.id));
             setSelectedTask(null);
         } catch (err) {
-            console.error(err);
+            throw err;
+        }
+    };
+
+    const handleSubtaskDelete = async (task) => {
+        if (!window.confirm("Permanently delete this subtask? This cannot be undone.")) return;
+
+        try {
+            await fetchWithAuth(
+                `/api/projects/${projectId}/tasks/${task.id}/permanent`,
+                { method: "DELETE" }
+            );
+
+            setTasks(prev => prev.filter(t => t.id !== task.id));
+            setSelectedTask(null);
+        } catch (err) {
+            throw err;
         }
     };
     const renameCollection = async (collectionId, name) => {
@@ -468,13 +484,17 @@ function ProjectTasks() {
                     taskTypes={taskTypes}
                     onClose={closeTask}
                     onUpdate={handleTaskUpdate}
-                    onDelete={canCreateTasks ? handleTaskDelete : null}
+                    onDelete={canCreateTasks ? (selectedTask.parentTaskId ? handleSubtaskDelete : handleTaskDelete) : null}
                     onDrop={handleDrop}
                     onRefresh={refreshTasks}
                     canCreateTasks={canCreateTasks}
                     onSubtaskCreated={(newTask) => {
                         setTasks(prev => [...prev, newTask]);
                         openTask(newTask);
+                    }}
+                    onSubtaskClick={(subtask) => {
+                        const match = tasks.find(t => t.id === subtask.id) || subtask;
+                        openTask(match);
                     }}
                     isMember={currentUserRole?.isMember === true}
                 />

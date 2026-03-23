@@ -380,6 +380,25 @@ namespace Taskboard.Controllers
                 CreatedAt = DateTime.UtcNow
             });
 
+            var subtasks = await _context.Tasks
+                .Where(t => t.ParentTaskId == taskId && t.ProjectId == projectId && !t.IsArchived)
+                .ToListAsync();
+
+            foreach (var subtask in subtasks)
+            {
+                subtask.IsArchived = true;
+                subtask.ArchivedAt = DateTime.UtcNow;
+
+                _context.TaskHistories.Add(new TaskHistory
+                {
+                    TaskId = subtask.Id,
+                    UserId = userId,
+                    ActionType = "Archived",
+                    Details = "automatically via parent task",
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+
             await _context.SaveChangesAsync();
 
             return Ok(new { success = true, taskId });
@@ -396,7 +415,7 @@ namespace Taskboard.Controllers
                 return Forbid();
 
             var tasks = await _context.Tasks
-                .Where(t => t.ProjectId == projectId && t.IsArchived)
+                .Where(t => t.ProjectId == projectId && t.IsArchived && t.ParentTaskId == null)
                 .Select(t => new
                 {
                     t.Id,
@@ -450,6 +469,25 @@ namespace Taskboard.Controllers
                 CreatedAt = DateTime.UtcNow
             });
 
+            var subtasks = await _context.Tasks
+                .Where(t => t.ParentTaskId == taskId && t.ProjectId == projectId && t.IsArchived)
+                .ToListAsync();
+
+            foreach (var subtask in subtasks)
+            {
+                subtask.IsArchived = false;
+                subtask.ArchivedAt = null;
+
+                _context.TaskHistories.Add(new TaskHistory
+                {
+                    TaskId = subtask.Id,
+                    UserId = userId,
+                    ActionType = "Restored",
+                    Details = "automatically via parent task",
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+
             await _context.SaveChangesAsync();
 
             return Ok(new { success = true, taskId });
@@ -470,10 +508,10 @@ namespace Taskboard.Controllers
             if (membership.ProjectRole?.CanCreateEditDeleteTasks != true) return Forbid();
 
             var task = await _context.Tasks
-                .FirstOrDefaultAsync(t => t.Id == taskId && t.ProjectId == projectId && t.IsArchived);
+                .FirstOrDefaultAsync(t => t.Id == taskId && t.ProjectId == projectId && (t.IsArchived || t.ParentTaskId != null));
 
             if (task == null)
-                return NotFound(new { success = false, message = "Archived task not found." });
+                return NotFound(new { success = false, message = "Task not found or cannot be permanently deleted." });
 
             // Delete subtasks and their related data
             var subtaskIds = await _context.Tasks

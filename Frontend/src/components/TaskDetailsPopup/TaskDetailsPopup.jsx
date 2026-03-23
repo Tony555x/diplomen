@@ -8,7 +8,7 @@ import TaskDetailsLeft from "./TaskDetailsLeft";
 import TaskDetailsRight from "./TaskDetailsRight";
 import TaskDetailsChat from "./TaskDetailsChat";
 
-function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpdate, onDelete, onRefresh, canCreateTasks = false, onSubtaskCreated, isMember = true }) {
+function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpdate, onDelete, onRefresh, canCreateTasks = false, onSubtaskCreated, onSubtaskClick, isMember = true }) {
     const { projectId } = useParams();
     const navigate = useNavigate();
 
@@ -36,11 +36,19 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
 
     const currentTaskType = taskTypes.find(tt => tt.id === task.taskTypeId);
 
+    // Re-sync local state whenever we switch to a different task
     useEffect(() => {
+        setTitle(task.title);
+        setStatus(task.status);
+        setCompleted(task.completed);
+        setFieldValues(task.fieldValues);
+        setDueDate(task.dueDate || null);
+        setMessages([]);
+        setNewMessage("");
         loadAssignees();
         loadMembers();
         loadMessages();
-    }, []);
+    }, [task.id]);
 
     useEffect(() => {
         if (isEditingTitle) {
@@ -104,6 +112,20 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
         }
     };
 
+    const handleDeleteClick = async () => {
+        setSaveError(null);
+        setIsSaving(true);
+        try {
+            await onDelete(task);
+            // ProjectTasks handles closing the popup (setSelectedTask(null)) on success
+        } catch (err) {
+            const msg = err?.message || "Failed to delete task. Please try again.";
+            setSaveError(msg);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     const handleBackdropClick = e => {
         if (e.target === e.currentTarget) onClose();
     };
@@ -156,80 +178,91 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
                     <button className={styles.closeBtn} onClick={onClose}>×</button>
                 </div>
 
-                    <div className={styles.mobileTabs}>
-                        <button
-                            className={`${styles.tabBtn} ${activeTab === 'details' ? styles.activeTab : ''}`}
-                            onClick={() => setActiveTab('details')}
-                        >
-                            Details
-                        </button>
-                        <button
-                            className={`${styles.tabBtn} ${activeTab === 'properties' ? styles.activeTab : ''}`}
-                            onClick={() => setActiveTab('properties')}
-                        >
-                            Properties
-                        </button>
-                        <button
-                            className={`${styles.tabBtn} ${activeTab === 'chat' ? styles.activeTab : ''}`}
-                            onClick={() => setActiveTab('chat')}
-                        >
-                            Chat
-                        </button>
+                <div className={styles.mobileTabs}>
+                    <button
+                        className={`${styles.tabBtn} ${activeTab === 'details' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('details')}
+                    >
+                        Details
+                    </button>
+                    <button
+                        className={`${styles.tabBtn} ${activeTab === 'properties' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('properties')}
+                    >
+                        Properties
+                    </button>
+                    <button
+                        className={`${styles.tabBtn} ${activeTab === 'chat' ? styles.activeTab : ''}`}
+                        onClick={() => setActiveTab('chat')}
+                    >
+                        Chat
+                    </button>
+                </div>
+
+                <div className={styles.body}>
+                    <div className={`${styles.columnWrapper} ${activeTab === 'details' ? styles.activeColumn : ''}`}>
+                        <TaskDetailsLeft
+                            taskType={currentTaskType}
+                            completed={completed}
+                            setCompleted={setCompleted}
+                            fieldValues={fieldValues}
+                            setFieldValues={setFieldValues}
+                            canCreateTasks={canCreateTasks}
+                        />
                     </div>
 
-                    <div className={styles.body}>
-                        <div className={`${styles.columnWrapper} ${activeTab === 'details' ? styles.activeColumn : ''}`}>
-                            <TaskDetailsLeft
-                                taskType={currentTaskType}
-                                completed={completed}
-                                setCompleted={setCompleted}
-                                fieldValues={fieldValues}
-                                setFieldValues={setFieldValues}
-                                canCreateTasks={canCreateTasks}
-                            />
-                        </div>
-
-                        <div className={`${styles.columnWrapper} ${activeTab === 'properties' ? styles.activeColumn : ''}`}>
-                            <TaskDetailsRight
-                                projectId={projectId}
-                                task={task}
-                                taskTypes={taskTypes}
-                                assignees={assignees}
-                                members={members}
-                                loadAssignees={loadAssignees}
-                                dueDate={dueDate}
-                                onDueDateChange={handleDueDateChange}
-                                onRefresh={onRefresh}
-                                canCreateTasks={canCreateTasks}
-                                onViewActivity={(uid) => navigate(`/project/${projectId}/members/${uid}/activity`)}
-                                onSubtaskCreated={onSubtaskCreated}
-                            />
-                        </div>
-
-                        <div className={`${styles.columnWrapper} ${activeTab === 'chat' ? styles.activeColumn : ''}`}>
-                            <TaskDetailsChat
-                                projectId={projectId}
-                                taskId={task.id}
-                                messages={messages}
-                                newMessage={newMessage}
-                                setNewMessage={setNewMessage}
-                                reloadMessages={loadMessages}
-                                messagesEndRef={messagesEndRef}
-                            />
-                        </div>
+                    <div className={`${styles.columnWrapper} ${activeTab === 'properties' ? styles.activeColumn : ''}`}>
+                        <TaskDetailsRight
+                            projectId={projectId}
+                            task={task}
+                            taskTypes={taskTypes}
+                            assignees={assignees}
+                            members={members}
+                            loadAssignees={loadAssignees}
+                            dueDate={dueDate}
+                            onDueDateChange={handleDueDateChange}
+                            onRefresh={onRefresh}
+                            canCreateTasks={canCreateTasks}
+                            onViewActivity={(uid) => navigate(`/project/${projectId}/members/${uid}/activity`)}
+                            onSubtaskCreated={onSubtaskCreated}
+                            onSubtaskClick={onSubtaskClick}
+                        />
                     </div>
+
+                    <div className={`${styles.columnWrapper} ${activeTab === 'chat' ? styles.activeColumn : ''}`}>
+                        <TaskDetailsChat
+                            projectId={projectId}
+                            taskId={task.id}
+                            messages={messages}
+                            newMessage={newMessage}
+                            setNewMessage={setNewMessage}
+                            reloadMessages={loadMessages}
+                            messagesEndRef={messagesEndRef}
+                        />
+                    </div>
+                </div>
 
                 <div className={styles.footer}>
                     {saveError && (
                         <span className={styles.saveError}>{saveError}</span>
                     )}
                     <div className={styles.footerActions}>
-                        {onDelete && (
+                        {onDelete && !task.parentTaskId && (
                             <button
                                 className={sharedStyles.deleteButton}
-                                onClick={() => onDelete(task)}
+                                onClick={handleDeleteClick}
+                                disabled={isSaving}
                             >
                                 Archive
+                            </button>
+                        )}
+                        {onDelete && task.parentTaskId && (
+                            <button
+                                className={sharedStyles.deleteButton}
+                                onClick={handleDeleteClick}
+                                disabled={isSaving}
+                            >
+                                Delete
                             </button>
                         )}
                         {!onDelete && <div />}
