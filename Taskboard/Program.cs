@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Taskboard.Data.Models;
 using Taskboard.Services;
+using Taskboard.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,6 +67,10 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IWidgetService, WidgetService>();
 builder.Services.AddScoped<IProjectAccessService, ProjectAccessService>();
 builder.Services.AddScoped<IEmailService, GmailEmailService>();
+
+builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+builder.Services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
 
 var app = builder.Build();
 

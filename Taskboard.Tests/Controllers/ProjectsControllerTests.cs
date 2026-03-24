@@ -13,6 +13,7 @@ using Taskboard.Controllers.Projects;
 using Taskboard.Data;
 using Taskboard.Data.Models;
 using Taskboard.Services;
+using Taskboard.Repositories;
 
 namespace Taskboard.Tests.Controllers.Projects
 {
@@ -22,6 +23,7 @@ namespace Taskboard.Tests.Controllers.Projects
         private AppDbContext _context;
         private Mock<INotificationService> _notificationServiceMock;
         private Mock<IProjectAccessService> _projectAccessServiceMock;
+        private Mock<IProjectRepository> _projectRepositoryMock;
         private ProjectsController _projectsController;
 
         [SetUp]
@@ -34,8 +36,9 @@ namespace Taskboard.Tests.Controllers.Projects
             _context = new AppDbContext(options);
             _notificationServiceMock = new Mock<INotificationService>();
             _projectAccessServiceMock = new Mock<IProjectAccessService>();
+            _projectRepositoryMock = new Mock<IProjectRepository>();
 
-            _projectsController = new ProjectsController(_context, _notificationServiceMock.Object, _projectAccessServiceMock.Object);
+            _projectsController = new ProjectsController(_context, _notificationServiceMock.Object, _projectAccessServiceMock.Object, _projectRepositoryMock.Object);
 
             var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
             {
@@ -141,7 +144,7 @@ namespace Taskboard.Tests.Controllers.Projects
         }
 
         [Test]
-        public async Task DeleteProject_UserIsOwner_DeletesProjectAndDependencies()
+        public async Task DeleteProject_UserIsOwner_CallsRepositoryDelete()
         {
             // Arrange
             var projectId = 1;
@@ -157,15 +160,7 @@ namespace Taskboard.Tests.Controllers.Projects
 
             // Assert
             Assert.That(result, Is.Not.Null);
-            
-            var dbProject = await _context.Projects.FindAsync(projectId);
-            Assert.That(dbProject, Is.Null);
-
-            var rolesLeft = await _context.ProjectRoles.Where(pr => pr.ProjectId == projectId).ToListAsync();
-            Assert.That(rolesLeft, Is.Empty);
-
-             var membersLeft = await _context.ProjectMembers.Where(pm => pm.ProjectId == projectId).ToListAsync();
-            Assert.That(membersLeft, Is.Empty);
+            _projectRepositoryMock.Verify(x => x.DeleteProjectAsync(projectId, true), Times.Once);
         }
     }
 }

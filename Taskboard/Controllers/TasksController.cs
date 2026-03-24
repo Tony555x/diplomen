@@ -6,6 +6,7 @@ using System.Security.Claims;
 using Taskboard.Contracts;
 using Taskboard.Data.Models;
 using Taskboard.Services;
+using Taskboard.Repositories;
 
 namespace Taskboard.Controllers
 {
@@ -17,12 +18,14 @@ namespace Taskboard.Controllers
         private readonly AppDbContext _context;
         private readonly INotificationService _notificationService;
         private readonly IProjectAccessService _projectAccessService;
+        private readonly ITaskRepository _taskRepository;
 
-        public TasksController(AppDbContext context, INotificationService notificationService, IProjectAccessService projectAccessService)
+        public TasksController(AppDbContext context, INotificationService notificationService, IProjectAccessService projectAccessService, ITaskRepository taskRepository)
         {
             _context = context;
             _notificationService = notificationService;
             _projectAccessService = projectAccessService;
+            _taskRepository = taskRepository;
         }
 
         // Helper: non-archived tasks for a project
@@ -513,47 +516,7 @@ namespace Taskboard.Controllers
             if (task == null)
                 return NotFound(new { success = false, message = "Task not found or cannot be permanently deleted." });
 
-            // Delete subtasks and their related data
-            var subtaskIds = await _context.Tasks
-                .Where(t => t.ParentTaskId == taskId)
-                .Select(t => t.Id)
-                .ToListAsync();
-
-            if (subtaskIds.Any())
-            {
-                var subtaskFieldValues = await _context.TaskFieldValues
-                    .Where(fv => subtaskIds.Contains(fv.TaskId))
-                    .ToListAsync();
-                _context.TaskFieldValues.RemoveRange(subtaskFieldValues);
-
-                var subtaskUserTasks = await _context.UserTasks
-                    .Where(ut => subtaskIds.Contains(ut.TaskItemId))
-                    .ToListAsync();
-                _context.UserTasks.RemoveRange(subtaskUserTasks);
-
-                var subtasks = await _context.Tasks
-                    .Where(t => t.ParentTaskId == taskId)
-                    .ToListAsync();
-                _context.Tasks.RemoveRange(subtasks);
-            }
-
-            var fieldValues = await _context.TaskFieldValues
-                .Where(fv => fv.TaskId == taskId)
-                .ToListAsync();
-            _context.TaskFieldValues.RemoveRange(fieldValues);
-
-            var blockers = await _context.TaskBlockers
-                .Where(tb => tb.BlockingTaskId == taskId || tb.BlockedTaskId == taskId)
-                .ToListAsync();
-            _context.TaskBlockers.RemoveRange(blockers);
-
-            var userTasks = await _context.UserTasks
-                .Where(ut => ut.TaskItemId == taskId)
-                .ToListAsync();
-            _context.UserTasks.RemoveRange(userTasks);
-
-            _context.Tasks.Remove(task);
-            await _context.SaveChangesAsync();
+            await _taskRepository.DeleteTaskAsync(taskId);
 
             return Ok(new { success = true, taskId });
         }

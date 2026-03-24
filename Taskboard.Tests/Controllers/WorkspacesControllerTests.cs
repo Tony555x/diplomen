@@ -13,6 +13,7 @@ using Taskboard.Data;
 using Taskboard.Data.Models;
 using Taskboard.Services;
 using Taskboard.Contracts;
+using Taskboard.Repositories;
 
 namespace Taskboard.Tests.Controllers
 {
@@ -21,6 +22,7 @@ namespace Taskboard.Tests.Controllers
     {
         private AppDbContext _context;
         private Mock<INotificationService> _notificationServiceMock;
+        private Mock<IWorkspaceRepository> _workspaceRepositoryMock;
         private WorkspacesController _workspacesController;
 
         [SetUp]
@@ -32,8 +34,9 @@ namespace Taskboard.Tests.Controllers
 
             _context = new AppDbContext(options);
             _notificationServiceMock = new Mock<INotificationService>();
+            _workspaceRepositoryMock = new Mock<IWorkspaceRepository>();
             
-            _workspacesController = new WorkspacesController(_context, _notificationServiceMock.Object);
+            _workspacesController = new WorkspacesController(_context, _notificationServiceMock.Object, _workspaceRepositoryMock.Object);
 
             var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
             {
@@ -193,6 +196,23 @@ namespace Taskboard.Tests.Controllers
             Assert.That(result, Is.Not.Null);
             var membership = await _context.WorkspaceMembers.FirstOrDefaultAsync(wm => wm.WorkspaceId == workspaceId && wm.UserId == "user1");
             Assert.That(membership, Is.Null);
+        }
+
+        [Test]
+        public async Task DeleteWorkspace_UserIsOwner_CallsRepositoryDelete()
+        {
+            // Arrange
+            var workspaceId = 1;
+            _context.Workspaces.Add(new Workspace { Id = workspaceId, Name = "Test" });
+            _context.WorkspaceMembers.Add(new WorkspaceMember { WorkspaceId = workspaceId, UserId = "user1", Role = "Owner", Status = "Active" });
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _workspacesController.DeleteWorkspace(workspaceId) as OkObjectResult;
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            _workspaceRepositoryMock.Verify(x => x.DeleteWorkspaceAsync(workspaceId, true), Times.Once);
         }
     }
 }

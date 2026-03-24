@@ -5,6 +5,7 @@ using System.Security.Claims;
 using Taskboard.Contracts;
 using Taskboard.Data.Models;
 using Taskboard.Services;
+using Taskboard.Repositories;
 
 namespace Taskboard.Controllers
 {
@@ -15,11 +16,13 @@ namespace Taskboard.Controllers
     {
         private readonly AppDbContext _context;
         private readonly INotificationService _notificationService;
+        private readonly IWorkspaceRepository _workspaceRepository;
 
-        public WorkspacesController(AppDbContext context, INotificationService notificationService)
+        public WorkspacesController(AppDbContext context, INotificationService notificationService, IWorkspaceRepository workspaceRepository)
         {
             _context = context;
             _notificationService = notificationService;
+            _workspaceRepository = workspaceRepository;
         }
 
         [HttpGet("{id}")]
@@ -301,8 +304,7 @@ namespace Taskboard.Controllers
             var workspace = await _context.Workspaces.FindAsync(id);
             if (workspace == null) return NotFound();
 
-            _context.Workspaces.Remove(workspace);
-            await _context.SaveChangesAsync();
+            await _workspaceRepository.DeleteWorkspaceAsync(id);
 
             return Ok(new { success = true });
         }

@@ -14,6 +14,7 @@ using Taskboard.Data.Models;
 using Taskboard.Services;
 using Taskboard.Contracts;
 using Taskboard.Contracts.Projects;
+using Taskboard.Repositories;
 
 namespace Taskboard.Tests.Controllers
 {
@@ -23,6 +24,7 @@ namespace Taskboard.Tests.Controllers
         private AppDbContext _context;
         private Mock<INotificationService> _notificationServiceMock;
         private Mock<IProjectAccessService> _projectAccessServiceMock;
+        private Mock<ITaskRepository> _taskRepositoryMock;
         private TasksController _tasksController;
 
         [SetUp]
@@ -35,8 +37,9 @@ namespace Taskboard.Tests.Controllers
             _context = new AppDbContext(options);
             _notificationServiceMock = new Mock<INotificationService>();
             _projectAccessServiceMock = new Mock<IProjectAccessService>();
+            _taskRepositoryMock = new Mock<ITaskRepository>();
 
-            _tasksController = new TasksController(_context, _notificationServiceMock.Object, _projectAccessServiceMock.Object);
+            _tasksController = new TasksController(_context, _notificationServiceMock.Object, _projectAccessServiceMock.Object, _taskRepositoryMock.Object);
 
             var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
             {
@@ -389,15 +392,13 @@ namespace Taskboard.Tests.Controllers
         }
 
         [Test]
-        public async Task PermanentDeleteTask_WithPermission_RemovesTaskAndSubtasks()
+        public async Task PermanentDeleteTask_WithPermission_CallsRepositoryDelete()
         {
             // Arrange
             var projectId = 1;
             var taskId = 7;
-            var subtaskId = 8;
             SetupMemberWithEditPermission(projectId);
             _context.Tasks.Add(new TaskItem { Id = taskId, ProjectId = projectId, Title = "Parent", IsArchived = true, ArchivedAt = DateTime.UtcNow });
-            _context.Tasks.Add(new TaskItem { Id = subtaskId, ProjectId = projectId, Title = "Subtask", ParentTaskId = taskId });
             await _context.SaveChangesAsync();
 
             // Act
@@ -407,11 +408,7 @@ namespace Taskboard.Tests.Controllers
             Assert.That(result, Is.Not.Null);
             Assert.That(result.StatusCode, Is.EqualTo(200));
 
-            var dbTask = await _context.Tasks.FindAsync(taskId);
-            Assert.That(dbTask, Is.Null);
-
-            var dbSubtask = await _context.Tasks.FindAsync(subtaskId);
-            Assert.That(dbSubtask, Is.Null);
+            _taskRepositoryMock.Verify(x => x.DeleteTaskAsync(taskId, true), Times.Once);
         }
 
         [Test]

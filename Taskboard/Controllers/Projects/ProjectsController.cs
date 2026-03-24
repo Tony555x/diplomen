@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Taskboard.Data.Models;
 using Taskboard.Contracts.Projects;
 using Taskboard.Services;
+using Taskboard.Repositories;
 
 namespace Taskboard.Controllers.Projects;
 
@@ -20,12 +21,14 @@ public class ProjectsController : ControllerBase
     private readonly AppDbContext _context;
     private readonly INotificationService _notificationService;
     private readonly IProjectAccessService _projectAccessService;
+    private readonly IProjectRepository _projectRepository;
 
-    public ProjectsController(AppDbContext context, INotificationService notificationService, IProjectAccessService projectAccessService)
+    public ProjectsController(AppDbContext context, INotificationService notificationService, IProjectAccessService projectAccessService, IProjectRepository projectRepository)
     {
         _context = context;
         _notificationService = notificationService;
         _projectAccessService = projectAccessService;
+        _projectRepository = projectRepository;
     }
 
     [HttpPost]
@@ -405,22 +408,7 @@ public class ProjectsController : ControllerBase
         var project = await _context.Projects.FirstOrDefaultAsync(p => p.Id == projectId);
         if (project == null) return NotFound(new { success = false, message = "Project not found." });
 
-        // Remove members first (they reference ProjectRoles via FK)
-        var members = await _context.ProjectMembers
-            .Where(pm => pm.ProjectId == projectId)
-            .ToListAsync();
-        _context.ProjectMembers.RemoveRange(members);
-        await _context.SaveChangesAsync();
-
-        // Remove roles next
-        var roles = await _context.ProjectRoles
-            .Where(r => r.ProjectId == projectId)
-            .ToListAsync();
-        _context.ProjectRoles.RemoveRange(roles);
-        await _context.SaveChangesAsync();
-
-        _context.Projects.Remove(project);
-        await _context.SaveChangesAsync();
+        await _projectRepository.DeleteProjectAsync(projectId);
 
         return Ok(new { success = true, message = "Project deleted." });
     }
