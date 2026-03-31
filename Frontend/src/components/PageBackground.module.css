@@ -8,36 +8,5 @@
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-}
-
-.blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.25;
-  z-index: -1;
-}
-
-.blob1 {
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, #3b82f6, transparent 70%);
-  top: -10vh;
-  left: -10vw;
-}
-
-.blob2 {
-  width: 550px;
-  height: 550px;
-  background: radial-gradient(circle, #735cf6, transparent 70%);
-  bottom: 10vh;
-  right: -5vw;
-}
-
-/* ── Mobile: keep only blob1, hide blob2 to prevent convergence ─ */
-@media (max-width: 768px) {
-
-  .blob2 {
-    display: none;
-  }
+  background: linear-gradient(135deg, #0f172a, #1e3a8a);
 }

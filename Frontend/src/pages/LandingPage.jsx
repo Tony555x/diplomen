@@ -49,7 +49,7 @@ export default function LandingPage() {
       {/* ── Mobile nav drawer ────────────────────────────────────── */}
       {menuOpen && (
         <div className={styles.mobileNav} role="dialog" aria-modal="true" aria-label="Mobile navigation">
-          <Link to="/login"    className={styles.mobileNavLink} onClick={handleNavClick}>Login</Link>
+          <Link to="/login" className={styles.mobileNavLink} onClick={handleNavClick}>Login</Link>
           <Link to="/register" className={`${styles.btnPrimary} ${styles.mobileNavCta}`} onClick={handleNavClick}>Get Started</Link>
         </div>
       )}
@@ -100,9 +100,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <footer className={styles.footer}>
-        © {new Date().getFullYear()} TaskBoard
-      </footer>
+
     </div>
   );
 }
