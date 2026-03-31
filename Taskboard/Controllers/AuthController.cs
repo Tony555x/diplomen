@@ -33,12 +33,16 @@ namespace Taskboard.Controllers
             var existingUser = await _userManager.FindByEmailAsync(request.Email);
             if (existingUser != null)
             {
-                return BadRequest(new
+                if (existingUser.EmailConfirmed)
                 {
-                    success = false,
-                    message = "Registration failed",
-                    errors = new[] { "Email is already registered." }
-                });
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Registration failed",
+                        errors = new[] { "Email is already registered." }
+                    });
+                }
+                await _userManager.DeleteAsync(existingUser);
             }
 
             var avatarColors = new[]
