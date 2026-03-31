@@ -24,7 +24,7 @@ export default function NotFoundPage() {
               <Link to="/login" className={styles.btnGhost}>Login</Link>
               <Link to="/register" className={styles.btnPrimary}>Get Started</Link>
             </>
-          ) }
+          )}
         </nav>
       </header>
 
@@ -51,10 +51,6 @@ export default function NotFoundPage() {
           </div>
         </div>
       </section>
-
-      <footer className={styles.footer}>
-        © {new Date().getFullYear()} TaskBoard
-      </footer>
     </div>
   );
 }
