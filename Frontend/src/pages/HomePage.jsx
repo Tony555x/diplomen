@@ -124,7 +124,16 @@ function HomePage() {
                                     className={styles.taskItem}
                                 >
                                     <div className={styles.taskInfo}>
-                                        <h3>{task.title}</h3>
+                                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            {task.taskTypeIcon && (
+                                                <img 
+                                                    src={`/cardicons/${task.taskTypeIcon}`} 
+                                                    alt="" 
+                                                    style={{ width: '16px', height: '16px', objectFit: 'contain' }}
+                                                />
+                                            )}
+                                            {task.title}
+                                        </h3>
                                         <p>{task.projectName}</p>
                                     </div>
                                     <span className={styles.taskStatus}>

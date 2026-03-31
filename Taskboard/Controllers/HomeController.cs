@@ -61,7 +61,8 @@ namespace Taskboard.Controllers
                     t.Title,
                     IsCompleted = t.Completed,
                     ProjectId = t.ProjectId,
-                    ProjectName = t.Project != null ? t.Project.Name : "No Project"
+                    ProjectName = t.Project != null ? t.Project.Name : "No Project",
+                    TaskTypeIcon = t.TaskType != null ? t.TaskType.Icon : null
                 })
                 .Take(10)
                 .ToListAsync();
