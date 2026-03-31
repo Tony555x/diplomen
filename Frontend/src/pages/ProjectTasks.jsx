@@ -315,7 +315,8 @@ function ProjectTasks() {
                         status: updatedTask.status,
                         title: updatedTask.title,
                         completed: updatedTask.completed,
-                        fieldValues: updatedTask.fieldValues
+                        fieldValues: updatedTask.fieldValues,
+                        collectionId: updatedTask.collectionId || null
                     }
                 }
             );

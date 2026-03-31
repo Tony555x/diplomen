@@ -96,8 +96,8 @@ function TaskDetailsPopup({ task, statuses = [], taskTypes = [], onClose, onUpda
         setIsSaving(true);
         try {
             const updatedTask = canCreateTasks
-                ? { ...task, title, status, completed, fieldValues }
-                : { ...task, status, completed };
+                ? { ...task, title, status, completed, fieldValues, collectionId: task.collectionId || null }
+                : { ...task, status, completed, collectionId: task.collectionId || null };
             await onUpdate(updatedTask);
             onClose();
 
