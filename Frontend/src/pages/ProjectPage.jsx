@@ -45,7 +45,7 @@ function ProjectPage() {
             <ProjectNavbar projectId={projectId} projectName={project?.name} />
             <div className="project-content">
                 <Routes>
-                    <Route path="/" element={<Navigate to={`/project/${projectId}/dashboard`} replace />} />
+                    <Route path="/" element={<Navigate to={`/project/${projectId}/tasks`} replace />} />
                     <Route path="/dashboard" element={<ProjectDashboard />} />
                     <Route path="/tasks" element={<ProjectTasks />} />
                     <Route path="/tasks/:taskId" element={<ProjectTasks />} />

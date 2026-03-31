@@ -63,7 +63,7 @@ namespace Taskboard.Tests.Controllers
         {
             // Arrange
             var request = new RegisterRequest { Username = "testuser", Email = "existing@test.com", Password = "Password123!" };
-            _userManagerMock.Setup(x => x.FindByEmailAsync(request.Email)).ReturnsAsync(new User { Email = request.Email });
+            _userManagerMock.Setup(x => x.FindByEmailAsync(request.Email)).ReturnsAsync(new User { Email = request.Email, EmailConfirmed = true });
 
             // Act
             var result = await _authController.Register(request) as BadRequestObjectResult;
