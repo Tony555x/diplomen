@@ -193,7 +193,7 @@ function ProjectTasks() {
     };
 
     const deleteStatus = async (statusId) => {
-        if (!window.confirm("Delete this status? This will only work if no tasks are currently in this status.")) return;
+        if (!window.confirm("Delete this column?")) return;
 
         try {
             const result = await fetchWithAuth(
@@ -242,6 +242,27 @@ function ProjectTasks() {
         } catch (err) {
             console.error(err);
             alert("Error updating status.");
+        }
+    };
+
+    const shiftStatus = async (statusId, direction) => {
+        try {
+            const result = await fetchWithAuth(
+                `/api/projects/${projectId}/statuses/${statusId}/shift?direction=${direction}`,
+                { method: "POST" }
+            );
+            if (result.success) {
+                // Fetch the newly ordered statuses
+                const statusesData = await fetchWithAuth(`/api/projects/${projectId}/statuses`);
+                if (statusesData) {
+                    setStatuses(statusesData);
+                }
+            } else {
+                alert(result.message || "Failed to shift status.");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Error shifting status.");
         }
     };
 
@@ -439,7 +460,7 @@ function ProjectTasks() {
         <>
             <div className={styles.projectTasks}>
                 <div className={styles.board}>
-                    {statuses.map(status => (
+                    {statuses.map((status, index) => (
                         <Column
                             key={status.id}
                             columnKey={status.name}
@@ -463,6 +484,9 @@ function ProjectTasks() {
                             status={status}
                             onDeleteStatus={() => deleteStatus(status.id)}
                             onUpdateStatus={(newName, newColor, newAutoComplete) => updateStatus(status.id, newName, newColor, newAutoComplete)}
+                            onShiftStatus={(direction) => shiftStatus(status.id, direction)}
+                            isFirstColumn={index === 0}
+                            isLastColumn={index === statuses.length - 1}
                             canCreateTasks={canCreateTasks}
                             canManageStatuses={canManageStatuses}
                         />

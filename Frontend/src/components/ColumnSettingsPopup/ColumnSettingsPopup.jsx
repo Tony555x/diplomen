@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import sharedStyles from "../PopupStyles.module.css";
 import styles from "./ColumnSettingsPopup.module.css";
 
-function ColumnSettingsPopup({ status, onClose, onUpdate, onDelete, canManageStatuses }) {
+function ColumnSettingsPopup({ status, onClose, onUpdate, onDelete, onShift, isFirstColumn, isLastColumn, canManageStatuses, hasTasks }) {
     const [name, setName] = useState(status.name);
     const [color, setColor] = useState(status.color || "#3B82F6");
     const [autoComplete, setAutoComplete] = useState(status.autoComplete || false);
@@ -110,11 +110,43 @@ function ColumnSettingsPopup({ status, onClose, onUpdate, onDelete, canManageSta
                     {saveError && (
                         <div className={sharedStyles.error}>{saveError}</div>
                     )}
+                    
+                    {canManageStatuses && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', borderBottom: '1px solid #374151', paddingBottom: '1.5rem' }}>
+                            <button
+                                type="button"
+                                className={sharedStyles.cancelButton}
+                                style={{ width: '48%', border: '1px dashed #4b5563' }}
+                                disabled={isFirstColumn || isSaving}
+                                onClick={() => {
+                                    onShift("left");
+                                    onClose();
+                                }}
+                            >
+                                ← Shift Left
+                            </button>
+                            <button
+                                type="button"
+                                className={sharedStyles.cancelButton}
+                                style={{ width: '48%', border: '1px dashed #4b5563' }}
+                                disabled={isLastColumn || isSaving}
+                                onClick={() => {
+                                    onShift("right");
+                                    onClose();
+                                }}
+                            >
+                                Shift Right →
+                            </button>
+                        </div>
+                    )}
+
                     <div className={sharedStyles.actions}>
                         {canManageStatuses ? (
                             <button
                                 className={sharedStyles.deleteButton}
                                 onClick={onDelete}
+                                disabled={hasTasks}
+                                title={hasTasks ? "Column must be empty to delete" : ""}
                             >
                                 Delete Column
                             </button>

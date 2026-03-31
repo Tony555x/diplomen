@@ -27,6 +27,9 @@ function Column({
   status,
   onDeleteStatus,
   onUpdateStatus,
+  onShiftStatus,
+  isFirstColumn,
+  isLastColumn,
   canCreateTasks,
   canManageStatuses
 }) {
@@ -361,7 +364,11 @@ function Column({
             onClose={() => setShowSettings(false)}
             onUpdate={onUpdateStatus}
             onDelete={onDeleteStatus}
+            onShift={onShiftStatus}
+            isFirstColumn={isFirstColumn}
+            isLastColumn={isLastColumn}
             canManageStatuses={canManageStatuses}
+            hasTasks={tasks.some(t => t.status === columnKey)}
           />
         )}
       </div>

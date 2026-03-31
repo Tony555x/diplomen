@@ -313,6 +313,52 @@ public class ProjectsController : ControllerBase
         return Ok(new { success = true, status });
     }
 
+    [HttpPost("{projectId}/statuses/{statusId}/shift")]
+    public async Task<IActionResult> ShiftTaskStatus(int projectId, int statusId, [FromQuery] string direction)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return Unauthorized();
+
+        var membership = await _context.ProjectMembers
+            .Include(pm => pm.ProjectRole)
+            .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId && pm.Status == ProjectMemberStatus.Active);
+
+        if (membership == null || membership.ProjectRole == null || !membership.ProjectRole.CanCreateDeleteTaskStatuses)
+            return Forbid();
+
+        var statuses = await _context.UserTaskStatuses
+            .Where(ts => ts.ProjectId == projectId)
+            .OrderBy(ts => ts.Order)
+            .ToListAsync();
+
+        var currentIndex = statuses.FindIndex(s => s.Id == statusId);
+        if (currentIndex == -1) return NotFound(new { success = false, message = "Status not found." });
+
+        if (direction == "left" && currentIndex > 0)
+        {
+            // Swap with left
+            var leftStatus = statuses[currentIndex - 1];
+            var temp = statuses[currentIndex].Order;
+            statuses[currentIndex].Order = leftStatus.Order;
+            leftStatus.Order = temp;
+        }
+        else if (direction == "right" && currentIndex < statuses.Count - 1)
+        {
+            // Swap with right
+            var rightStatus = statuses[currentIndex + 1];
+            var temp = statuses[currentIndex].Order;
+            statuses[currentIndex].Order = rightStatus.Order;
+            rightStatus.Order = temp;
+        }
+        else
+        {
+            return BadRequest(new { success = false, message = "Cannot shift in that direction." });
+        }
+
+        await _context.SaveChangesAsync();
+        return Ok(new { success = true });
+    }
+
     [HttpPatch("{projectId}")]
     public async Task<IActionResult> UpdateProject(
         int projectId,
