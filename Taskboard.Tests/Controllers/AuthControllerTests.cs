@@ -100,30 +100,35 @@ namespace Taskboard.Tests.Controllers
         }
 
         [Test]
-        public async Task Register_WhenEmailFails_DeletesUserAndReturnsBadRequest()
+        public async Task Register_WhenEmailFails_AutoConfirmsUserAndReturnsOk()
         {
             // Arrange
             var request = new RegisterRequest { Username = "newuser", Email = "fail@test.com", Password = "Password123!" };
             _userManagerMock.Setup(x => x.FindByEmailAsync(request.Email)).ReturnsAsync((User)null);
             _userManagerMock.Setup(x => x.CreateAsync(It.IsAny<User>(), request.Password)).ReturnsAsync(IdentityResult.Success);
             _userManagerMock.Setup(x => x.GenerateEmailConfirmationTokenAsync(It.IsAny<User>())).ReturnsAsync("confirm-token");
-            _userManagerMock.Setup(x => x.DeleteAsync(It.IsAny<User>())).ReturnsAsync(IdentityResult.Success);
+            _userManagerMock.Setup(x => x.ConfirmEmailAsync(It.IsAny<User>(), "confirm-token")).ReturnsAsync(IdentityResult.Success);
 
             _emailServiceMock
                 .Setup(e => e.SendVerificationEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new Exception("SMTP error"));
 
             // Act
-            var result = await _authController.Register(request) as BadRequestObjectResult;
+            var result = await _authController.Register(request) as OkObjectResult;
 
-            // Assert
+            // Assert — user is NOT deleted; account is auto-confirmed instead
             Assert.That(result, Is.Not.Null);
-            Assert.That(result.StatusCode, Is.EqualTo(400));
+            Assert.That(result.StatusCode, Is.EqualTo(200));
             var t = result.Value.GetType();
-            Assert.That(t.GetProperty("success").GetValue(result.Value, null), Is.False);
+            Assert.That(t.GetProperty("success").GetValue(result.Value, null), Is.True);
+            Assert.That(t.GetProperty("message").GetValue(result.Value, null)?.ToString(),
+                Does.Contain("account has been created"));
 
-            // User must have been rolled back
-            _userManagerMock.Verify(x => x.DeleteAsync(It.IsAny<User>()), Times.Once);
+            // Email auto-confirm must have been called
+            _userManagerMock.Verify(x => x.ConfirmEmailAsync(It.IsAny<User>(), "confirm-token"), Times.Once);
+
+            // User must NOT have been rolled back
+            _userManagerMock.Verify(x => x.DeleteAsync(It.IsAny<User>()), Times.Never);
         }
 
         [Test]
