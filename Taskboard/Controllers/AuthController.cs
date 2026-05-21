@@ -72,16 +72,17 @@ namespace Taskboard.Controllers
 
                 await _emailService.SendVerificationEmailAsync(user.Email!, user.UserName!, verifyUrl!);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                // Roll back user creation if email fails
-                await _userManager.DeleteAsync(user);
+                // Email failed — auto-confirm so the user can log in immediately
+                var confirmToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                await _userManager.ConfirmEmailAsync(user, confirmToken);
 
-                return BadRequest(new
+                return Ok(new
                 {
-                    success = false,
-                    message = "Registration failed: Could not send verification email.",
-                    errors = new[] { ex.Message }
+                    success = true,
+                    message = "Your account has been created. You can now log in.",
+                    errors = Array.Empty<string>()
                 });
             }
 

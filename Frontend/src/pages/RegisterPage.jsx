@@ -22,7 +22,7 @@ export default function RegisterPage() {
       if (!res.success) {
         setError(res.message || "Registration failed.");
       } else {
-        setSuccess("Registration successful! Please check your email to verify your account.");
+        setSuccess(res.message);
         setUsername("");
         setEmail("");
         setPassword("");
